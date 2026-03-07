@@ -44,10 +44,8 @@
             background-position: center;
             background-repeat: no-repeat;
             
-            /* УВЕЛИЧИЛИ РАЗМЕР ТАБЛИЧКИ ЕЩЕ СИЛЬНЕЕ */
             width: 390px; 
             
-            /* Скорректировали отступы для нового размера, чтобы обойти гвозди */
             box-sizing: border-box; 
             padding-top: 90px;    
             padding-bottom: 80px; 
@@ -68,7 +66,7 @@
         /* Счет */
         .score-container {
             color: #1a0b02; 
-            font-size: 3.4rem; /* Чуть-чуть увеличили цифры, чтобы они заполняли новую доску */
+            font-size: 3.4rem; 
             font-weight: bold;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9);
             margin-bottom: 12px;
@@ -96,14 +94,15 @@
             transition: width 0.3s ease-out;
         }
 
-        /* Текст энергии: ВЫРЕЗАНО НОЖОМ ПО ДЕРЕВУ */
+        /* Текст энергии: УМЕНЬШЕННЫЙ РАЗМЕР, ЧТОБЫ НЕ КАСАТЬСЯ ГВОЗДЕЙ */
         .energy-text {
             color: #1f0d04; 
-            font-size: 0.95rem; 
+            font-size: 0.8rem; /* Сделал шрифт меньше */
             margin-top: 8px;
             font-family: 'Georgia', serif; 
             font-weight: bold;
-            letter-spacing: 0.5px;
+            letter-spacing: 0; /* Убрал лишние отступы между буквами */
+            white-space: nowrap; /* Чтобы текст точно не переносился на новую строку */
             text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.95), 1px 1px 1px rgba(255, 255, 255, 0.25);
             z-index: 2;
         }
