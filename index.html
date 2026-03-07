@@ -94,17 +94,24 @@
             transition: width 0.3s ease-out;
         }
 
-        /* Текст энергии: УМЕНЬШЕННЫЙ РАЗМЕР, ЧТОБЫ НЕ КАСАТЬСЯ ГВОЗДЕЙ */
+        /* Текст энергии: ЯРКИЙ СВЕТЯЩИЙСЯ СТИЛЬ */
         .energy-text {
-            color: #1f0d04; 
-            font-size: 0.8rem; /* Сделал шрифт меньше */
+            color: #e0f7fa; /* Яркий, почти белый цвет с голубым оттенком */
+            font-size: 0.85rem; 
             margin-top: 8px;
             font-family: 'Georgia', serif; 
             font-weight: bold;
-            letter-spacing: 0; /* Убрал лишние отступы между буквами */
-            white-space: nowrap; /* Чтобы текст точно не переносился на новую строку */
-            text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.95), 1px 1px 1px rgba(255, 255, 255, 0.25);
+            white-space: nowrap; 
+            /* Красивое неоновое свечение и черная обводка, чтобы выделялось */
+            text-shadow: 0 0 8px rgba(0, 191, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.9);
             z-index: 2;
+        }
+
+        /* Магия для синей молнии */
+        .blue-lightning {
+            display: inline-block;
+            /* Сдвигаем желтый цвет в спектр синего */
+            filter: hue-rotate(200deg) brightness(1.2) saturate(1.5); 
         }
 
         /* --- КАРТИНКА РУДЫ --- */
@@ -226,7 +233,8 @@
             energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
 
             if (energy >= maxEnergy) {
-                energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
+                // Добавлен класс blue-lightning для перекраски эмодзи
+                energyTextElement.innerHTML = `${energy} / ${maxEnergy} <span class="blue-lightning">⚡</span> (Максимум)`;
             } else {
                 let now = Date.now();
                 let timeLeftMs = regenIntervalMs - (now - lastTickTime);
@@ -236,7 +244,8 @@
                 let seconds = Math.floor((timeLeftMs % 60000) / 1000);
                 let timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
                 
-                energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${timeString})`;
+                // Добавлен класс blue-lightning для перекраски эмодзи
+                energyTextElement.innerHTML = `${energy} / ${maxEnergy} <span class="blue-lightning">⚡</span> (+100 через ${timeString})`;
             }
         }
 
@@ -284,8 +293,8 @@
                 }, 1000);
             } else {
                 energyTextElement.style.color = '#ff5252';
-                // После мигания красным возвращаем цвет вырезанного дерева
-                setTimeout(() => energyTextElement.style.color = '#1f0d04', 300);
+                // Возвращаем яркий светящийся цвет после мигания красным
+                setTimeout(() => energyTextElement.style.color = '#e0f7fa', 300);
                 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
