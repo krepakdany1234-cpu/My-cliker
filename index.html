@@ -38,7 +38,7 @@
             border: 4px solid #2a160a;
             border-radius: 8px;
             padding: 15px 25px;
-            margin-bottom: 40px; 
+            margin-bottom: 30px; 
             box-shadow: 0 15px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.6);
             position: relative;
             text-align: center;
@@ -100,72 +100,112 @@
             text-shadow: 1px 1px 2px #000;
         }
 
-        /* --- ОБЩАЯ ОБЕРТКА РУДЫ И КАМНЯ --- */
+        /* --- ОБЩАЯ ОБЕРТКА (Для правильных теней всей конструкции) --- */
         .ore-wrapper {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Зеленое свечение + Глубокая черная тень на земле */
-            filter: drop-shadow(0 0 20px rgba(76, 175, 80, 0.3)) drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8));
+            /* Глубокая тень от камней + зеленое свечение от руды */
+            filter: drop-shadow(0 20px 15px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 25px rgba(76, 175, 80, 0.4));
             cursor: pointer;
             transition: transform 0.1s ease, filter 0.1s ease;
             -webkit-tap-highlight-color: transparent;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
-        /* --- ПЛОТНЫЙ ИЗУМРУДНЫЙ КРИСТАЛЛ --- */
+        /* --- РЕАЛИСТИЧНЫЙ 3D КРИСТАЛЛ --- */
         .mithril-ore {
             width: 140px;
-            height: 260px;
-            clip-path: polygon(50% 0%, 90% 20%, 90% 85%, 50% 100%, 10% 85%, 10% 20%);
-            background-color: #1b5e20;
-            background-image: 
-                linear-gradient(105deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.15) 25%, transparent 25%),
-                linear-gradient(-105deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 25%, transparent 25%),
-                radial-gradient(ellipse at center, #4caf50 0%, #1b5e20 80%);
+            height: 270px; /* Сделал чуть выше, как на эскизе */
+            /* Точная форма ограненного кристалла */
+            clip-path: polygon(50% 0%, 95% 25%, 85% 85%, 50% 100%, 15% 85%, 5% 25%);
+            
+            /* Сложная система градиентов для создания объемных 3D-граней */
+            background: 
+                /* 1. Светящееся ядро в центре */
+                radial-gradient(circle at 50% 65%, #69f0ae 0%, #00c853 25%, transparent 60%),
+                
+                /* 2. Верхняя левая грань (освещенная) */
+                linear-gradient(155deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 32%, transparent 32.5%),
+                
+                /* 3. Верхняя правая грань (в тени) */
+                linear-gradient(-155deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 32%, transparent 32.5%),
+                
+                /* 4. Левая вертикальная грань (глубокая тень) */
+                linear-gradient(95deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 25%, transparent 25.5%),
+                
+                /* 5. Правая вертикальная грань (блик) */
+                linear-gradient(-95deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 25%, transparent 25.5%),
+                
+                /* Основной глубокий изумрудный цвет (база) */
+                #0f5132;
+                
             position: relative;
-            z-index: 2; /* Кристалл находится поверх камней */
+            z-index: 2; /* Кристалл поверх камней */
         }
 
-        /* Имитация центральной ромбовидной грани */
+        /* Центральная ромбовидная грань с легким бликом */
         .mithril-ore::before {
             content: '';
             position: absolute;
-            top: 25%;
-            left: 20%;
-            width: 60%;
-            height: 50%;
-            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
-            border: 1px solid rgba(255,255,255,0.1);
+            top: 0; left: 0; right: 0; bottom: 0;
+            clip-path: polygon(50% 25%, 75% 55%, 50% 85%, 25% 55%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 80%);
+            border: 1px solid rgba(255,255,255,0.15);
         }
 
-        /* --- КАМЕНЬ (ГРУНТ) ПОД РУДОЙ --- */
+        /* --- ГРУДА КАМНЕЙ (ОСНОВАНИЕ) --- */
         .rock-base {
             position: absolute;
-            bottom: -15px; /* Сдвигаем вниз под кристалл */
-            width: 150px;
+            bottom: -15px;
+            width: 140px;
             height: 50px;
-            background-color: #4a4a4a;
-            border-radius: 50px; /* Делаем овальную основу */
-            z-index: 1; /* Камень находится за кристаллом */
+            z-index: 1; /* Под кристаллом */
             
-            /* Создаем комки камней и тени с помощью box-shadow */
+            /* Главный центральный камень */
+            background: radial-gradient(circle at 40% 30%, #757575 0%, #424242 60%, #212121 100%);
+            border-radius: 40% 60% 50% 50% / 50% 50% 60% 50%;
             box-shadow: 
-                inset -10px -10px 15px rgba(0,0,0,0.8), /* Объем самого камня */
-                inset 5px 5px 10px rgba(255,255,255,0.2), /* Блик на камне */
-                -25px 5px 0 -5px #3d3d3d, /* Левый кусок камня */
-                25px 10px 0 -8px #2c2c2c, /* Правый кусок камня */
-                0 -25px 20px rgba(0,0,0,0.9); /* Тень от самого кристалла на камни */
+                inset -5px -10px 15px rgba(0,0,0,0.8), /* Объем камня */
+                0 -10px 15px rgba(76, 175, 80, 0.4); /* Зеленый отсвет от кристалла на камень */
+        }
+
+        /* Боковые камни, создающие кластер (груду) */
+        .rock-base::before, .rock-base::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle at 40% 20%, #8a8a8a 0%, #4f4f4f 60%, #1a1a1a 100%);
+            box-shadow: inset -3px -5px 10px rgba(0,0,0,0.8);
+        }
+
+        /* Левый малый камень */
+        .rock-base::before {
+            width: 65px;
+            height: 40px;
+            left: -25px;
+            bottom: 5px;
+            border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
+            transform: rotate(-20deg);
+        }
+
+        /* Правый средний камень (чуть темнее) */
+        .rock-base::after {
+            width: 80px;
+            height: 45px;
+            right: -30px;
+            bottom: -5px;
+            border-radius: 30% 70% 50% 50% / 40% 50% 60% 50%;
+            transform: rotate(15deg);
+            background: radial-gradient(circle at 30% 30%, #6d6d6d 0%, #3b3b3b 60%, #111111 100%);
         }
 
         /* --- АНИМАЦИЯ НАЖАТИЯ --- */
         .ore-wrapper:active {
-            /* При клике кристалл сжимается и слегка опускается вниз к земле */
-            transform: scale(0.95) translateY(5px);
-            /* Тень становится гуще и ближе */
-            filter: drop-shadow(0 0 40px rgba(76, 175, 80, 0.7)) drop-shadow(0 15px 10px rgba(0, 0, 0, 0.9));
+            /* Конструкция сжимается и проседает к земле */
+            transform: scale(0.96) translateY(6px);
+            /* Тень становится гуще и короче */
+            filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(76, 175, 80, 0.7));
         }
 
         /* Летающие циферки */
