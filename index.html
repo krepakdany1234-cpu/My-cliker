@@ -42,7 +42,6 @@
             width: 365px; 
             
             box-sizing: border-box; 
-            /* Сдвигаем всё вверх, подальше от нижних гвоздей */
             padding-top: 85px;    
             padding-bottom: 75px; 
             padding-left: 35px;   
@@ -71,7 +70,8 @@
 
         /* --- ПОЛОСКА ЭНЕРГИИ --- */
         .energy-wrapper {
-            width: 75%; /* Полоска стала чуть у́же, чтобы влезть между гвоздями */
+            /* СДЕЛАЛИ УЖЕ: теперь 65%, чтобы точно не задеть гвозди */
+            width: 65%; 
             background-color: rgba(10, 5, 0, 0.5); 
             border: 1px solid rgba(0,0,0,0.8);
             border-bottom: 1px solid rgba(255,255,255,0.15); 
@@ -90,14 +90,19 @@
             transition: width 0.3s ease-out;
         }
 
-        /* Текст энергии */
+        /* Текст энергии: ЯРКИЙ КАМЕНЬ */
         .energy-text {
-            color: #4a2610; 
+            color: #e2e8f0; /* Яркий каменно-серый цвет */
             font-size: 0.9rem; 
             margin-top: 8px;
             font-family: Arial, sans-serif; 
             font-weight: bold;
-            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.4), -1px -1px 2px rgba(0, 0, 0, 0.9);
+            letter-spacing: 0.5px;
+            /* Эффект высеченного камня: темная фаска, светлый блик и падающая тень */
+            text-shadow: 
+                -1px -1px 0px #64748b, 
+                1px 1px 0px #ffffff, 
+                2px 2px 4px rgba(0, 0, 0, 0.9);
             z-index: 2;
         }
 
@@ -258,7 +263,8 @@
                 }, 1000);
             } else {
                 energyTextElement.style.color = '#ff5252';
-                setTimeout(() => energyTextElement.style.color = '#4a2610', 300);
+                // Возвращаем каменно-серый цвет после мигания красным
+                setTimeout(() => energyTextElement.style.color = '#e2e8f0', 300);
                 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
