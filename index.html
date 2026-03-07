@@ -1,3 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мифриловый Кликер</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        /* --- ЗАДНИЙ ФОН (Город) --- */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            user-select: none;
+            
+            background-image: url('1772901742360.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            background-color: rgba(0, 0, 0, 0.6);
+            background-blend-mode: overlay;
+        }
+
         /* --- ТАБЛИЧКА --- */
         .guild-board {
             background: none;
@@ -14,8 +44,8 @@
             box-sizing: border-box; 
             /* Сдвигаем всё вверх, подальше от нижних гвоздей */
             padding-top: 85px;    
-            padding-bottom: 75px; /* Увеличил отступ снизу */
-            padding-left: 35px;   /* Немного увеличил отступы по бокам */
+            padding-bottom: 75px; 
+            padding-left: 35px;   
             padding-right: 35px;
             
             filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8));
@@ -32,7 +62,7 @@
         /* Счет: Эффект глубокой резьбы (выжженное дерево) */
         .score-container {
             color: #1a0b02; 
-            font-size: 3.2rem; /* Сделал шрифт чуть меньше, чтобы сэкономить место по высоте */
+            font-size: 3.2rem; 
             font-weight: bold;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9);
             margin-bottom: 10px;
@@ -41,12 +71,12 @@
 
         /* --- ПОЛОСКА ЭНЕРГИИ --- */
         .energy-wrapper {
-            width: 75%; /* Сделал полоску чуть у́же, чтобы она точно влезла между гвоздями */
+            width: 75%; /* Полоска стала чуть у́же, чтобы влезть между гвоздями */
             background-color: rgba(10, 5, 0, 0.5); 
             border: 1px solid rgba(0,0,0,0.8);
             border-bottom: 1px solid rgba(255,255,255,0.15); 
             border-radius: 8px; 
-            height: 12px; /* Чуть тоньше */
+            height: 12px; 
             overflow: hidden;
             box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); 
             z-index: 2;
@@ -63,11 +93,178 @@
         /* Текст энергии */
         .energy-text {
             color: #4a2610; 
-            font-size: 0.9rem; /* Немного уменьшил шрифт */
+            font-size: 0.9rem; 
             margin-top: 8px;
             font-family: Arial, sans-serif; 
             font-weight: bold;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.4), -1px -1px 2px rgba(0, 0, 0, 0.9);
             z-index: 2;
         }
+
+        /* --- КАРТИНКА РУДЫ --- */
+        .ore-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .crystal-img {
+            width: 280px; 
+            height: auto;
+            filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4));
+            transition: transform 0.1s ease, filter 0.1s ease;
+            pointer-events: none;
+        }
+
+        .ore-wrapper:active .crystal-img {
+            transform: scale(0.95) translateY(5px);
+            filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8));
+        }
+
+        .floating-text {
+            position: absolute;
+            color: #a5d6a7;
+            font-size: 1.8rem;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 0 0 10px #50b487, 1px 1px 2px #000;
+            z-index: 10;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="guild-board">
+        <div class="score-container" id="score">0</div>
         
+        <div class="energy-wrapper">
+            <div class="energy-bar" id="energy-bar"></div>
+        </div>
+        <div class="energy-text" id="energy-text">Загрузка...</div>
+    </div>
+
+    <div class="ore-wrapper" id="ore">
+        <img src="1000019091-removebg-preview.png" alt="Кристалл" class="crystal-img">
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        const scoreElement = document.getElementById('score');
+        const oreElement = document.getElementById('ore');
+        const energyBar = document.getElementById('energy-bar');
+        const energyTextElement = document.getElementById('energy-text');
+
+        const maxEnergy = 500;
+        const regenAmount = 100;
+        const regenIntervalMs = 5 * 60 * 1000;
+
+        let score = parseInt(localStorage.getItem('mithrilScore')) || 0;
+        let energy = parseInt(localStorage.getItem('mithrilEnergy'));
+        if (isNaN(energy)) energy = maxEnergy;
+
+        let lastTickTime = parseInt(localStorage.getItem('lastTickTime')) || Date.now();
+
+        function checkEnergyRegen() {
+            let now = Date.now();
+            if (energy < maxEnergy) {
+                let timePassed = now - lastTickTime;
+                
+                if (timePassed >= regenIntervalMs) {
+                    let ticks = Math.floor(timePassed / regenIntervalMs);
+                    energy += ticks * regenAmount;
+                    if (energy > maxEnergy) energy = maxEnergy;
+                    
+                    lastTickTime += ticks * regenIntervalMs; 
+                    saveData();
+                }
+            } else {
+                lastTickTime = now;
+            }
+        }
+
+        function updateUI() {
+            scoreElement.innerText = score;
+            energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
+
+            if (energy >= maxEnergy) {
+                energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
+            } else {
+                let now = Date.now();
+                let timeLeftMs = regenIntervalMs - (now - lastTickTime);
+                if (timeLeftMs < 0) timeLeftMs = 0;
+                
+                let minutes = Math.floor(timeLeftMs / 60000);
+                let seconds = Math.floor((timeLeftMs % 60000) / 1000);
+                let timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${timeString})`;
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('mithrilScore', score);
+            localStorage.setItem('mithrilEnergy', energy);
+            localStorage.setItem('lastTickTime', lastTickTime);
+        }
+
+        checkEnergyRegen();
+        updateUI();
+        
+        setInterval(() => {
+            checkEnergyRegen();
+            updateUI();
+        }, 1000);
+
+        oreElement.addEventListener('pointerdown', (e) => {
+            if (energy >= 1) {
+                if (energy === maxEnergy) {
+                    lastTickTime = Date.now();
+                }
+
+                energy--;
+                score++;
+                
+                saveData();
+                updateUI();
+
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
+
+                const plusOne = document.createElement('div');
+                plusOne.classList.add('floating-text');
+                plusOne.innerText = '+1';
+                
+                plusOne.style.left = `${e.clientX - 15}px`;
+                plusOne.style.top = `${e.clientY - 40}px`;
+                
+                document.body.appendChild(plusOne);
+
+                setTimeout(() => {
+                    plusOne.remove();
+                }, 1000);
+            } else {
+                energyTextElement.style.color = '#ff5252';
+                setTimeout(() => energyTextElement.style.color = '#4a2610', 300);
+                
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
