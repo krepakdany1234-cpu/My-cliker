@@ -17,7 +17,12 @@
             align-items: center;
             justify-content: center;
             font-family: 'Georgia', serif;
+            
+            /* БАЗОВАЯ ЗАЩИТА: Запрет выделения текста */
             user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
             
             background-image: url('1772901742360.png');
             background-size: cover;
@@ -58,7 +63,7 @@
             justify-content: center;
         }
 
-        /* Счет: Эффект глубокой резьбы (выжженное дерево) */
+        /* Счет */
         .score-container {
             color: #1a0b02; 
             font-size: 3.2rem; 
@@ -70,7 +75,6 @@
 
         /* --- ПОЛОСКА ЭНЕРГИИ --- */
         .energy-wrapper {
-            /* СДЕЛАЛИ УЖЕ: теперь 65%, чтобы точно не задеть гвозди */
             width: 65%; 
             background-color: rgba(10, 5, 0, 0.5); 
             border: 1px solid rgba(0,0,0,0.8);
@@ -90,19 +94,15 @@
             transition: width 0.3s ease-out;
         }
 
-        /* Текст энергии: ЯРКИЙ КАМЕНЬ */
+        /* Текст энергии */
         .energy-text {
-            color: #e2e8f0; /* Яркий каменно-серый цвет */
+            color: #e2e8f0; 
             font-size: 0.9rem; 
             margin-top: 8px;
             font-family: Arial, sans-serif; 
             font-weight: bold;
             letter-spacing: 0.5px;
-            /* Эффект высеченного камня: темная фаска, светлый блик и падающая тень */
-            text-shadow: 
-                -1px -1px 0px #64748b, 
-                1px 1px 0px #ffffff, 
-                2px 2px 4px rgba(0, 0, 0, 0.9);
+            text-shadow: -1px -1px 0px #64748b, 1px 1px 0px #ffffff, 2px 2px 4px rgba(0, 0, 0, 0.9);
             z-index: 2;
         }
 
@@ -122,7 +122,11 @@
             height: auto;
             filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4));
             transition: transform 0.1s ease, filter 0.1s ease;
+            
+            /* ЗАЩИТА: Отключаем клики мыши по самой картинке (клики идут по обертке), 
+               а также запрещаем перетаскивание */
             pointer-events: none;
+            -webkit-user-drag: none;
         }
 
         .ore-wrapper:active .crystal-img {
@@ -159,10 +163,34 @@
     </div>
 
     <div class="ore-wrapper" id="ore">
-        <img src="1000019091-removebg-preview.png" alt="Кристалл" class="crystal-img">
+        <img src="1000019091-removebg-preview.png" alt="Кристалл" class="crystal-img" draggable="false">
     </div>
 
     <script>
+        // --- БЛОК ЗАЩИТЫ ОТ КОПИРОВАНИЯ И КОНСОЛИ ---
+        
+        // 1. Блокируем правую кнопку мыши (контекстное меню)
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // 2. Блокируем горячие клавиши для вскрытия кода (F12, Ctrl+Shift+I, Ctrl+U)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F12' || 
+               (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+               (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+               (e.ctrlKey && e.shiftKey && e.key === 'J') || 
+               (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+            }
+        });
+
+        // 3. Жесткий запрет на выделение текста (для старых браузеров)
+        document.addEventListener('selectstart', event => event.preventDefault());
+        
+        // 4. Запрет на перетаскивание любых элементов на странице
+        document.addEventListener('dragstart', event => event.preventDefault());
+
+        // --- ОСНОВНОЙ КОД ИГРЫ ---
+        
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
@@ -263,7 +291,6 @@
                 }, 1000);
             } else {
                 energyTextElement.style.color = '#ff5252';
-                // Возвращаем каменно-серый цвет после мигания красным
                 setTimeout(() => energyTextElement.style.color = '#e2e8f0', 300);
                 
                 if (tg.HapticFeedback) {
