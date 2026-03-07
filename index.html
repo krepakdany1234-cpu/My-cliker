@@ -122,7 +122,7 @@
             height: auto;
             filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4));
             transition: transform 0.1s ease, filter 0.1s ease;
-            cursor: pointer; /* Делаем саму картинку кликабельной */
+            cursor: pointer; 
             
             /* ЗАЩИТА от перетаскивания */
             -webkit-user-drag: none;
@@ -151,7 +151,7 @@
             100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
         }
 
-        /* --- АНИМАЦИЯ КИРКИ --- */
+        /* --- ПЛАВНАЯ И МЕДЛЕННАЯ АНИМАЦИЯ КИРКИ --- */
         .pickaxe-effect {
             position: absolute;
             font-size: 3.5rem; 
@@ -159,16 +159,16 @@
             z-index: 50;
             /* Точка вращения - ручка кирки (внизу справа) */
             transform-origin: 80% 80%; 
-            /* Резкая анимация удара */
-            animation: mineStrike 0.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+            /* Более медленная и плавная анимация (0.6s вместо 0.3s, ease-in-out) */
+            animation: mineStrike 0.6s ease-in-out forwards;
             filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6));
         }
 
         @keyframes mineStrike {
-            0% { transform: rotate(-50deg) scale(1.3); opacity: 0; }
-            20% { transform: rotate(-70deg) scale(1.3); opacity: 1; } /* Замах */
-            60% { transform: rotate(15deg) scale(1.3); opacity: 1; }  /* Удар */
-            100% { transform: rotate(20deg) scale(1.3); opacity: 0; } /* Исчезновение */
+            0% { transform: rotate(-30deg) scale(1.3); opacity: 0; }
+            30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } /* Плавный и широкий замах */
+            60% { transform: rotate(25deg) scale(1.3); opacity: 1; }  /* Удар */
+            100% { transform: rotate(35deg) scale(1.1); opacity: 0; } /* Плавный отскок и исчезновение */
         }
     </style>
 </head>
@@ -210,7 +210,6 @@
         tg.ready();
 
         const scoreElement = document.getElementById('score');
-        // Теперь мы берем саму картинку, а не обертку!
         const oreImgElement = document.getElementById('ore-img');
         const energyBar = document.getElementById('energy-bar');
         const energyTextElement = document.getElementById('energy-text');
@@ -276,7 +275,6 @@
             updateUI();
         }, 1000);
 
-        // Вешаем событие строго на картинку руды
         oreImgElement.addEventListener('pointerdown', (e) => {
             if (energy >= 1) {
                 if (energy === maxEnergy) {
@@ -297,7 +295,6 @@
                 const pickaxe = document.createElement('div');
                 pickaxe.classList.add('pickaxe-effect');
                 pickaxe.innerText = '⛏️';
-                // Смещаем кирку так, чтобы её острие било в точку клика
                 pickaxe.style.left = `${e.clientX + 5}px`;
                 pickaxe.style.top = `${e.clientY - 45}px`;
                 document.body.appendChild(pickaxe);
