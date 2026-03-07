@@ -8,7 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
-        /* --- ЗАДНИЙ ФОН (Заросший город) --- */
+        /* --- ЗАДНИЙ ФОН (Сгенерированный заросший город) --- */
         body {
             margin: 0;
             height: 100vh;
@@ -16,34 +16,34 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-family: 'Georgia', serif; /* Шрифт с засечками для фэнтези атмосферы */
+            font-family: 'Georgia', serif;
             user-select: none;
             
-            /* Темный мистический лес/город. 
-               Чтобы поставить свою картинку, раскомментируй строку ниже и вставь ссылку вместо URL_КАРТИНКИ: */
-            /* background-image: url('URL_КАРТИНКИ'); */
-            
-            background-color: #1a2f24;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            /* Ссылка на нашу сгенерированную картинку */
+            background-image: url('http://googleusercontent.com/generated_image_content/0');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
+            
+            /* Добавляем легкое затемнение фона, чтобы интерфейс лучше выделялся */
+            background-color: rgba(0, 0, 0, 0.4);
+            background-blend-mode: overlay;
         }
 
         /* --- СЧЕТЧИК (Деревянная табличка гильдии) --- */
         .guild-board {
-            background-color: #5c3a21; /* Цвет темного дерева */
-            border: 4px solid #361f0e; /* Темная рамка */
+            background-color: #5c3a21;
+            border: 4px solid #361f0e;
             border-radius: 8px;
             padding: 15px 40px;
             margin-bottom: 60px;
             box-shadow: 
-                0 10px 20px rgba(0,0,0,0.6), /* Тень от таблички */
-                inset 0 0 15px rgba(0,0,0,0.5); /* Внутренняя тень для объема */
+                0 10px 20px rgba(0,0,0,0.8),
+                inset 0 0 15px rgba(0,0,0,0.5);
             position: relative;
             text-align: center;
         }
 
-        /* Имитация гвоздей на табличке */
         .guild-board::before, .guild-board::after {
             content: '';
             position: absolute;
@@ -58,7 +58,7 @@
         .guild-board::after { right: 10px; }
 
         .greeting {
-            color: #d4af37; /* Золотистый цвет текста */
+            color: #d4af37;
             font-size: 1.2rem;
             margin-bottom: 5px;
             text-shadow: 1px 1px 2px #000;
@@ -75,14 +75,12 @@
         .mithril-ore {
             width: 200px;
             height: 190px;
-            /* Делаем форму неровного камня */
             border-radius: 40% 60% 55% 45% / 50% 45% 65% 50%;
-            /* Цвет светящегося мифрила (серебристо-голубой) */
             background: radial-gradient(circle at 30% 30%, #ffffff, #80deea, #006064);
             box-shadow: 
-                0 0 40px rgba(0, 188, 212, 0.6), /* Внешнее свечение */
-                inset -10px -10px 20px rgba(0,0,0,0.5), /* Тень снизу */
-                inset 10px 10px 20px rgba(255,255,255,0.8); /* Блик сверху */
+                0 0 40px rgba(0, 188, 212, 0.6),
+                inset -10px -10px 20px rgba(0,0,0,0.5),
+                inset 10px 10px 20px rgba(255,255,255,0.8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -92,22 +90,20 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Анимация удара киркой (нажатия) */
         .mithril-ore:active {
-            transform: scale(0.9) rotate(-3deg); /* Камень немного сжимается и наклоняется */
+            transform: scale(0.9) rotate(-3deg);
             box-shadow: 
                 0 0 60px rgba(0, 188, 212, 0.9), 
                 inset -5px -5px 10px rgba(0,0,0,0.5), 
                 inset 5px 5px 10px rgba(255,255,255,0.8);
         }
 
-        /* Летающие циферки (эффект добычи) */
         .floating-text {
             position: absolute;
             color: #80deea;
             font-size: 1.5rem;
             font-weight: bold;
-            pointer-events: none; /* Чтобы не мешало кликать */
+            pointer-events: none;
             animation: floatUp 1s ease-out forwards;
             text-shadow: 0 0 5px #00bcd4;
         }
@@ -137,33 +133,27 @@
         const oreElement = document.getElementById('ore');
         const greetingElement = document.getElementById('greeting');
 
-        // Получаем имя из Telegram
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             greetingElement.innerText = tg.initDataUnsafe.user.first_name;
         }
 
-        // Обработка удара по руде
         oreElement.addEventListener('pointerdown', (e) => {
             score++;
             scoreElement.innerText = score;
 
-            // Вибрация (как удар киркой)
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('medium');
             }
 
-            // Создаем красивую отлетающую циферку "+1"
             const plusOne = document.createElement('div');
             plusOne.classList.add('floating-text');
             plusOne.innerText = '+1';
             
-            // Позиционируем циферку там, где был клик
             plusOne.style.left = `${e.clientX - 10}px`;
             plusOne.style.top = `${e.clientY - 20}px`;
             
             document.body.appendChild(plusOne);
 
-            // Удаляем циферку после окончания анимации
             setTimeout(() => {
                 plusOne.remove();
             }, 1000);
