@@ -42,7 +42,7 @@
             box-shadow: 0 15px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.6);
             position: relative;
             text-align: center;
-            width: 220px; /* Фиксируем ширину таблички */
+            width: 220px;
         }
 
         .guild-board::before, .guild-board::after {
@@ -88,7 +88,6 @@
         .energy-bar {
             height: 100%;
             width: 100%;
-            /* Цвет магической синей энергии */
             background: linear-gradient(90deg, #00b4db, #00838f);
             transition: width 0.1s ease-out;
         }
@@ -102,9 +101,10 @@
             transition: color 0.3s ease;
         }
 
-        /* --- КНОПКА (Ромбовидная мифриловая руда) --- */
+        /* --- ЧИСТАЯ ПОЛУПРОЗРАЧНАЯ РУДА --- */
         .ore-wrapper {
-            filter: drop-shadow(0 0 30px rgba(0, 188, 212, 0.7));
+            /* Мягкое голубое свечение вокруг */
+            filter: drop-shadow(0 0 25px rgba(0, 188, 212, 0.5));
             cursor: pointer;
             transition: transform 0.1s ease, filter 0.1s ease;
             -webkit-tap-highlight-color: transparent;
@@ -115,8 +115,20 @@
             height: 140px;
             transform: rotate(45deg);
             border-radius: 20px;
-            background: linear-gradient(135deg, #e0f7fa, #00838f, #00363a);
-            box-shadow: inset 10px 10px 20px rgba(255, 255, 255, 0.6), inset -10px -10px 20px rgba(0, 0, 0, 0.7);
+            
+            /* Полупрозрачный фон (эффект чистого стекла) */
+            background: linear-gradient(135deg, rgba(224, 247, 250, 0.4), rgba(0, 188, 212, 0.1));
+            
+            /* Размытие того, что находится за кристаллом */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            
+            /* Тонкая светлая рамка, чтобы подчеркнуть форму ромба */
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            
+            /* Внутренний светлый блик без темной грязи */
+            box-shadow: inset 10px 10px 25px rgba(255, 255, 255, 0.6);
+            
             display: flex;
             align-items: center;
             justify-content: center;
@@ -124,34 +136,39 @@
             overflow: hidden;
         }
 
+        /* Красивый диагональный блик света */
         .mithril-ore::after {
             content: '';
             position: absolute;
             top: -50%; left: -50%;
             width: 200%; height: 200%;
-            background: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(to bottom right, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%);
             transform: rotate(-45deg);
             pointer-events: none;
         }
 
+        /* Содержимое внутри руды (эмодзи) */
         .ore-content {
             transform: rotate(-45deg);
-            font-size: 5rem;
+            font-size: 4rem;
+            opacity: 0.9; /* Тоже немного прозрачный */
         }
 
+        /* Анимация нажатия */
         .ore-wrapper:active {
-            transform: scale(0.9);
-            filter: drop-shadow(0 0 50px rgba(0, 188, 212, 1));
+            transform: scale(0.92);
+            filter: drop-shadow(0 0 40px rgba(0, 188, 212, 0.8));
         }
 
+        /* Летающие циферки */
         .floating-text {
             position: absolute;
-            color: #80deea;
+            color: #e0f7fa;
             font-size: 1.8rem;
             font-weight: bold;
             pointer-events: none;
             animation: floatUp 1s ease-out forwards;
-            text-shadow: 0 0 8px #00bcd4, 1px 1px 2px #000;
+            text-shadow: 0 0 10px #00bcd4, 1px 1px 2px #000;
             z-index: 10;
         }
 
@@ -194,16 +211,13 @@
             greetingElement.innerText = tg.initDataUnsafe.user.first_name;
         }
 
-        // --- НАСТРОЙКИ ИГРЫ ---
-        const maxEnergy = 500; // Максимальная энергия
-        const energyRegenPerSec = 2; // Сколько энергии восстанавливается в секунду
+        const maxEnergy = 500;
+        const energyRegenPerSec = 2;
 
-        // --- ЗАГРУЗКА ДАННЫХ ИЗ ПАМЯТИ ---
         let score = parseInt(localStorage.getItem('mithrilScore')) || 0;
         let energy = parseInt(localStorage.getItem('mithrilEnergy'));
         if (isNaN(energy)) energy = maxEnergy;
 
-        // --- ОФЛАЙН РЕГЕНЕРАЦИЯ ---
         let lastSavedTime = parseInt(localStorage.getItem('lastSaveTime'));
         if (lastSavedTime) {
             let secondsOffline = Math.floor((Date.now() - lastSavedTime) / 1000);
@@ -211,36 +225,29 @@
             if (energy > maxEnergy) energy = maxEnergy;
         }
 
-        // Функция обновления экрана и сохранения данных
         function updateUI() {
             scoreElement.innerText = score;
             energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡`;
             
-            // Высчитываем процент заполненности полоски
             let energyPercent = (energy / maxEnergy) * 100;
             energyBar.style.width = `${energyPercent}%`;
 
-            // Сохраняем все данные
             localStorage.setItem('mithrilScore', score);
             localStorage.setItem('mithrilEnergy', energy);
             localStorage.setItem('lastSaveTime', Date.now());
         }
 
-        // Показываем интерфейс при старте
         updateUI();
 
-        // --- ТАЙМЕР ВОССТАНОВЛЕНИЯ ЭНЕРГИИ ---
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy += energyRegenPerSec;
                 if (energy > maxEnergy) energy = maxEnergy;
                 updateUI();
             }
-        }, 1000); // 1000 миллисекунд = 1 секунда
+        }, 1000);
 
-        // --- ОБРАБОТКА КЛИКА ---
         oreElement.addEventListener('pointerdown', (e) => {
-            // Проверяем, хватает ли энергии для удара
             if (energy >= 1) {
                 energy--;
                 score++;
@@ -263,7 +270,6 @@
                     plusOne.remove();
                 }, 1000);
             } else {
-                // Если энергии нет - мигаем красным текстом и добавляем легкую ошибку вибрацией
                 energyTextElement.style.color = '#ff5252';
                 setTimeout(() => energyTextElement.style.color = '#80deea', 300);
                 
