@@ -88,132 +88,132 @@
         .energy-bar {
             height: 100%;
             width: 100%;
-            background: linear-gradient(90deg, #50b487, #1f4a37); 
+            /* Цвет энергии теперь тоже голубо-изумрудный */
+            background: linear-gradient(90deg, #00ffff, #00bfa5, #006064); 
             transition: width 0.3s ease-out;
         }
 
         .energy-text {
-            color: #a5d6a7;
+            color: #84ffff;
             font-size: 0.85rem;
             margin-top: 8px;
             font-family: Arial, sans-serif;
             text-shadow: 1px 1px 2px #000;
         }
 
-        /* --- ОБЩАЯ ОБЕРТКА (Для тени) --- */
+        /* --- ОБЩАЯ ОБЕРТКА (Свечение и тень) --- */
         .ore-wrapper {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(80, 180, 135, 0.3));
+            /* Черная тень от камней вниз + голубо-изумрудное свечение вокруг */
+            filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 35px rgba(0, 255, 200, 0.5));
             cursor: pointer;
             transition: transform 0.1s ease, filter 0.1s ease;
             -webkit-tap-highlight-color: transparent;
             margin-top: 20px;
         }
 
-        /* --- РЕАЛИСТИЧНЫЙ КРИСТАЛЛ (АКВАРЕЛЬНЫЕ ЦВЕТА) --- */
+        /* --- 3D КРИСТАЛЛ (СТЕКЛО И СВЕТ) --- */
         .mithril-ore {
             width: 140px;
             height: 280px;
-            /* Форма кристалла с небольшими неровностями */
-            clip-path: polygon(50% 0%, 92% 22%, 88% 85%, 50% 100%, 12% 85%, 8% 22%);
+            clip-path: polygon(50% 0%, 95% 25%, 85% 90%, 50% 100%, 15% 90%, 5% 25%);
             
-            /* Сложные приглушенные градиенты как на рисунке */
+            /* Сложные блики и голубо-изумрудное свечение */
             background: 
-                /* Левая светлая грань */
-                linear-gradient(105deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 35%, transparent 36%),
-                /* Правая темная грань */
-                linear-gradient(-105deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 35%, transparent 36%),
-                /* Верхушка светлее */
-                linear-gradient(to bottom, #72c39b 0%, transparent 20%),
-                /* Базовый градиент (от темного низа к светлому центру) */
-                radial-gradient(ellipse at 50% 60%, #85dfb2 0%, #3e8865 50%, #1a422f 100%);
+                /* Острый белый блик слева (отражение света) */
+                linear-gradient(105deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 25%, transparent 26%),
+                /* Глубокая тень справа */
+                linear-gradient(-105deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 25%, transparent 26%),
+                /* Светлая верхушка */
+                linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, transparent 20%),
+                /* Магическое ядро (Cyan -> Emerald -> Dark Green) */
+                radial-gradient(ellipse at 50% 55%, #00ffff 0%, #00bfa5 40%, #004d40 80%, #00261c 100%);
                 
             position: relative;
-            z-index: 2;
+            z-index: 2; /* Кристалл находится ПОД передними камнями */
         }
 
-        /* Центральная грань (светящийся ромб) */
+        /* Центральная ромбовидная грань кристалла */
         .mithril-ore::before {
             content: '';
             position: absolute;
-            top: 20%; left: 18%; right: 18%; bottom: 20%;
+            top: 15%; left: 15%; right: 15%; bottom: 20%;
             clip-path: polygon(50% 0%, 100% 45%, 50% 100%, 0% 45%);
             background: 
-                /* Блик внутри ромба */
-                radial-gradient(circle at 50% 80%, rgba(255,255,255,0.4) 0%, transparent 40%),
-                linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.15) 100%),
-                #4fa77c;
-            border: 1px solid rgba(255,255,255,0.2);
+                /* Яркий эпицентр свечения */
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.9) 0%, rgba(0, 255, 200, 0.6) 30%, transparent 70%),
+                /* Скошенный блик по диагонали */
+                linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%, rgba(0,0,0,0.3) 100%),
+                rgba(0, 191, 165, 0.4);
+            /* Тонкая светлая рамка создает эффект твердого стекла */
+            border: 1px solid rgba(255, 255, 255, 0.7);
         }
 
-        /* Нижние затемненные грани для объема */
-        .mithril-ore::after {
-            content: '';
+        /* --- ГРУДА КАМНЕЙ (ОСНОВАНИЕ) --- */
+        .rock-container {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                linear-gradient(35deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.1) 20%, transparent 21%),
-                linear-gradient(-35deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 20%, transparent 21%);
+            bottom: -15px;
+            width: 180px;
+            height: 70px;
+            z-index: 3; /* Камни ПЕРЕКРЫВАЮТ низ кристалла (эффект врастания) */
             pointer-events: none;
         }
 
-        /* --- РЕАЛИСТИЧНЫЕ ГРАНЕНЫЕ КАМНИ --- */
-        .rock-base {
+        /* Центральный передний камень */
+        .rock-center {
             position: absolute;
-            bottom: -25px;
-            width: 170px;
-            height: 75px;
-            z-index: 1;
-            /* Убрали круглые края, используем угловатый многоугольник */
-            clip-path: polygon(5% 85%, 0% 40%, 25% 15%, 50% 5%, 80% 20%, 100% 50%, 90% 95%, 40% 100%);
-            background: 
-                linear-gradient(145deg, #6c665c 0%, #46413a 40%, #201d19 100%);
+            left: 50%; transform: translateX(-50%);
+            bottom: 5px;
+            width: 100px; height: 50px;
+            background: linear-gradient(145deg, #504b44 0%, #292521 100%);
+            clip-path: polygon(10% 80%, 25% 30%, 50% 15%, 75% 35%, 90% 85%, 50% 100%);
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.1);
         }
 
-        /* Левый граненый камень */
-        .rock-base::before {
-            content: '';
+        /* Левый камень */
+        .rock-left {
             position: absolute;
-            left: 0; bottom: 0;
-            width: 90px; height: 65px;
-            clip-path: polygon(0% 80%, 15% 30%, 50% 10%, 85% 40%, 100% 90%, 40% 100%);
-            background: 
-                linear-gradient(110deg, rgba(255,255,255,0.1) 0%, transparent 30%),
-                linear-gradient(135deg, #5b564d 0%, #35302a 100%);
-            border-right: 2px solid rgba(0,0,0,0.3);
+            left: 15px; bottom: -5px;
+            width: 80px; height: 45px;
+            background: linear-gradient(110deg, #635b51 0%, #2c2824 100%);
+            clip-path: polygon(5% 90%, 20% 40%, 50% 15%, 85% 50%, 95% 95%, 40% 100%);
         }
 
-        /* Правый малый камень */
-        .rock-base::after {
-            content: '';
+        /* Правый камень */
+        .rock-right {
             position: absolute;
-            right: 0; bottom: 5px;
-            width: 75px; height: 50px;
-            clip-path: polygon(10% 90%, 0% 40%, 30% 0%, 80% 15%, 100% 60%, 80% 100%);
-            background: 
-                linear-gradient(-110deg, rgba(255,255,255,0.05) 0%, transparent 30%),
-                linear-gradient(-135deg, #4d4840 0%, #1c1915 100%);
-            border-left: 2px solid rgba(0,0,0,0.4);
+            right: 15px; bottom: 0px;
+            width: 75px; height: 40px;
+            background: linear-gradient(-110deg, #534c44 0%, #1f1b18 100%);
+            clip-path: polygon(95% 85%, 80% 30%, 50% 10%, 15% 45%, 5% 90%, 60% 100%);
+        }
+
+        /* Голубое свечение на камнях (отсвет от кристалла) */
+        .rock-glow {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0, 255, 200, 0.35) 0%, transparent 60%);
+            z-index: 4;
         }
 
         /* --- АНИМАЦИЯ НАЖАТИЯ --- */
         .ore-wrapper:active {
             transform: scale(0.96) translateY(6px);
-            filter: drop-shadow(0 15px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 35px rgba(80, 180, 135, 0.5));
+            filter: drop-shadow(0 15px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 50px rgba(0, 255, 200, 0.8));
         }
 
         /* Летающие циферки */
         .floating-text {
             position: absolute;
-            color: #85dfb2;
+            color: #84ffff;
             font-size: 1.8rem;
             font-weight: bold;
             pointer-events: none;
             animation: floatUp 1s ease-out forwards;
-            text-shadow: 0 0 10px #50b487, 1px 1px 2px #000;
+            text-shadow: 0 0 10px #00e676, 1px 1px 2px #000;
             z-index: 10;
         }
 
@@ -237,7 +237,13 @@
 
     <div class="ore-wrapper" id="ore">
         <div class="mithril-ore"></div>
-        <div class="rock-base"></div>
+        
+        <div class="rock-container">
+            <div class="rock-left"></div>
+            <div class="rock-right"></div>
+            <div class="rock-center"></div>
+            <div class="rock-glow"></div>
+        </div>
     </div>
 
     <script>
@@ -346,7 +352,7 @@
                 }, 1000);
             } else {
                 energyTextElement.style.color = '#ff5252';
-                setTimeout(() => energyTextElement.style.color = '#a5d6a7', 300);
+                setTimeout(() => energyTextElement.style.color = '#84ffff', 300);
                 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
