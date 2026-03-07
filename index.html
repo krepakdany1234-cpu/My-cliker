@@ -39,13 +39,15 @@
             background-position: center;
             background-repeat: no-repeat;
             
-            width: 330px; 
+            /* УВЕЛИЧИЛИ РАЗМЕР ТАБЛИЧКИ */
+            width: 365px; 
             
+            /* Скорректировали отступы для новой ширины */
             box-sizing: border-box; 
-            padding-top: 80px;    
-            padding-bottom: 50px; 
-            padding-left: 25px;
-            padding-right: 25px;
+            padding-top: 90px;    
+            padding-bottom: 55px; 
+            padding-left: 30px;
+            padding-right: 30px;
             
             filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8));
             
@@ -89,15 +91,15 @@
             transition: width 0.3s ease-out;
         }
 
-        /* Текст энергии: ТЕПЕРЬ КАК ВЫЖЖЕННОЕ ДЕРЕВО */
+        /* Текст энергии: СДЕЛАЛИ ЯРЧЕ И СВЕТЛЕЕ */
         .energy-text {
-            color: #1a0b02; /* Темно-коричневый, как у счета */
-            font-size: 0.95rem; /* Сделал чуть-чуть крупнее, чтобы лучше читалось с тенью */
+            color: #4a2610; /* Более светлый древесный оттенок */
+            font-size: 0.95rem; 
             margin-top: 10px;
             font-family: Arial, sans-serif; 
             font-weight: bold;
-            /* Тот самый эффект резьбы с темной тенью и светлым бликом */
-            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9);
+            /* Усилили белый блик снизу (0.4 вместо 0.25), чтобы текст лучше читался */
+            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.4), -1px -1px 2px rgba(0, 0, 0, 0.9);
             z-index: 2;
         }
 
@@ -258,8 +260,8 @@
                 }, 1000);
             } else {
                 energyTextElement.style.color = '#ff5252';
-                // Возвращаем темно-коричневый цвет после мигания красным
-                setTimeout(() => energyTextElement.style.color = '#1a0b02', 300);
+                // Возвращаем НОВЫЙ светлый цвет после мигания красным
+                setTimeout(() => energyTextElement.style.color = '#4a2610', 300);
                 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
