@@ -88,7 +88,7 @@
         .energy-bar {
             height: 100%;
             width: 100%;
-            background: linear-gradient(90deg, #4caf50, #1b5e20); /* Зеленая энергия под цвет кристалла */
+            background: linear-gradient(90deg, #4caf50, #1b5e20); 
             transition: width 0.3s ease-out;
         }
 
@@ -100,39 +100,35 @@
             text-shadow: 1px 1px 2px #000;
         }
 
-        /* --- ПЛОТНЫЙ ИЗУМРУДНЫЙ КРИСТАЛЛ (КАК НА ФОТО) --- */
+        /* --- ОБЩАЯ ОБЕРТКА РУДЫ И КАМНЯ --- */
         .ore-wrapper {
-            filter: drop-shadow(0 0 30px rgba(76, 175, 80, 0.4)); /* Зеленое свечение вокруг */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Зеленое свечение + Глубокая черная тень на земле */
+            filter: drop-shadow(0 0 20px rgba(76, 175, 80, 0.3)) drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8));
             cursor: pointer;
             transition: transform 0.1s ease, filter 0.1s ease;
             -webkit-tap-highlight-color: transparent;
-            margin-top: 10px;
+            margin-top: 20px;
         }
 
+        /* --- ПЛОТНЫЙ ИЗУМРУДНЫЙ КРИСТАЛЛ --- */
         .mithril-ore {
             width: 140px;
             height: 260px;
-            
-            /* Форма кристалла с фото (острый верх, сужающийся низ) */
             clip-path: polygon(50% 0%, 90% 20%, 90% 85%, 50% 100%, 10% 85%, 10% 20%);
-            
-            /* Плотный цвет с градиентами граней */
             background-color: #1b5e20;
             background-image: 
-                /* Левая светлая грань */
                 linear-gradient(105deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.15) 25%, transparent 25%),
-                /* Правая темная грань */
                 linear-gradient(-105deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 25%, transparent 25%),
-                /* Основной цвет от светлого центра к темным краям */
                 radial-gradient(ellipse at center, #4caf50 0%, #1b5e20 80%);
-            
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
+            z-index: 2; /* Кристалл находится поверх камней */
         }
 
-        /* Имитация центральной ромбовидной грани (как на фото) */
+        /* Имитация центральной ромбовидной грани */
         .mithril-ore::before {
             content: '';
             position: absolute;
@@ -145,17 +141,31 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .ore-content {
-            font-size: 3.5rem;
-            /* Легкая тень под эмодзи, чтобы он читался внутри кристалла */
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
-            z-index: 2;
+        /* --- КАМЕНЬ (ГРУНТ) ПОД РУДОЙ --- */
+        .rock-base {
+            position: absolute;
+            bottom: -15px; /* Сдвигаем вниз под кристалл */
+            width: 150px;
+            height: 50px;
+            background-color: #4a4a4a;
+            border-radius: 50px; /* Делаем овальную основу */
+            z-index: 1; /* Камень находится за кристаллом */
+            
+            /* Создаем комки камней и тени с помощью box-shadow */
+            box-shadow: 
+                inset -10px -10px 15px rgba(0,0,0,0.8), /* Объем самого камня */
+                inset 5px 5px 10px rgba(255,255,255,0.2), /* Блик на камне */
+                -25px 5px 0 -5px #3d3d3d, /* Левый кусок камня */
+                25px 10px 0 -8px #2c2c2c, /* Правый кусок камня */
+                0 -25px 20px rgba(0,0,0,0.9); /* Тень от самого кристалла на камни */
         }
 
-        /* Анимация нажатия */
+        /* --- АНИМАЦИЯ НАЖАТИЯ --- */
         .ore-wrapper:active {
-            transform: scale(0.95);
-            filter: drop-shadow(0 0 50px rgba(76, 175, 80, 0.8));
+            /* При клике кристалл сжимается и слегка опускается вниз к земле */
+            transform: scale(0.95) translateY(5px);
+            /* Тень становится гуще и ближе */
+            filter: drop-shadow(0 0 40px rgba(76, 175, 80, 0.7)) drop-shadow(0 15px 10px rgba(0, 0, 0, 0.9));
         }
 
         /* Летающие циферки */
@@ -189,9 +199,8 @@
     </div>
 
     <div class="ore-wrapper" id="ore">
-        <div class="mithril-ore">
-            <div class="ore-content">💎</div>
-        </div>
+        <div class="mithril-ore"></div>
+        <div class="rock-base"></div>
     </div>
 
     <script>
@@ -209,42 +218,34 @@
             greetingElement.innerText = tg.initDataUnsafe.user.first_name;
         }
 
-        // --- НАСТРОЙКИ ИГРЫ ---
         const maxEnergy = 500;
-        const regenAmount = 100; // Сколько восстанавливать
-        const regenIntervalMs = 5 * 60 * 1000; // 5 минут в миллисекундах (300 000 мс)
+        const regenAmount = 100;
+        const regenIntervalMs = 5 * 60 * 1000;
 
-        // --- ЗАГРУЗКА ДАННЫХ ---
         let score = parseInt(localStorage.getItem('mithrilScore')) || 0;
         let energy = parseInt(localStorage.getItem('mithrilEnergy'));
         if (isNaN(energy)) energy = maxEnergy;
 
-        // Время последнего добавления энергии
         let lastTickTime = parseInt(localStorage.getItem('lastTickTime')) || Date.now();
 
-        // --- ФУНКЦИЯ ПРОВЕРКИ И НАЧИСЛЕНИЯ ЭНЕРГИИ ---
         function checkEnergyRegen() {
             let now = Date.now();
             if (energy < maxEnergy) {
                 let timePassed = now - lastTickTime;
                 
-                // Если прошло больше 5 минут
                 if (timePassed >= regenIntervalMs) {
-                    let ticks = Math.floor(timePassed / regenIntervalMs); // Считаем, сколько раз по 5 мин прошло
+                    let ticks = Math.floor(timePassed / regenIntervalMs);
                     energy += ticks * regenAmount;
                     if (energy > maxEnergy) energy = maxEnergy;
                     
-                    // Сдвигаем время последнего начисления
                     lastTickTime += ticks * regenIntervalMs; 
                     saveData();
                 }
             } else {
-                // Если энергия полная, держим таймер на текущем времени, чтобы не начислять сразу после клика
                 lastTickTime = now;
             }
         }
 
-        // --- ОБНОВЛЕНИЕ ТАЙМЕРА НА ЭКРАНЕ ---
         function updateUI() {
             scoreElement.innerText = score;
             energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
@@ -256,7 +257,6 @@
                 let timeLeftMs = regenIntervalMs - (now - lastTickTime);
                 if (timeLeftMs < 0) timeLeftMs = 0;
                 
-                // Перевод миллисекунд в Минуты:Секунды
                 let minutes = Math.floor(timeLeftMs / 60000);
                 let seconds = Math.floor((timeLeftMs % 60000) / 1000);
                 let timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
@@ -265,15 +265,13 @@
             }
         }
 
-        // Сохранение в память
         function saveData() {
             localStorage.setItem('mithrilScore', score);
             localStorage.setItem('mithrilEnergy', energy);
             localStorage.setItem('lastTickTime', lastTickTime);
         }
 
-        // --- ИГРОВОЙ ЦИКЛ (вызывается каждую секунду) ---
-        checkEnergyRegen(); // Проверка при старте
+        checkEnergyRegen();
         updateUI();
         
         setInterval(() => {
@@ -281,10 +279,8 @@
             updateUI();
         }, 1000);
 
-        // --- ОБРАБОТКА КЛИКА ---
         oreElement.addEventListener('pointerdown', (e) => {
             if (energy >= 1) {
-                // Если энергия была полная, начинаем отсчет 5 минут с этого момента
                 if (energy === maxEnergy) {
                     lastTickTime = Date.now();
                 }
