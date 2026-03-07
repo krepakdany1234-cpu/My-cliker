@@ -28,28 +28,29 @@
             background-blend-mode: overlay;
         }
 
-        /* --- НОВАЯ ТАБЛИЧКА ИЗ ТВОЕЙ КАРТИНКИ --- */
+        /* --- ТАБЛИЧКА ИЗ ТВОЕЙ КАРТИНКИ --- */
         .guild-board {
-            /* Убираем старые рамки и цвета */
             background: none;
             border: none;
             box-shadow: none;
             
-            /* ВНИМАНИЕ: Впиши сюда название загруженной картинки таблички! */
             background-image: url('1000019094-removebg-preview.png');
-            background-size: 100% 100%; /* Растягиваем картинку по размеру блока */
+            background-size: 100% 100%; 
             background-position: center;
             background-repeat: no-repeat;
             
-            /* Настраиваем размеры, чтобы текст помещался ровно на доске */
-            width: 320px;
-            min-height: 200px;
-            padding: 30px 20px; 
-            margin-bottom: 20px; 
+            width: 330px; 
             
-            /* Добавляем тень для всей доски, чтобы она выделялась на фоне города */
+            /* МАГИЯ: Сдвигаем всё внутрь доски, чтобы не залезало на веревки */
+            box-sizing: border-box; 
+            padding-top: 75px;    
+            padding-bottom: 45px; 
+            padding-left: 25px;
+            padding-right: 25px;
+            
             filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8));
             
+            margin-bottom: 20px; 
             position: relative;
             text-align: center;
             display: flex;
@@ -66,7 +67,8 @@
 
         .score-container {
             color: #fff8e7; font-size: 3.2rem; font-weight: bold;
-            text-shadow: 2px 3px 5px rgba(0,0,0,0.9); margin-bottom: 15px;
+            text-shadow: 2px 3px 5px rgba(0,0,0,0.9); 
+            margin-bottom: 8px; /* Чуть уменьшили отступ */
             z-index: 2;
         }
 
