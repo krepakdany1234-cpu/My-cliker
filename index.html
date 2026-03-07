@@ -128,7 +128,6 @@
             -webkit-user-drag: none;
         }
 
-        /* Анимация при нажатии на картинку */
         .crystal-img:active {
             transform: scale(0.95) translateY(5px);
             filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8));
@@ -151,24 +150,23 @@
             100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
         }
 
-        /* --- ПЛАВНАЯ И МЕДЛЕННАЯ АНИМАЦИЯ КИРКИ --- */
+        /* --- АНИМАЦИЯ КИРКИ --- */
         .pickaxe-effect {
             position: absolute;
             font-size: 3.5rem; 
             pointer-events: none;
             z-index: 50;
-            /* Точка вращения - ручка кирки (внизу справа) */
             transform-origin: 80% 80%; 
-            /* Более медленная и плавная анимация (0.6s вместо 0.3s, ease-in-out) */
-            animation: mineStrike 0.6s ease-in-out forwards;
+            /* Время теперь задается динамически через JavaScript! */
+            animation: mineStrike ease-in-out forwards;
             filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6));
         }
 
         @keyframes mineStrike {
             0% { transform: rotate(-30deg) scale(1.3); opacity: 0; }
-            30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } /* Плавный и широкий замах */
-            60% { transform: rotate(25deg) scale(1.3); opacity: 1; }  /* Удар */
-            100% { transform: rotate(35deg) scale(1.1); opacity: 0; } /* Плавный отскок и исчезновение */
+            30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 
+            60% { transform: rotate(25deg) scale(1.3); opacity: 1; }  
+            100% { transform: rotate(35deg) scale(1.1); opacity: 0; } 
         }
     </style>
 </head>
@@ -223,6 +221,9 @@
         if (isNaN(energy)) energy = maxEnergy;
 
         let lastTickTime = parseInt(localStorage.getItem('lastTickTime')) || Date.now();
+        
+        // ПЕРЕМЕННАЯ ДЛЯ ДИНАМИЧЕСКОЙ СКОРОСТИ КИРКИ
+        let lastClickAnimTime = 0;
 
         function checkEnergyRegen() {
             let now = Date.now();
@@ -291,15 +292,27 @@
                     tg.HapticFeedback.impactOccurred('medium');
                 }
 
-                // --- 1. АНИМАЦИЯ КИРКИ ---
+                // --- МАГИЯ УСКОРЕНИЯ КИРКИ ---
+                let nowAnim = Date.now();
+                // Вычисляем время между текущим и прошлым кликом (в миллисекундах)
+                let timeSinceLastClick = nowAnim - (lastClickAnimTime || nowAnim);
+                lastClickAnimTime = nowAnim;
+
+                // Базовая анимация 0.6 сек. Чем быстрее клик, тем меньше время! (минимум 0.15 сек)
+                let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
+
                 const pickaxe = document.createElement('div');
                 pickaxe.classList.add('pickaxe-effect');
                 pickaxe.innerText = '⛏️';
                 pickaxe.style.left = `${e.clientX + 5}px`;
                 pickaxe.style.top = `${e.clientY - 45}px`;
+                
+                // ПРИМЕНЯЕМ СКОРОСТЬ К АНИМАЦИИ
+                pickaxe.style.animationDuration = `${animDuration}s`;
+                
                 document.body.appendChild(pickaxe);
 
-                // --- 2. ЛЕТАЮЩАЯ ЦИФРА +1 ---
+                // --- ЛЕТАЮЩАЯ ЦИФРА +1 ---
                 const plusOne = document.createElement('div');
                 plusOne.classList.add('floating-text');
                 plusOne.innerText = '+1';
@@ -307,11 +320,15 @@
                 plusOne.style.top = `${e.clientY - 40}px`;
                 document.body.appendChild(plusOne);
 
-                // Удаляем элементы после завершения анимации
+                // Удаляем элементы (кирку удаляем синхронно с её скоростью)
+                setTimeout(() => {
+                    pickaxe.remove();
+                }, animDuration * 1000);
+                
                 setTimeout(() => {
                     plusOne.remove();
-                    pickaxe.remove();
                 }, 1000);
+
             } else {
                 energyTextElement.style.color = '#ff5252';
                 setTimeout(() => energyTextElement.style.color = '#ffeba1', 300);
