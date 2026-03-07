@@ -28,12 +28,13 @@
             background-blend-mode: overlay;
         }
 
-        /* --- ТАБЛИЧКА ИЗ ТВОЕЙ КАРТИНКИ --- */
+        /* --- ТАБЛИЧКА --- */
         .guild-board {
             background: none;
             border: none;
             box-shadow: none;
             
+            /* Твоя картинка */
             background-image: url('1000019094-removebg-preview.png');
             background-size: 100% 100%; 
             background-position: center;
@@ -41,10 +42,9 @@
             
             width: 330px; 
             
-            /* МАГИЯ: Сдвигаем всё внутрь доски, чтобы не залезало на веревки */
             box-sizing: border-box; 
-            padding-top: 75px;    
-            padding-bottom: 45px; 
+            padding-top: 80px;    
+            padding-bottom: 50px; 
             padding-left: 25px;
             padding-right: 25px;
             
@@ -59,36 +59,59 @@
             justify-content: center;
         }
 
+        /* Имя: Эффект старой позолоченной краски на дереве */
         .greeting {
-            color: #ffd700; font-size: 1.2rem; margin-bottom: 5px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9); letter-spacing: 1px;
+            color: #e5b85c; 
+            font-size: 1.2rem; 
+            margin-bottom: 5px;
+            text-shadow: -1px -1px 2px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.1);
+            letter-spacing: 1px;
+            opacity: 0.9; /* Слегка просвечивает текстура дерева */
             z-index: 2;
         }
 
+        /* Счет: Эффект глубокой резьбы (выжженное дерево) */
         .score-container {
-            color: #fff8e7; font-size: 3.2rem; font-weight: bold;
-            text-shadow: 2px 3px 5px rgba(0,0,0,0.9); 
-            margin-bottom: 8px; /* Чуть уменьшили отступ */
+            color: #1a0b02; /* Очень темно-коричневый, почти черный */
+            font-size: 3.5rem; 
+            font-weight: bold;
+            /* Магия резьбы: темная тень сверху, светлый блик снизу */
+            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9);
+            margin-bottom: 12px;
             z-index: 2;
         }
 
         /* --- ПОЛОСКА ЭНЕРГИИ --- */
+        /* Вырезанный в доске желоб */
         .energy-wrapper {
-            width: 80%; background-color: #1a0f07; border: 2px solid #000;
-            border-radius: 10px; height: 14px; overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.2);
+            width: 80%; 
+            background-color: rgba(10, 5, 0, 0.5); /* Полупрозрачный, видно дерево */
+            border: 1px solid rgba(0,0,0,0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.15); /* Блик на нижней кромке желоба */
+            border-radius: 8px; 
+            height: 14px; 
+            overflow: hidden;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); /* Глубокая тень внутри */
             z-index: 2;
         }
 
+        /* Сама магическая энергия */
         .energy-bar {
-            height: 100%; width: 100%;
-            background: linear-gradient(90deg, #50b487, #1f4a37); 
+            height: 100%; 
+            width: 100%;
+            background: linear-gradient(90deg, #2e7d32, #50b487, #81c784); 
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5); /* Объем для жидкости */
             transition: width 0.3s ease-out;
         }
 
+        /* Текст энергии: тоже вырезан в дереве */
         .energy-text {
-            color: #a5d6a7; font-size: 0.85rem; margin-top: 8px;
-            font-family: Arial, sans-serif; text-shadow: 1px 1px 2px #000;
+            color: #2b1505; 
+            font-size: 0.85rem; 
+            margin-top: 10px;
+            font-family: Arial, sans-serif; 
+            font-weight: bold;
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.2);
             z-index: 2;
         }
 
@@ -255,7 +278,7 @@
                 }, 1000);
             } else {
                 energyTextElement.style.color = '#ff5252';
-                setTimeout(() => energyTextElement.style.color = '#a5d6a7', 300);
+                setTimeout(() => energyTextElement.style.color = '#2b1505', 300);
                 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
