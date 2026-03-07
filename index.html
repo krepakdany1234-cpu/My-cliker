@@ -3,98 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Мой Telegram Кликер</title>
+    <title>Мифриловый Кликер</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
-        /* Стили страницы */
+        /* --- ЗАДНИЙ ФОН (Заросший город) --- */
         body {
-            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
-            /* Используем цвета из темы Telegram пользователя */
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            user-select: none; /* Запрещаем выделение текста */
+            font-family: 'Georgia', serif; /* Шрифт с засечками для фэнтези атмосферы */
+            user-select: none;
+            
+            /* Темный мистический лес/город. 
+               Чтобы поставить свою картинку, раскомментируй строку ниже и вставь ссылку вместо URL_КАРТИНКИ: */
+            /* background-image: url('URL_КАРТИНКИ'); */
+            
+            background-color: #1a2f24;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background-size: cover;
+            background-position: center;
         }
 
+        /* --- СЧЕТЧИК (Деревянная табличка гильдии) --- */
+        .guild-board {
+            background-color: #5c3a21; /* Цвет темного дерева */
+            border: 4px solid #361f0e; /* Темная рамка */
+            border-radius: 8px;
+            padding: 15px 40px;
+            margin-bottom: 60px;
+            box-shadow: 
+                0 10px 20px rgba(0,0,0,0.6), /* Тень от таблички */
+                inset 0 0 15px rgba(0,0,0,0.5); /* Внутренняя тень для объема */
+            position: relative;
+            text-align: center;
+        }
+
+        /* Имитация гвоздей на табличке */
+        .guild-board::before, .guild-board::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            width: 8px;
+            height: 8px;
+            background-color: #1a0f07;
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 2px #4a4a4a;
+        }
+        .guild-board::before { left: 10px; }
+        .guild-board::after { right: 10px; }
+
         .greeting {
+            color: #d4af37; /* Золотистый цвет текста */
             font-size: 1.2rem;
-            margin-bottom: 20px;
-            color: var(--tg-theme-hint-color, #999999);
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px #000;
         }
 
         .score-container {
-            font-size: 4rem;
+            color: #fff8e7;
+            font-size: 3.5rem;
             font-weight: bold;
-            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px #000;
         }
 
-        /* Стили самой монетки/кнопки */
-        .coin {
+        /* --- КНОПКА (Мифриловая руда) --- */
+        .mithril-ore {
             width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, #ffd700, #ffa500);
-            border-radius: 50%;
+            height: 190px;
+            /* Делаем форму неровного камня */
+            border-radius: 40% 60% 55% 45% / 50% 45% 65% 50%;
+            /* Цвет светящегося мифрила (серебристо-голубой) */
+            background: radial-gradient(circle at 30% 30%, #ffffff, #80deea, #006064);
+            box-shadow: 
+                0 0 40px rgba(0, 188, 212, 0.6), /* Внешнее свечение */
+                inset -10px -10px 20px rgba(0,0,0,0.5), /* Тень снизу */
+                inset 10px 10px 20px rgba(255,255,255,0.8); /* Блик сверху */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            color: white;
-            box-shadow: 0 10px 25px rgba(255, 165, 0, 0.5);
+            font-size: 5rem;
             cursor: pointer;
-            transition: transform 0.05s ease-in-out;
-            -webkit-tap-highlight-color: transparent; /* Убираем синюю подсветку на мобилках */
+            transition: all 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Анимация при нажатии */
-        .coin:active {
-            transform: scale(0.92);
+        /* Анимация удара киркой (нажатия) */
+        .mithril-ore:active {
+            transform: scale(0.9) rotate(-3deg); /* Камень немного сжимается и наклоняется */
+            box-shadow: 
+                0 0 60px rgba(0, 188, 212, 0.9), 
+                inset -5px -5px 10px rgba(0,0,0,0.5), 
+                inset 5px 5px 10px rgba(255,255,255,0.8);
+        }
+
+        /* Летающие циферки (эффект добычи) */
+        .floating-text {
+            position: absolute;
+            color: #80deea;
+            font-size: 1.5rem;
+            font-weight: bold;
+            pointer-events: none; /* Чтобы не мешало кликать */
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 0 0 5px #00bcd4;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div class="greeting" id="greeting">Привет, игрок!</div>
-    <div class="score-container" id="score">0</div>
-    <div class="coin" id="coin">TAP!</div>
+    <div class="guild-board">
+        <div class="greeting" id="greeting">Авантюрист</div>
+        <div class="score-container" id="score">0</div>
+    </div>
+
+    <div class="mithril-ore" id="ore">💎</div>
 
     <script>
-        // Инициализируем Telegram Web App
         const tg = window.Telegram.WebApp;
-        
-        // Разворачиваем приложение на весь экран мобильного телефона
         tg.expand();
-        
-        // Сообщаем Telegram, что приложение готово к отображению
         tg.ready();
 
         let score = 0;
         const scoreElement = document.getElementById('score');
-        const coinElement = document.getElementById('coin');
+        const oreElement = document.getElementById('ore');
         const greetingElement = document.getElementById('greeting');
 
-        // Если приложение открыто в Telegram, получаем имя пользователя
+        // Получаем имя из Telegram
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            greetingElement.innerText = `Привет, ${tg.initDataUnsafe.user.first_name}!`;
+            greetingElement.innerText = tg.initDataUnsafe.user.first_name;
         }
 
-        // Обрабатываем клик по монетке
-        coinElement.addEventListener('pointerdown', (e) => {
-            // Увеличиваем счет
+        // Обработка удара по руде
+        oreElement.addEventListener('pointerdown', (e) => {
             score++;
             scoreElement.innerText = score;
 
-            // Включаем легкую вибрацию на телефоне (если поддерживается)
+            // Вибрация (как удар киркой)
             if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
+                tg.HapticFeedback.impactOccurred('medium');
             }
+
+            // Создаем красивую отлетающую циферку "+1"
+            const plusOne = document.createElement('div');
+            plusOne.classList.add('floating-text');
+            plusOne.innerText = '+1';
+            
+            // Позиционируем циферку там, где был клик
+            plusOne.style.left = `${e.clientX - 10}px`;
+            plusOne.style.top = `${e.clientY - 20}px`;
+            
+            document.body.appendChild(plusOne);
+
+            // Удаляем циферку после окончания анимации
+            setTimeout(() => {
+                plusOne.remove();
+            }, 1000);
         });
     </script>
 </body>
