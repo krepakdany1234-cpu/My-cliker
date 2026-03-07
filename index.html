@@ -38,7 +38,7 @@
             border: 4px solid #2a160a;
             border-radius: 8px;
             padding: 15px 30px;
-            margin-bottom: 80px;
+            margin-bottom: 50px; /* Немного уменьшил отступ, так как кристалл стал выше */
             box-shadow: 0 15px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.6);
             position: relative;
             text-align: center;
@@ -101,80 +101,83 @@
             transition: color 0.3s ease;
         }
 
-        /* --- ЧИСТАЯ ПОЛУПРОЗРАЧНАЯ РУДА --- */
+        /* --- ВЫСОКИЙ КРИСТАЛЛ (КАК НА ФОТО) --- */
         .ore-wrapper {
-            /* Мягкое голубое свечение вокруг */
-            filter: drop-shadow(0 0 25px rgba(0, 188, 212, 0.5));
+            /* Изумрудно-голубое свечение вокруг формы */
+            filter: drop-shadow(0 0 25px rgba(0, 255, 170, 0.4));
             cursor: pointer;
             transition: transform 0.1s ease, filter 0.1s ease;
             -webkit-tap-highlight-color: transparent;
+            margin-top: 10px;
         }
 
         .mithril-ore {
-            width: 140px;
-            height: 140px;
-            transform: rotate(45deg);
-            border-radius: 20px;
+            /* Размеры вытянутого кристалла */
+            width: 130px;
+            height: 240px;
             
-            /* Полупрозрачный фон (эффект чистого стекла) */
-            background: linear-gradient(135deg, rgba(224, 247, 250, 0.4), rgba(0, 188, 212, 0.1));
+            /* Вырезаем сложную форму кристалла (координаты углов) */
+            clip-path: polygon(50% 0%, 100% 20%, 85% 95%, 50% 100%, 15% 95%, 0% 20%);
             
-            /* Размытие того, что находится за кристаллом */
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            /* Сложный фон: основной прозрачный цвет + объемные грани */
+            background: 
+                /* Левый светлый край */
+                linear-gradient(to right, rgba(255,255,255,0.25) 0%, transparent 30%),
+                /* Правый темный край */
+                linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 30%),
+                /* Центральная светлая грань */
+                linear-gradient(to right, transparent 48%, rgba(255,255,255,0.4) 50%, transparent 52%),
+                /* Основной изумрудный цвет стекла */
+                linear-gradient(135deg, rgba(167, 255, 235, 0.45), rgba(0, 150, 136, 0.15));
             
-            /* Тонкая светлая рамка, чтобы подчеркнуть форму ромба */
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            
-            /* Внутренний светлый блик без темной грязи */
-            box-shadow: inset 10px 10px 25px rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
         }
 
         /* Красивый диагональный блик света */
         .mithril-ore::after {
             content: '';
             position: absolute;
-            top: -50%; left: -50%;
+            top: -20%; left: -50%;
             width: 200%; height: 200%;
-            background: linear-gradient(to bottom right, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%);
-            transform: rotate(-45deg);
+            background: linear-gradient(to bottom right, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 100%);
+            transform: rotate(-15deg);
             pointer-events: none;
         }
 
-        /* Содержимое внутри руды (эмодзи) */
         .ore-content {
-            transform: rotate(-45deg);
-            font-size: 4rem;
-            opacity: 0.9; /* Тоже немного прозрачный */
+            font-size: 4.5rem;
+            opacity: 0.8;
+            /* Легкая тень под эмодзи, чтобы он читался внутри кристалла */
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
         }
 
         /* Анимация нажатия */
         .ore-wrapper:active {
-            transform: scale(0.92);
-            filter: drop-shadow(0 0 40px rgba(0, 188, 212, 0.8));
+            transform: scale(0.95); /* Слегка вдавливается */
+            filter: drop-shadow(0 0 45px rgba(0, 255, 170, 0.8)); /* Вспыхивает ярче */
         }
 
         /* Летающие циферки */
         .floating-text {
             position: absolute;
-            color: #e0f7fa;
+            color: #a7ffeb;
             font-size: 1.8rem;
             font-weight: bold;
             pointer-events: none;
             animation: floatUp 1s ease-out forwards;
-            text-shadow: 0 0 10px #00bcd4, 1px 1px 2px #000;
+            text-shadow: 0 0 10px #00bfa5, 1px 1px 2px #000;
             z-index: 10;
         }
 
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-60px) scale(1.5); opacity: 0; }
+            100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
         }
     </style>
 </head>
@@ -262,7 +265,7 @@
                 plusOne.innerText = '+1';
                 
                 plusOne.style.left = `${e.clientX - 15}px`;
-                plusOne.style.top = `${e.clientY - 30}px`;
+                plusOne.style.top = `${e.clientY - 40}px`;
                 
                 document.body.appendChild(plusOne);
 
