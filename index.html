@@ -44,13 +44,15 @@
             background-position: center;
             background-repeat: no-repeat;
             
-            width: 365px; 
+            /* УВЕЛИЧИЛИ РАЗМЕР ТАБЛИЧКИ ЕЩЕ СИЛЬНЕЕ */
+            width: 390px; 
             
+            /* Скорректировали отступы для нового размера, чтобы обойти гвозди */
             box-sizing: border-box; 
-            padding-top: 85px;    
-            padding-bottom: 75px; 
-            padding-left: 35px;   
-            padding-right: 35px;
+            padding-top: 90px;    
+            padding-bottom: 80px; 
+            padding-left: 40px;   
+            padding-right: 40px;
             
             filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8));
             
@@ -66,10 +68,10 @@
         /* Счет */
         .score-container {
             color: #1a0b02; 
-            font-size: 3.2rem; 
+            font-size: 3.4rem; /* Чуть-чуть увеличили цифры, чтобы они заполняли новую доску */
             font-weight: bold;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             z-index: 2;
         }
 
@@ -96,16 +98,13 @@
 
         /* Текст энергии: ВЫРЕЗАНО НОЖОМ ПО ДЕРЕВУ */
         .energy-text {
-            color: #1f0d04; /* Темный цвет углубления в дереве */
+            color: #1f0d04; 
             font-size: 0.95rem; 
             margin-top: 8px;
-            font-family: 'Georgia', serif; /* Засечки делают текст более "угловатым", как от ножа */
+            font-family: 'Georgia', serif; 
             font-weight: bold;
             letter-spacing: 0.5px;
-            /* Эффект резьбы: глубокая черная тень внутри сверху и светлый срез снизу */
-            text-shadow: 
-                -1px -1px 1px rgba(0, 0, 0, 0.95), 
-                1px 1px 1px rgba(255, 255, 255, 0.25);
+            text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.95), 1px 1px 1px rgba(255, 255, 255, 0.25);
             z-index: 2;
         }
 
