@@ -94,17 +94,17 @@
             transition: width 0.3s ease-out;
         }
 
-        /* Текст энергии: ВЫРЕЗАНО НОЖОМ (Компактный размер) */
+        /* Текст энергии: СДЕЛАЛИ ЯРКИМ И ЧИТАЕМЫМ */
         .energy-text {
-            color: #1f0d04; 
-            font-size: 0.8rem; 
+            color: #ffeba1; /* Яркий светло-золотистый/древесный цвет */
+            font-size: 0.85rem; /* Чуть-чуть увеличили для читаемости */
             margin-top: 8px;
             font-family: 'Georgia', serif; 
             font-weight: bold;
-            letter-spacing: 0; 
+            letter-spacing: 0.5px; 
             white-space: nowrap; 
-            /* Эффект резьбы: глубокая черная тень внутри сверху и светлый срез снизу */
-            text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.95), 1px 1px 1px rgba(255, 255, 255, 0.25);
+            /* Плотная черная тень-обводка, чтобы буквы выделялись на темном дереве */
+            text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8);
             z-index: 2;
         }
 
@@ -227,7 +227,6 @@
             energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
 
             if (energy >= maxEnergy) {
-                // Вернули обычный текст без дополнительных классов
                 energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
             } else {
                 let now = Date.now();
@@ -238,7 +237,6 @@
                 let seconds = Math.floor((timeLeftMs % 60000) / 1000);
                 let timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
                 
-                // Вернули обычный текст
                 energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${timeString})`;
             }
         }
@@ -287,8 +285,8 @@
                 }, 1000);
             } else {
                 energyTextElement.style.color = '#ff5252';
-                // После мигания красным возвращаем цвет вырезанного дерева
-                setTimeout(() => energyTextElement.style.color = '#1f0d04', 300);
+                // Возвращаем светлый цвет после мигания красным
+                setTimeout(() => energyTextElement.style.color = '#ffeba1', 300);
                 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
