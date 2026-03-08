@@ -208,12 +208,19 @@
             border-radius: 15px;
             width: 90%; 
             max-width: 400px;
+            max-height: 85vh; /* Ограничиваем высоту для скролла */
+            overflow-y: auto; /* Включаем прокрутку, если предметов много */
             padding: 20px;
             color: #ffeba1;
             box-shadow: 0 10px 30px rgba(0,0,0,1), inset 0 0 20px rgba(0,0,0,0.6);
             text-align: center;
             position: relative;
         }
+
+        /* Стиль для полосы прокрутки внутри магазина */
+        .shop-modal::-webkit-scrollbar { width: 6px; }
+        .shop-modal::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
+        .shop-modal::-webkit-scrollbar-thumb { background: #8b5a2b; border-radius: 10px; }
 
         .close-shop-btn {
             position: absolute;
@@ -223,6 +230,7 @@
             cursor: pointer; 
             font-weight: bold;
             text-shadow: 1px 1px 2px #000;
+            z-index: 10;
         }
 
         .shop-title {
@@ -300,7 +308,7 @@
                 <div class="shop-item-info">
                     <h3>⚒️ Острая кирка</h3>
                     <p>Добыча за клик: +1</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Текущий уровень: <span id="lvl-pickaxe">1</span> / 100</p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Уровень: <span id="lvl-pickaxe">1</span> / 100</p>
                 </div>
                 <button class="shop-buy-btn" id="buy-pickaxe">2500 💎</button>
             </div>
@@ -309,9 +317,18 @@
                 <div class="shop-item-info">
                     <h3>🎒 Гномья сумка</h3>
                     <p>Макс. энергия: +50</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Текущий запас: <span id="lvl-energy">500</span> / 2000</p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Запас: <span id="lvl-energy">500</span> / 2000</p>
                 </div>
                 <button class="shop-buy-btn" id="buy-energy">100 💎</button>
+            </div>
+
+            <div class="shop-item">
+                <div class="shop-item-info">
+                    <h3>⏳ Древние часы</h3>
+                    <p>Регенерация: -30 сек</p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Уровень: <span id="lvl-regen">1</span> / 9</p>
+                </div>
+                <button class="shop-buy-btn" id="buy-regen">8000 💎</button>
             </div>
         </div>
     </div>
@@ -332,37 +349,57 @@
             let tg = window.Telegram ? window.Telegram.WebApp : null;
             if (tg) tg.expand();
 
-            // 3. Загрузка данных из памяти
-            let score = parseInt(localStorage.getItem('mithrilScore')) || 0;
-            let clickPower = parseInt(localStorage.getItem('mithrilClickPower')) || 1;
-            let maxEnergy = parseInt(localStorage.getItem('mithrilMaxEnergy')) || 500;
-            let costPickaxe = parseInt(localStorage.getItem('mithrilCostPickaxe')) || 2500;
-            let costEnergy = parseInt(localStorage.getItem('mithrilCostEnergy')) || 100;
+            // 3. Безопасное получение данных из памяти
+            function getSave(key, defValue) {
+                try {
+                    let val = localStorage.getItem(key);
+                    if (val !== null && !isNaN(parseInt(val))) {
+                        return parseInt(val);
+                    }
+                } catch (e) {}
+                return defValue;
+            }
+
+            // Загрузка переменных
+            let score = getSave('mithrilScore', 0);
             
-            // Лечим старые сохранения, если цена кирки была сломана
-            if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500;
+            let clickPower = getSave('mithrilClickPower', 1);
+            let costPickaxe = getSave('mithrilCostPickaxe', 2500);
+            if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500; 
 
-            let energy = parseInt(localStorage.getItem('mithrilEnergy'));
-            if (isNaN(energy)) energy = maxEnergy;
+            let maxEnergy = getSave('mithrilMaxEnergy', 500);
+            let costEnergy = getSave('mithrilCostEnergy', 100);
+            
+            // ПЕРЕМЕННЫЕ НОВОГО УЛУЧШЕНИЯ
+            let regenLevel = getSave('mithrilRegenLevel', 1);
+            let costRegen = getSave('mithrilCostRegen', 8000);
 
-            let lastTickTime = parseInt(localStorage.getItem('lastTickTime')) || Date.now();
-            const regenAmount = 100;
-            const regenIntervalMs = 5 * 60 * 1000;
+            let energy = getSave('mithrilEnergy', maxEnergy);
+            let lastTickTime = getSave('lastTickTime', Date.now());
             let lastClickAnimTime = 0;
 
-            // ЛИМИТЫ (Константы)
+            const regenAmount = 100;
+            // Рассчитываем время в зависимости от уровня (База: 5 мин = 300000мс. Каждый лвл отнимает 30000мс)
+            let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
+
+            // ЛИМИТЫ
             const MAX_CLICK_POWER = 100;
             const MAX_ENERGY_LIMIT = 2000;
+            const MAX_REGEN_LEVEL = 9; // На 9 уровне время будет ровно 1 минута (60000мс)
 
             // 4. Основные функции
             function saveData() {
-                localStorage.setItem('mithrilScore', score);
-                localStorage.setItem('mithrilEnergy', energy);
-                localStorage.setItem('lastTickTime', lastTickTime);
-                localStorage.setItem('mithrilClickPower', clickPower);
-                localStorage.setItem('mithrilMaxEnergy', maxEnergy);
-                localStorage.setItem('mithrilCostPickaxe', costPickaxe);
-                localStorage.setItem('mithrilCostEnergy', costEnergy);
+                try {
+                    localStorage.setItem('mithrilScore', score);
+                    localStorage.setItem('mithrilEnergy', energy);
+                    localStorage.setItem('lastTickTime', lastTickTime);
+                    localStorage.setItem('mithrilClickPower', clickPower);
+                    localStorage.setItem('mithrilMaxEnergy', maxEnergy);
+                    localStorage.setItem('mithrilCostPickaxe', costPickaxe);
+                    localStorage.setItem('mithrilCostEnergy', costEnergy);
+                    localStorage.setItem('mithrilRegenLevel', regenLevel);
+                    localStorage.setItem('mithrilCostRegen', costRegen);
+                } catch(e) {}
             }
 
             function updateUI() {
@@ -381,8 +418,9 @@
 
                 document.getElementById('lvl-pickaxe').innerText = clickPower;
                 document.getElementById('lvl-energy').innerText = maxEnergy;
+                document.getElementById('lvl-regen').innerText = regenLevel;
                 
-                // Проверка лимитов для магазина
+                // Проверка лимитов кирки
                 if (clickPower >= MAX_CLICK_POWER) {
                     document.getElementById('buy-pickaxe').innerText = "МАКС";
                     document.getElementById('buy-pickaxe').disabled = true;
@@ -391,12 +429,22 @@
                     document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
                 }
 
+                // Проверка лимитов сумки
                 if (maxEnergy >= MAX_ENERGY_LIMIT) {
                     document.getElementById('buy-energy').innerText = "МАКС";
                     document.getElementById('buy-energy').disabled = true;
                 } else {
                     document.getElementById('buy-energy').innerText = `${costEnergy} 💎`;
                     document.getElementById('buy-energy').disabled = score < costEnergy;
+                }
+
+                // Проверка лимитов регенерации
+                if (regenLevel >= MAX_REGEN_LEVEL) {
+                    document.getElementById('buy-regen').innerText = "МАКС";
+                    document.getElementById('buy-regen').disabled = true;
+                } else {
+                    document.getElementById('buy-regen').innerText = `${costRegen} 💎`;
+                    document.getElementById('buy-regen').disabled = score < costRegen;
                 }
             }
 
@@ -416,7 +464,6 @@
                 updateUI();
             }
 
-            // Запускаем интерфейс
             checkRegen();
             setInterval(checkRegen, 1000);
 
@@ -430,6 +477,7 @@
                 document.getElementById('shop-modal').style.display = 'none';
             };
 
+            // Покупка кирки
             document.getElementById('buy-pickaxe').onclick = () => {
                 if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
                     score -= costPickaxe;
@@ -441,6 +489,7 @@
                 }
             };
 
+            // Покупка сумки
             document.getElementById('buy-energy').onclick = () => {
                 if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
                     score -= costEnergy;
@@ -452,33 +501,12 @@
                 }
             };
 
-            // 6. Клик по руде
-            document.getElementById('ore-img').addEventListener('pointerdown', (e) => {
-                if (energy >= 1) {
-                    if (energy === maxEnergy) lastTickTime = Date.now();
-                    
-                    energy--;
-                    score += clickPower;
+            // Покупка восстановления энергии
+            document.getElementById('buy-regen').onclick = () => {
+                if (score >= costRegen && regenLevel < MAX_REGEN_LEVEL) {
+                    score -= costRegen;
+                    regenLevel++;
+                    costRegen += 450; // Прибавляем ровно 450 руды за каждый уровень
+                    regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); // Обновляем интервал
                     saveData();
-                    updateUI();
-
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
-
-                    let nowAnim = Date.now();
-                    let timeSinceLastClick = nowAnim - (lastClickAnimTime || nowAnim - 1000);
-                    lastClickAnimTime = nowAnim;
-                    let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
-
-                    // КИРКА
-                    const pickaxe = document.createElement('img');
-                    pickaxe.src = '1000019118-removebg-preview.png'; 
-                    pickaxe.className = 'pickaxe-effect';
-                    pickaxe.style.left = `${e.clientX - 60}px`;
-                    pickaxe.style.top = `${e.clientY - 80}px`;
-                    pickaxe.style.animationDuration = `${animDuration}s`;
-                    document.body.appendChild(pickaxe);
-
-                    // ЦИФРА УРОНА
-                    const plusOne = document.createElement('div');
-                    plusOne.className =
-        
+                 
