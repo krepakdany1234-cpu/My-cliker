@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мифриловый Кликер</title>
@@ -329,7 +333,7 @@
     </div>
 
     <script>
-        // ДИАГНОСТИКА ОШИБОК: Если что-то сломается, браузер напишет это красным цветом на доске
+        // ДИАГНОСТИКА ОШИБОК
         window.onerror = function(msg, url, line) {
             let errEl = document.getElementById('energy-text');
             if(errEl) { errEl.innerText = "ОШИБКА: " + msg + " (стр. " + line + ")"; errEl.style.color = "red"; }
@@ -337,9 +341,6 @@
         };
 
         try {
-            // Если скрипт запустился, меняем текст, чтобы убедиться, что он работает
-            document.getElementById('energy-text').innerText = "Проверка файлов...";
-
             document.addEventListener('contextmenu', e => e.preventDefault());
             document.addEventListener('dragstart', e => e.preventDefault());
             document.addEventListener('selectstart', e => e.preventDefault());
@@ -399,7 +400,7 @@
                 document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
                 
                 let textEl = document.getElementById('energy-text');
-                textEl.style.color = "#ffeba1"; // Возвращаем цвет, если была ошибка
+                textEl.style.color = "#ffeba1";
                 
                 if (energy >= maxEnergy) {
                     textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
@@ -455,11 +456,9 @@
                 updateUI();
             }
 
-            // ЗАПУСК ИГРЫ (Стирает надпись Загрузка)
             checkRegen();
             setInterval(checkRegen, 1000);
 
-            // Кнопки магазина
             document.getElementById('open-shop').onclick = function() {
                 updateUI();
                 document.getElementById('shop-modal').style.display = 'flex';
@@ -503,11 +502,16 @@
                 }
             };
 
-            // Клик по руде
             document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
                 if (energy >= 1) {
                     if (energy === maxEnergy) lastTickTime = Date.now();
                     
                     energy--;
                     score += clickPower;
-                    
+                    saveData();
+                    updateUI();
+
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+
+                    let nowAnim = Date.now();
+                    l
