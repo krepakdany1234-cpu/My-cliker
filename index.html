@@ -348,7 +348,7 @@
     </div>
 
     <script>
-        // --- ЗАЩИТА КОДА (Ловушку с debugger убрали, чтобы не ломать игру) ---
+        // --- ЗАЩИТА КОДА ---
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('selectstart', event => event.preventDefault());
         document.addEventListener('dragstart', event => event.preventDefault());
@@ -361,10 +361,18 @@
             }
         });
 
-        // --- ОСНОВНОЙ КОД ИГРЫ ---
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        // --- БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ TELEGRAM ---
+        // (теперь не зависает, если открыть просто в браузере)
+        let tg = null;
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                tg = window.Telegram.WebApp;
+                tg.expand();
+                tg.ready();
+            }
+        } catch (e) {
+            console.log("Телеграм не найден, работаем в режиме браузера");
+        }
 
         const scoreElement = document.getElementById('score');
         const oreImgElement = document.getElementById('ore-img');
@@ -380,28 +388,29 @@
         const lblLvlPickaxe = document.getElementById('lvl-pickaxe');
         const lblLvlEnergy = document.getElementById('lvl-energy');
 
-        // ЗАГРУЗКА ДАННЫХ С ПРОВЕРКАМИ НА ОШИБКИ
-        let score = parseInt(localStorage.getItem('mithrilScore')) || 0;
-        let clickPower = parseInt(localStorage.getItem('mithrilClickPower')) || 1;
-        let maxEnergy = parseInt(localStorage.getItem('mithrilMaxEnergy')) || 500;
-        
-        // Цена кирки теперь 2500
-        let costPickaxe = parseInt(localStorage.getItem('mithrilCostPickaxe')) || 2500;
-        let costEnergy = parseInt(localStorage.getItem('mithrilCostEnergy')) || 100;
-
-        // Если у пользователя сохранилась старая цена (50), обновляем её до 2500
-        if (clickPower === 1 && costPickaxe < 2500) {
-            costPickaxe = 2500;
+        // Вспомогательная функция, чтобы безопасно доставать цифры из памяти
+        function getSavedInt(key, defaultValue) {
+            const val = parseInt(localStorage.getItem(key));
+            return isNaN(val) ? defaultValue : val;
         }
 
-        let storedEnergy = parseInt(localStorage.getItem('mithrilEnergy'));
-        let energy = isNaN(storedEnergy) ? maxEnergy : storedEnergy;
+        // ЗАГРУЗКА ДАННЫХ ИЗ ПАМЯТИ
+        let score = getSavedInt('mithrilScore', 0);
+        let clickPower = getSavedInt('mithrilClickPower', 1);
+        let maxEnergy = getSavedInt('mithrilMaxEnergy', 500);
+        
+        // Устанавливаем цену кирки на 2500
+        let costPickaxe = getSavedInt('mithrilCostPickaxe', 2500);
+        if (clickPower === 1 && costPickaxe < 2500) {
+            costPickaxe = 2500; // Лечит старые сохранения, если цена была меньше
+        }
+        
+        let costEnergy = getSavedInt('mithrilCostEnergy', 100);
+        let energy = getSavedInt('mithrilEnergy', maxEnergy);
 
         const regenAmount = 100;
         const regenIntervalMs = 5 * 60 * 1000;
-        
-        let storedTick = parseInt(localStorage.getItem('lastTickTime'));
-        let lastTickTime = isNaN(storedTick) ? Date.now() : storedTick;
+        let lastTickTime = getSavedInt('lastTickTime', Date.now());
         let lastClickAnimTime = 0;
 
         function checkEnergyRegen() {
@@ -461,7 +470,7 @@
         }
 
         checkEnergyRegen();
-        updateUI();
+        updateUI(); // Эта строчка стирает "Загрузка..."
         
         setInterval(() => {
             checkEnergyRegen();
@@ -484,7 +493,7 @@
                 costPickaxe = Math.floor(costPickaxe * 1.5); 
                 saveData();
                 updateUI();
-                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             }
         });
 
@@ -495,7 +504,7 @@
                 costEnergy = Math.floor(costEnergy * 1.5); 
                 saveData();
                 updateUI();
-                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             }
         });
 
@@ -511,18 +520,19 @@
                 saveData();
                 updateUI();
 
-                if (tg.HapticFeedback) {
+                // Вибрация сработает только если открыто внутри Telegram
+                if (tg && tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred('heavy');
                 }
 
                 let nowAnim = Date.now();
-                let timeSinceLastClick = nowAnim - (lastClickAnimTime || nowAnim);
+                let timeSinceLastClick = nowAnim - (lastClickAnimTime === 0 ? (nowAnim - 1000) : lastClickAnimTime);
                 lastClickAnimTime = nowAnim;
 
                 let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
                 const pickaxe = document.createElement('img');
-                pickaxe.src = 'ТВОЯ_КИРКА.png'; // <- НАЗВАНИЕ КАРТИНКИ КИРКИ
+                pickaxe.src = 'ТВОЯ_КИРКА.png'; // <- НЕ ЗАБУДЬ ВСТАВИТЬ НАЗВАНИЕ КАРТИНКИ КИРКИ
                 pickaxe.classList.add('pickaxe-effect');
                 pickaxe.style.left = `${e.clientX - 60}px`;
                 pickaxe.style.top = `${e.clientY - 80}px`;
@@ -542,12 +552,4 @@
                     spark.classList.add('spark');
                     
                     const offsetX = (Math.random() - 0.5) * 30;
-                    const offsetY = (Math.random() - 0.5) * 30;
-                    spark.style.left = `${e.clientX + offsetX}px`;
-                    spark.style.top = `${e.clientY - 10 + offsetY}px`;
-
-                    const tx = (Math.random() - 0.5) * 160;
-                    const ty = (Math.random() - 0.5) * 160;
-                    
-                    spark.style.setProperty('--tx', `${tx}px`);
-                    spark.style.setProp
+                    const offsetY = (Math.random
