@@ -300,7 +300,7 @@
                 <div class="shop-item-info">
                     <h3>⚒️ Острая кирка</h3>
                     <p>Добыча за клик: +1</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Текущий уровень: <span id="lvl-pickaxe">1</span></p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Текущий уровень: <span id="lvl-pickaxe">1</span> / 100</p>
                 </div>
                 <button class="shop-buy-btn" id="buy-pickaxe">2500 💎</button>
             </div>
@@ -309,7 +309,7 @@
                 <div class="shop-item-info">
                     <h3>🎒 Гномья сумка</h3>
                     <p>Макс. энергия: +50</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Текущий запас: <span id="lvl-energy">500</span></p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Текущий запас: <span id="lvl-energy">500</span> / 2000</p>
                 </div>
                 <button class="shop-buy-btn" id="buy-energy">100 💎</button>
             </div>
@@ -350,6 +350,10 @@
             const regenIntervalMs = 5 * 60 * 1000;
             let lastClickAnimTime = 0;
 
+            // ЛИМИТЫ (Константы)
+            const MAX_CLICK_POWER = 100;
+            const MAX_ENERGY_LIMIT = 2000;
+
             // 4. Основные функции
             function saveData() {
                 localStorage.setItem('mithrilScore', score);
@@ -377,11 +381,23 @@
 
                 document.getElementById('lvl-pickaxe').innerText = clickPower;
                 document.getElementById('lvl-energy').innerText = maxEnergy;
-                document.getElementById('buy-pickaxe').innerText = `${costPickaxe} 💎`;
-                document.getElementById('buy-energy').innerText = `${costEnergy} 💎`;
                 
-                document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
-                document.getElementById('buy-energy').disabled = score < costEnergy;
+                // Проверка лимитов для магазина
+                if (clickPower >= MAX_CLICK_POWER) {
+                    document.getElementById('buy-pickaxe').innerText = "МАКС";
+                    document.getElementById('buy-pickaxe').disabled = true;
+                } else {
+                    document.getElementById('buy-pickaxe').innerText = `${costPickaxe} 💎`;
+                    document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
+                }
+
+                if (maxEnergy >= MAX_ENERGY_LIMIT) {
+                    document.getElementById('buy-energy').innerText = "МАКС";
+                    document.getElementById('buy-energy').disabled = true;
+                } else {
+                    document.getElementById('buy-energy').innerText = `${costEnergy} 💎`;
+                    document.getElementById('buy-energy').disabled = score < costEnergy;
+                }
             }
 
             function checkRegen() {
@@ -400,7 +416,7 @@
                 updateUI();
             }
 
-            // Запускаем интерфейс (Убирает "Загрузка...")
+            // Запускаем интерфейс
             checkRegen();
             setInterval(checkRegen, 1000);
 
@@ -415,7 +431,7 @@
             };
 
             document.getElementById('buy-pickaxe').onclick = () => {
-                if (score >= costPickaxe) {
+                if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
                     score -= costPickaxe;
                     clickPower++;
                     costPickaxe = Math.floor(costPickaxe * 1.5);
@@ -426,7 +442,7 @@
             };
 
             document.getElementById('buy-energy').onclick = () => {
-                if (score >= costEnergy) {
+                if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
                     score -= costEnergy;
                     maxEnergy += 50;
                     costEnergy = Math.floor(costEnergy * 1.5);
@@ -455,7 +471,7 @@
 
                     // КИРКА
                     const pickaxe = document.createElement('img');
-                    pickaxe.src = '1000019118-removebg-preview.png'; // <--- ВСТАВЬ НАЗВАНИЕ СВОЕЙ КАРТИНКИ ТУТ
+                    pickaxe.src = '1000019118-removebg-preview.png'; 
                     pickaxe.className = 'pickaxe-effect';
                     pickaxe.style.left = `${e.clientX - 60}px`;
                     pickaxe.style.top = `${e.clientY - 80}px`;
@@ -464,39 +480,5 @@
 
                     // ЦИФРА УРОНА
                     const plusOne = document.createElement('div');
-                    plusOne.className = 'floating-text';
-                    plusOne.innerText = `+${clickPower}`;
-                    plusOne.style.left = `${e.clientX - 15}px`;
-                    plusOne.style.top = `${e.clientY - 40}px`;
-                    document.body.appendChild(plusOne);
-
-                    // ИСКРЫ
-                    const sparkCount = 6 + Math.floor(Math.random() * 3);
-                    for (let i = 0; i < sparkCount; i++) {
-                        const spark = document.createElement('div');
-                        spark.className = 'spark';
-                        spark.style.left = `${e.clientX + (Math.random() - 0.5) * 30}px`;
-                        spark.style.top = `${e.clientY - 10 + (Math.random() - 0.5) * 30}px`;
-                        spark.style.setProperty('--tx', `${(Math.random() - 0.5) * 160}px`);
-                        spark.style.setProperty('--ty', `${(Math.random() - 0.5) * 160}px`);
-                        document.body.appendChild(spark);
-                        setTimeout(() => spark.remove(), 600);
-                    }
-
-                    setTimeout(() => pickaxe.remove(), animDuration * 1000);
-                    setTimeout(() => plusOne.remove(), 1000);
-                } else {
-                    let textEl = document.getElementById('energy-text');
-                    textEl.style.color = '#ff5252';
-                    setTimeout(() => textEl.style.color = '#ffeba1', 300);
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                }
-            });
-
-        } catch (err) {
-            // Если случится невозможное, ошибка напечатается прямо на доске
-            document.getElementById('energy-text').innerText = "ОШИБКА: " + err.message;
-        }
-    </script>
-</body>
-</html>
+                    plusOne.className =
+        
