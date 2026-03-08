@@ -153,41 +153,44 @@
             100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
         }
 
-        /* --- АНИМАЦИЯ КИРКИ --- */
+        /* --- АНИМАЦИЯ РЕАЛИСТИЧНОЙ КИРКИ --- */
         .pickaxe-effect {
             position: absolute;
-            font-size: 3.5rem; 
+            /* Задаем размер картинки кирки */
+            width: 100px; 
+            height: auto;
             pointer-events: none;
             z-index: 50;
-            transform-origin: 80% 80%; 
+            /* Точка вращения теперь зависит от картинки, обычно это правый нижний угол (рукоять) */
+            transform-origin: bottom right; 
             animation: mineStrike ease-in-out forwards;
-            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6));
+            /* Добавил тень самой картинке, чтобы она выглядела объемнее */
+            filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7));
         }
 
         @keyframes mineStrike {
-            0% { transform: rotate(-30deg) scale(1.3); opacity: 0; }
-            30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 
-            60% { transform: rotate(25deg) scale(1.3); opacity: 1; }  
-            100% { transform: rotate(35deg) scale(1.1); opacity: 0; } 
+            0% { transform: rotate(-30deg) scale(1.1); opacity: 0; }
+            30% { transform: rotate(-70deg) scale(1.2); opacity: 1; } 
+            60% { transform: rotate(15deg) scale(1.1); opacity: 1; }  
+            100% { transform: rotate(25deg) scale(0.9); opacity: 0; } 
         }
 
         /* --- ИСКРЫ --- */
         .spark {
             position: absolute;
-            width: 8px; /* Увеличили размер искры */
+            width: 8px; 
             height: 8px;
-            background-color: #ffffff; /* Белая ослепительная сердцевина */
+            background-color: #ffffff; 
             border-radius: 50%;
             pointer-events: none;
             z-index: 45;
-            /* Мощное многослойное свечение */
             box-shadow: 0 0 8px #fff, 0 0 15px #ffd700, 0 0 25px #ff8c00;
-            animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; /* Увеличили время жизни искры */
+            animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
         }
 
         @keyframes sparkFly {
             0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            50% { opacity: 1; } /* Дольше остаются яркими */
+            50% { opacity: 1; } 
             100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
         }
     </style>
@@ -310,7 +313,7 @@
                 updateUI();
 
                 if (tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('heavy'); // Сделали вибрацию мощнее (heavy)
+                    tg.HapticFeedback.impactOccurred('heavy');
                 }
 
                 let nowAnim = Date.now();
@@ -319,12 +322,17 @@
 
                 let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
-                // --- 1. КИРКА ---
-                const pickaxe = document.createElement('div');
+                // --- 1. РЕАЛИСТИЧНАЯ КИРКА (КАРТИНКА) ---
+                const pickaxe = document.createElement('img');
+                
+                // ВНИМАНИЕ: СЮДА ВПИШИ НАЗВАНИЕ СВОЕЙ КАРТИНКИ КИРКИ!
+                // Например: 'real_pickaxe.png'
+                pickaxe.src = 'ТВОЯ_КИРКА.png'; 
+                
                 pickaxe.classList.add('pickaxe-effect');
-                pickaxe.innerText = '⛏️';
-                pickaxe.style.left = `${e.clientX + 5}px`;
-                pickaxe.style.top = `${e.clientY - 45}px`;
+                // Сдвигаем координаты так, чтобы острие кирки попадало примерно в место клика
+                pickaxe.style.left = `${e.clientX - 60}px`;
+                pickaxe.style.top = `${e.clientY - 80}px`;
                 pickaxe.style.animationDuration = `${animDuration}s`;
                 document.body.appendChild(pickaxe);
 
@@ -336,19 +344,17 @@
                 plusOne.style.top = `${e.clientY - 40}px`;
                 document.body.appendChild(plusOne);
 
-                // --- 3. ИСКРЫ (Теперь от 6 до 8 крупных искр за клик) ---
+                // --- 3. ИСКРЫ ---
                 const sparkCount = 6 + Math.floor(Math.random() * 3);
                 for (let i = 0; i < sparkCount; i++) {
                     const spark = document.createElement('div');
                     spark.classList.add('spark');
                     
-                    // Небольшой разброс в точке появления
                     const offsetX = (Math.random() - 0.5) * 30;
                     const offsetY = (Math.random() - 0.5) * 30;
                     spark.style.left = `${e.clientX + offsetX}px`;
                     spark.style.top = `${e.clientY - 10 + offsetY}px`;
 
-                    // Увеличили дальность разлета (от -80px до +80px)
                     const tx = (Math.random() - 0.5) * 160;
                     const ty = (Math.random() - 0.5) * 160;
                     
@@ -357,11 +363,9 @@
 
                     document.body.appendChild(spark);
 
-                    // Удаляем искры после завершения анимации
                     setTimeout(() => { spark.remove(); }, 600);
                 }
 
-                // Удаляем кирку и цифру
                 setTimeout(() => { pickaxe.remove(); }, animDuration * 1000);
                 setTimeout(() => { plusOne.remove(); }, 1000);
 
