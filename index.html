@@ -208,8 +208,8 @@
             border-radius: 15px;
             width: 90%; 
             max-width: 400px;
-            max-height: 85vh; /* Ограничиваем высоту для скролла */
-            overflow-y: auto; /* Включаем прокрутку, если предметов много */
+            max-height: 85vh; 
+            overflow-y: auto; 
             padding: 20px;
             color: #ffeba1;
             box-shadow: 0 10px 30px rgba(0,0,0,1), inset 0 0 20px rgba(0,0,0,0.6);
@@ -217,7 +217,6 @@
             position: relative;
         }
 
-        /* Стиль для полосы прокрутки внутри магазина */
         .shop-modal::-webkit-scrollbar { width: 6px; }
         .shop-modal::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
         .shop-modal::-webkit-scrollbar-thumb { background: #8b5a2b; border-radius: 10px; }
@@ -255,12 +254,8 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
 
-        .shop-item-info h3 { 
-            margin: 0 0 5px 0; font-size: 1.1rem; color: #ffd700; text-shadow: 1px 1px 2px #000;
-        }
-        .shop-item-info p { 
-            margin: 0; font-size: 0.85rem; color: #a5d6a7; text-shadow: 1px 1px 1px #000;
-        }
+        .shop-item-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #ffd700; text-shadow: 1px 1px 2px #000; }
+        .shop-item-info p { margin: 0; font-size: 0.85rem; color: #a5d6a7; text-shadow: 1px 1px 1px #000; }
 
         .shop-buy-btn {
             background: linear-gradient(to bottom, #2e7d32, #1b5e20);
@@ -334,22 +329,24 @@
     </div>
 
     <script>
+        // ДИАГНОСТИКА ОШИБОК: Если что-то сломается, браузер напишет это красным цветом на доске
+        window.onerror = function(msg, url, line) {
+            let errEl = document.getElementById('energy-text');
+            if(errEl) { errEl.innerText = "ОШИБКА: " + msg + " (стр. " + line + ")"; errEl.style.color = "red"; }
+            return false;
+        };
+
         try {
-            // 1. Защита от выделения и горячих клавиш
+            // Если скрипт запустился, меняем текст, чтобы убедиться, что он работает
+            document.getElementById('energy-text').innerText = "Проверка файлов...";
+
             document.addEventListener('contextmenu', e => e.preventDefault());
             document.addEventListener('dragstart', e => e.preventDefault());
             document.addEventListener('selectstart', e => e.preventDefault());
-            document.addEventListener('keydown', e => {
-                if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','C','J'].includes(e.key)) || (e.ctrlKey && e.key === 'U')) {
-                    e.preventDefault();
-                }
-            });
 
-            // 2. Инициализация Telegram
             let tg = window.Telegram ? window.Telegram.WebApp : null;
             if (tg) tg.expand();
 
-            // 3. Безопасное получение данных из памяти
             function getSave(key, defValue) {
                 try {
                     let val = localStorage.getItem(key);
@@ -360,7 +357,6 @@
                 return defValue;
             }
 
-            // Загрузка переменных
             let score = getSave('mithrilScore', 0);
             
             let clickPower = getSave('mithrilClickPower', 1);
@@ -370,7 +366,6 @@
             let maxEnergy = getSave('mithrilMaxEnergy', 500);
             let costEnergy = getSave('mithrilCostEnergy', 100);
             
-            // ПЕРЕМЕННЫЕ НОВОГО УЛУЧШЕНИЯ
             let regenLevel = getSave('mithrilRegenLevel', 1);
             let costRegen = getSave('mithrilCostRegen', 8000);
 
@@ -379,15 +374,12 @@
             let lastClickAnimTime = 0;
 
             const regenAmount = 100;
-            // Рассчитываем время в зависимости от уровня (База: 5 мин = 300000мс. Каждый лвл отнимает 30000мс)
             let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
 
-            // ЛИМИТЫ
             const MAX_CLICK_POWER = 100;
             const MAX_ENERGY_LIMIT = 2000;
-            const MAX_REGEN_LEVEL = 9; // На 9 уровне время будет ровно 1 минута (60000мс)
+            const MAX_REGEN_LEVEL = 9; 
 
-            // 4. Основные функции
             function saveData() {
                 try {
                     localStorage.setItem('mithrilScore', score);
@@ -407,6 +399,8 @@
                 document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
                 
                 let textEl = document.getElementById('energy-text');
+                textEl.style.color = "#ffeba1"; // Возвращаем цвет, если была ошибка
+                
                 if (energy >= maxEnergy) {
                     textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
                 } else {
@@ -420,7 +414,6 @@
                 document.getElementById('lvl-energy').innerText = maxEnergy;
                 document.getElementById('lvl-regen').innerText = regenLevel;
                 
-                // Проверка лимитов кирки
                 if (clickPower >= MAX_CLICK_POWER) {
                     document.getElementById('buy-pickaxe').innerText = "МАКС";
                     document.getElementById('buy-pickaxe').disabled = true;
@@ -429,7 +422,6 @@
                     document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
                 }
 
-                // Проверка лимитов сумки
                 if (maxEnergy >= MAX_ENERGY_LIMIT) {
                     document.getElementById('buy-energy').innerText = "МАКС";
                     document.getElementById('buy-energy').disabled = true;
@@ -438,7 +430,6 @@
                     document.getElementById('buy-energy').disabled = score < costEnergy;
                 }
 
-                // Проверка лимитов регенерации
                 if (regenLevel >= MAX_REGEN_LEVEL) {
                     document.getElementById('buy-regen').innerText = "МАКС";
                     document.getElementById('buy-regen').disabled = true;
@@ -464,21 +455,21 @@
                 updateUI();
             }
 
+            // ЗАПУСК ИГРЫ (Стирает надпись Загрузка)
             checkRegen();
             setInterval(checkRegen, 1000);
 
-            // 5. Кнопки магазина
-            document.getElementById('open-shop').onclick = () => {
+            // Кнопки магазина
+            document.getElementById('open-shop').onclick = function() {
                 updateUI();
                 document.getElementById('shop-modal').style.display = 'flex';
             };
             
-            document.getElementById('close-shop').onclick = () => {
+            document.getElementById('close-shop').onclick = function() {
                 document.getElementById('shop-modal').style.display = 'none';
             };
 
-            // Покупка кирки
-            document.getElementById('buy-pickaxe').onclick = () => {
+            document.getElementById('buy-pickaxe').onclick = function() {
                 if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
                     score -= costPickaxe;
                     clickPower++;
@@ -489,8 +480,7 @@
                 }
             };
 
-            // Покупка сумки
-            document.getElementById('buy-energy').onclick = () => {
+            document.getElementById('buy-energy').onclick = function() {
                 if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
                     score -= costEnergy;
                     maxEnergy += 50;
@@ -501,12 +491,23 @@
                 }
             };
 
-            // Покупка восстановления энергии
-            document.getElementById('buy-regen').onclick = () => {
+            document.getElementById('buy-regen').onclick = function() {
                 if (score >= costRegen && regenLevel < MAX_REGEN_LEVEL) {
                     score -= costRegen;
                     regenLevel++;
-                    costRegen += 450; // Прибавляем ровно 450 руды за каждый уровень
-                    regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); // Обновляем интервал
+                    costRegen += 450; 
+                    regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); 
                     saveData();
-                 
+                    updateUI();
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                }
+            };
+
+            // Клик по руде
+            document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
+                if (energy >= 1) {
+                    if (energy === maxEnergy) lastTickTime = Date.now();
+                    
+                    energy--;
+                    score += clickPower;
+                    
