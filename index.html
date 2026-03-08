@@ -12,7 +12,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
-        /* --- БАЗОВЫЕ НАСТРОЙКИ И ЗАЩИТА --- */
         * {
             -webkit-touch-callout: none; 
             -webkit-user-select: none;   
@@ -30,18 +29,15 @@
             align-items: center;
             justify-content: center;
             font-family: 'Georgia', serif;
-            
             background-image: url('1772901742360.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            
             background-color: rgba(0, 0, 0, 0.6);
             background-blend-mode: overlay;
             overflow: hidden; 
         }
 
-        /* --- ТАБЛИЧКА И СЧЕТ --- */
         .guild-board {
             background-image: url('1000019094-removebg-preview.png');
             background-size: 100% 100%; 
@@ -71,7 +67,6 @@
             z-index: 2;
         }
 
-        /* --- ЭНЕРГИЯ --- */
         .energy-wrapper {
             width: 65%; 
             background-color: rgba(10, 5, 0, 0.5); 
@@ -102,7 +97,6 @@
             z-index: 2;
         }
 
-        /* --- РУДА --- */
         .ore-wrapper {
             position: relative;
             display: flex;
@@ -125,7 +119,6 @@
             filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8));
         }
 
-        /* --- ЭФФЕКТЫ --- */
         .floating-text {
             position: absolute;
             color: #a5d6a7;
@@ -174,7 +167,6 @@
             100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
         }
 
-        /* --- МАГАЗИН --- */
         .open-shop-btn {
             position: absolute;
             bottom: 30px;
@@ -289,7 +281,7 @@
         <div class="energy-wrapper">
             <div class="energy-bar" id="energy-bar"></div>
         </div>
-        <div class="energy-text" id="energy-text">Загрузка...</div>
+        <div class="energy-text" id="energy-text">Подключение...</div>
     </div>
 
     <div class="ore-wrapper">
@@ -333,185 +325,174 @@
     </div>
 
     <script>
-        // ДИАГНОСТИКА ОШИБОК
-        window.onerror = function(msg, url, line) {
-            let errEl = document.getElementById('energy-text');
-            if(errEl) { errEl.innerText = "ОШИБКА: " + msg + " (стр. " + line + ")"; errEl.style.color = "red"; }
-            return false;
-        };
+        // Запускаем всё ТОЛЬКО после полной загрузки страницы
+        window.onload = function() {
+            try {
+                // Сразу даем знать, что скрипт начал работу
+                let txtEl = document.getElementById('energy-text');
+                if(txtEl) txtEl.innerText = "Запуск системы...";
 
-        try {
-            document.addEventListener('contextmenu', e => e.preventDefault());
-            document.addEventListener('dragstart', e => e.preventDefault());
-            document.addEventListener('selectstart', e => e.preventDefault());
+                document.addEventListener('contextmenu', e => e.preventDefault());
+                document.addEventListener('dragstart', e => e.preventDefault());
+                document.addEventListener('selectstart', e => e.preventDefault());
 
-            let tg = window.Telegram ? window.Telegram.WebApp : null;
-            if (tg) tg.expand();
+                let tg = window.Telegram ? window.Telegram.WebApp : null;
+                try { if (tg) tg.expand(); } catch(e) {}
 
-            function getSave(key, defValue) {
-                try {
-                    let val = localStorage.getItem(key);
-                    if (val !== null && !isNaN(parseInt(val))) {
-                        return parseInt(val);
-                    }
-                } catch (e) {}
-                return defValue;
-            }
+                function getSave(key, defValue) {
+                    try {
+                        let val = localStorage.getItem(key);
+                        if (val !== null && val !== 'NaN') {
+                            let p = parseInt(val);
+                            if (!isNaN(p)) return p;
+                        }
+                    } catch (e) {}
+                    return defValue;
+                }
 
-            let score = getSave('mithrilScore', 0);
-            
-            let clickPower = getSave('mithrilClickPower', 1);
-            let costPickaxe = getSave('mithrilCostPickaxe', 2500);
-            if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500; 
-
-            let maxEnergy = getSave('mithrilMaxEnergy', 500);
-            let costEnergy = getSave('mithrilCostEnergy', 100);
-            
-            let regenLevel = getSave('mithrilRegenLevel', 1);
-            let costRegen = getSave('mithrilCostRegen', 8000);
-
-            let energy = getSave('mithrilEnergy', maxEnergy);
-            let lastTickTime = getSave('lastTickTime', Date.now());
-            let lastClickAnimTime = 0;
-
-            const regenAmount = 100;
-            let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
-
-            const MAX_CLICK_POWER = 100;
-            const MAX_ENERGY_LIMIT = 2000;
-            const MAX_REGEN_LEVEL = 9; 
-
-            function saveData() {
-                try {
-                    localStorage.setItem('mithrilScore', score);
-                    localStorage.setItem('mithrilEnergy', energy);
-                    localStorage.setItem('lastTickTime', lastTickTime);
-                    localStorage.setItem('mithrilClickPower', clickPower);
-                    localStorage.setItem('mithrilMaxEnergy', maxEnergy);
-                    localStorage.setItem('mithrilCostPickaxe', costPickaxe);
-                    localStorage.setItem('mithrilCostEnergy', costEnergy);
-                    localStorage.setItem('mithrilRegenLevel', regenLevel);
-                    localStorage.setItem('mithrilCostRegen', costRegen);
-                } catch(e) {}
-            }
-
-            function updateUI() {
-                document.getElementById('score').innerText = score;
-                document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
+                let score = getSave('mithrilScore', 0);
                 
-                let textEl = document.getElementById('energy-text');
-                textEl.style.color = "#ffeba1";
+                let clickPower = getSave('mithrilClickPower', 1);
+                let costPickaxe = getSave('mithrilCostPickaxe', 2500);
+                if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500; 
+
+                let maxEnergy = getSave('mithrilMaxEnergy', 500);
+                let costEnergy = getSave('mithrilCostEnergy', 100);
                 
-                if (energy >= maxEnergy) {
-                    textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
-                } else {
-                    let timeLeft = Math.max(0, regenIntervalMs - (Date.now() - lastTickTime));
-                    let m = Math.floor(timeLeft / 60000);
-                    let s = Math.floor((timeLeft % 60000) / 1000);
-                    textEl.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${m}:${s < 10 ? '0' : ''}${s})`;
+                let regenLevel = getSave('mithrilRegenLevel', 1);
+                let costRegen = getSave('mithrilCostRegen', 8000);
+
+                let energy = getSave('mithrilEnergy', maxEnergy);
+                let lastTickTime = getSave('lastTickTime', Date.now());
+                let lastClickAnimTime = 0;
+
+                const regenAmount = 100;
+                let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
+
+                const MAX_CLICK_POWER = 100;
+                const MAX_ENERGY_LIMIT = 2000;
+                const MAX_REGEN_LEVEL = 9; 
+
+                function saveData() {
+                    try {
+                        localStorage.setItem('mithrilScore', score);
+                        localStorage.setItem('mithrilEnergy', energy);
+                        localStorage.setItem('lastTickTime', lastTickTime);
+                        localStorage.setItem('mithrilClickPower', clickPower);
+                        localStorage.setItem('mithrilMaxEnergy', maxEnergy);
+                        localStorage.setItem('mithrilCostPickaxe', costPickaxe);
+                        localStorage.setItem('mithrilCostEnergy', costEnergy);
+                        localStorage.setItem('mithrilRegenLevel', regenLevel);
+                        localStorage.setItem('mithrilCostRegen', costRegen);
+                    } catch(e) {}
                 }
 
-                document.getElementById('lvl-pickaxe').innerText = clickPower;
-                document.getElementById('lvl-energy').innerText = maxEnergy;
-                document.getElementById('lvl-regen').innerText = regenLevel;
-                
-                if (clickPower >= MAX_CLICK_POWER) {
-                    document.getElementById('buy-pickaxe').innerText = "МАКС";
-                    document.getElementById('buy-pickaxe').disabled = true;
-                } else {
-                    document.getElementById('buy-pickaxe').innerText = `${costPickaxe} 💎`;
-                    document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
-                }
-
-                if (maxEnergy >= MAX_ENERGY_LIMIT) {
-                    document.getElementById('buy-energy').innerText = "МАКС";
-                    document.getElementById('buy-energy').disabled = true;
-                } else {
-                    document.getElementById('buy-energy').innerText = `${costEnergy} 💎`;
-                    document.getElementById('buy-energy').disabled = score < costEnergy;
-                }
-
-                if (regenLevel >= MAX_REGEN_LEVEL) {
-                    document.getElementById('buy-regen').innerText = "МАКС";
-                    document.getElementById('buy-regen').disabled = true;
-                } else {
-                    document.getElementById('buy-regen').innerText = `${costRegen} 💎`;
-                    document.getElementById('buy-regen').disabled = score < costRegen;
-                }
-            }
-
-            function checkRegen() {
-                let now = Date.now();
-                if (energy < maxEnergy) {
-                    let passed = now - lastTickTime;
-                    if (passed >= regenIntervalMs) {
-                        let ticks = Math.floor(passed / regenIntervalMs);
-                        energy = Math.min(maxEnergy, energy + (ticks * regenAmount));
-                        lastTickTime += ticks * regenIntervalMs; 
-                        saveData();
-                    }
-                } else {
-                    lastTickTime = now;
-                }
-                updateUI();
-            }
-
-            checkRegen();
-            setInterval(checkRegen, 1000);
-
-            document.getElementById('open-shop').onclick = function() {
-                updateUI();
-                document.getElementById('shop-modal').style.display = 'flex';
-            };
-            
-            document.getElementById('close-shop').onclick = function() {
-                document.getElementById('shop-modal').style.display = 'none';
-            };
-
-            document.getElementById('buy-pickaxe').onclick = function() {
-                if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
-                    score -= costPickaxe;
-                    clickPower++;
-                    costPickaxe = Math.floor(costPickaxe * 1.5);
-                    saveData();
-                    updateUI();
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                }
-            };
-
-            document.getElementById('buy-energy').onclick = function() {
-                if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
-                    score -= costEnergy;
-                    maxEnergy += 50;
-                    costEnergy = Math.floor(costEnergy * 1.5);
-                    saveData();
-                    updateUI();
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                }
-            };
-
-            document.getElementById('buy-regen').onclick = function() {
-                if (score >= costRegen && regenLevel < MAX_REGEN_LEVEL) {
-                    score -= costRegen;
-                    regenLevel++;
-                    costRegen += 450; 
-                    regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); 
-                    saveData();
-                    updateUI();
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                }
-            };
-
-            document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
-                if (energy >= 1) {
-                    if (energy === maxEnergy) lastTickTime = Date.now();
+                function updateUI() {
+                    document.getElementById('score').innerText = score;
+                    document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
                     
-                    energy--;
-                    score += clickPower;
-                    saveData();
+                    let textEl = document.getElementById('energy-text');
+                    textEl.style.color = "#ffeba1";
+                    
+                    if (energy >= maxEnergy) {
+                        textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Макс)`;
+                    } else {
+                        let timeLeft = Math.max(0, regenIntervalMs - (Date.now() - lastTickTime));
+                        let m = Math.floor(timeLeft / 60000);
+                        let s = Math.floor((timeLeft % 60000) / 1000);
+                        textEl.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${m}:${s < 10 ? '0' : ''}${s})`;
+                    }
+
+                    document.getElementById('lvl-pickaxe').innerText = clickPower;
+                    document.getElementById('lvl-energy').innerText = maxEnergy;
+                    document.getElementById('lvl-regen').innerText = regenLevel;
+                    
+                    if (clickPower >= MAX_CLICK_POWER) {
+                        document.getElementById('buy-pickaxe').innerText = "МАКС";
+                        document.getElementById('buy-pickaxe').disabled = true;
+                    } else {
+                        document.getElementById('buy-pickaxe').innerText = `${costPickaxe} 💎`;
+                        document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
+                    }
+
+                    if (maxEnergy >= MAX_ENERGY_LIMIT) {
+                        document.getElementById('buy-energy').innerText = "МАКС";
+                        document.getElementById('buy-energy').disabled = true;
+                    } else {
+                        document.getElementById('buy-energy').innerText = `${costEnergy} 💎`;
+                        document.getElementById('buy-energy').disabled = score < costEnergy;
+                    }
+
+                    if (regenLevel >= MAX_REGEN_LEVEL) {
+                        document.getElementById('buy-regen').innerText = "МАКС";
+                        document.getElementById('buy-regen').disabled = true;
+                    } else {
+                        document.getElementById('buy-regen').innerText = `${costRegen} 💎`;
+                        document.getElementById('buy-regen').disabled = score < costRegen;
+                    }
+                }
+
+                function checkRegen() {
+                    let now = Date.now();
+                    if (energy < maxEnergy) {
+                        let passed = now - lastTickTime;
+                        if (passed >= regenIntervalMs) {
+                            let ticks = Math.floor(passed / regenIntervalMs);
+                            energy = Math.min(maxEnergy, energy + (ticks * regenAmount));
+                            lastTickTime += ticks * regenIntervalMs; 
+                            saveData();
+                        }
+                    } else {
+                        lastTickTime = now;
+                    }
                     updateUI();
+                }
 
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+                checkRegen();
+                setInterval(checkRegen, 1000);
 
-                    let nowAnim = Date.now();
-                    l
+                document.getElementById('open-shop').onclick = function() {
+                    updateUI();
+                    document.getElementById('shop-modal').style.display = 'flex';
+                };
+                
+                document.getElementById('close-shop').onclick = function() {
+                    document.getElementById('shop-modal').style.display = 'none';
+                };
+
+                document.getElementById('buy-pickaxe').onclick = function() {
+                    if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
+                        score -= costPickaxe;
+                        clickPower++;
+                        costPickaxe = Math.floor(costPickaxe * 1.5);
+                        saveData();
+                        updateUI();
+                        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                    }
+                };
+
+                document.getElementById('buy-energy').onclick = function() {
+                    if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
+                        score -= costEnergy;
+                        maxEnergy += 50;
+                        costEnergy = Math.floor(costEnergy * 1.5);
+                        saveData();
+                        updateUI();
+                        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                    }
+                };
+
+                document.getElementById('buy-regen').onclick = function() {
+                    if (score >= costRegen && regenLevel < MAX_REGEN_LEVEL) {
+                        score -= costRegen;
+                        regenLevel++;
+                        costRegen += 450; 
+                        regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); 
+                        saveData();
+                        updateUI();
+                        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                    }
+                };
+
+                document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
+                 
