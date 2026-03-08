@@ -10,13 +10,13 @@
     <style>
         /* --- ТОТАЛЬНАЯ ЗАЩИТА ВСЕХ ЭЛЕМЕНТОВ --- */
         * {
-            -webkit-touch-callout: none; /* Запрет меню "Сохранить картинку" на iOS/Android */
-            -webkit-user-select: none;   /* Safari */
-            -khtml-user-select: none;    /* Konqueror HTML */
-            -moz-user-select: none;      /* Firefox */
-            -ms-user-select: none;       /* Internet Explorer/Edge */
-            user-select: none;           /* Стандартный синтаксис */
-            -webkit-user-drag: none;     /* Запрет перетаскивания */
+            -webkit-touch-callout: none; 
+            -webkit-user-select: none;   
+            -khtml-user-select: none;    
+            -moz-user-select: none;      
+            -ms-user-select: none;       
+            user-select: none;           
+            -webkit-user-drag: none;     
         }
 
         /* --- ЗАДНИЙ ФОН (Город) --- */
@@ -36,7 +36,7 @@
             
             background-color: rgba(0, 0, 0, 0.6);
             background-blend-mode: overlay;
-            overflow: hidden; /* Запрет прокрутки экрана */
+            overflow: hidden; 
         }
 
         /* --- ТАБЛИЧКА --- */
@@ -170,6 +170,26 @@
             60% { transform: rotate(25deg) scale(1.3); opacity: 1; }  
             100% { transform: rotate(35deg) scale(1.1); opacity: 0; } 
         }
+
+        /* --- ИСКРЫ --- */
+        .spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #ffd700; /* Золотисто-желтый цвет искры */
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 45;
+            /* Горячее свечение вокруг искры */
+            box-shadow: 0 0 6px #ff8c00, 0 0 10px #ff0000;
+            animation: sparkFly 0.4s ease-out forwards;
+        }
+
+        @keyframes sparkFly {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            /* Разлетаются по координатам, которые мы зададим в JavaScript */
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
@@ -189,18 +209,14 @@
 
     <script>
         // --- ПРОДВИНУТАЯ ЗАЩИТА КОДА И ГРАФИКИ ---
-        
-        // 1. Ловушка для консоли разработчика. Если открыть DevTools, страница зависнет.
         setInterval(function() {
             (function() { return false; }['constructor']('debugger')['call']());
         }, 1000);
 
-        // 2. Блокировка правой кнопки и выделения
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('selectstart', event => event.preventDefault());
         document.addEventListener('dragstart', event => event.preventDefault());
 
-        // 3. Блокировка горячих клавиш (F12, Ctrl+Shift+I и т.д.)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F12' || 
                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) || 
@@ -303,15 +319,16 @@
 
                 let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
+                // --- 1. КИРКА ---
                 const pickaxe = document.createElement('div');
                 pickaxe.classList.add('pickaxe-effect');
                 pickaxe.innerText = '⛏️';
                 pickaxe.style.left = `${e.clientX + 5}px`;
                 pickaxe.style.top = `${e.clientY - 45}px`;
                 pickaxe.style.animationDuration = `${animDuration}s`;
-                
                 document.body.appendChild(pickaxe);
 
+                // --- 2. ЛЕТАЮЩАЯ ЦИФРА ---
                 const plusOne = document.createElement('div');
                 plusOne.classList.add('floating-text');
                 plusOne.innerText = '+1';
@@ -319,6 +336,30 @@
                 plusOne.style.top = `${e.clientY - 40}px`;
                 document.body.appendChild(plusOne);
 
+                // --- 3. ИСКРЫ (Генерируем 4 искры за один клик) ---
+                for (let i = 0; i < 4; i++) {
+                    const spark = document.createElement('div');
+                    spark.classList.add('spark');
+                    
+                    // Появляются в месте клика
+                    spark.style.left = `${e.clientX}px`;
+                    spark.style.top = `${e.clientY - 10}px`;
+
+                    // Случайный вектор разлета (от -40px до +40px по X и Y)
+                    const tx = (Math.random() - 0.5) * 80;
+                    const ty = (Math.random() - 0.5) * 80;
+                    
+                    // Передаем координаты в CSS-анимацию
+                    spark.style.setProperty('--tx', `${tx}px`);
+                    spark.style.setProperty('--ty', `${ty}px`);
+
+                    document.body.appendChild(spark);
+
+                    // Удаляем искры после завершения их анимации (0.4 сек)
+                    setTimeout(() => { spark.remove(); }, 400);
+                }
+
+                // Удаляем кирку и цифру
                 setTimeout(() => { pickaxe.remove(); }, animDuration * 1000);
                 setTimeout(() => { plusOne.remove(); }, 1000);
 
