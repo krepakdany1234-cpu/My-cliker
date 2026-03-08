@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мифриловый Кликер</title>
@@ -12,265 +8,37 @@
     <script src="https://telegram.org/js/telegram-web-app.js" async></script>
     
     <style>
-        * {
-            -webkit-touch-callout: none; 
-            -webkit-user-select: none;   
-            user-select: none;           
-            -webkit-user-drag: none;     
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Georgia', serif;
-            background-image: url('1772901742360.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-color: rgba(0, 0, 0, 0.6);
-            background-blend-mode: overlay;
-            overflow: hidden; 
-        }
-
-        .guild-board {
-            background-image: url('1000019094-removebg-preview.png');
-            background-size: 100% 100%; 
-            background-position: center;
-            background-repeat: no-repeat;
-            width: 390px; 
-            padding-top: 90px;    
-            padding-bottom: 80px; 
-            padding-left: 40px;   
-            padding-right: 40px;
-            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8));
-            margin-bottom: 20px; 
-            position: relative;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .score-container {
-            color: #1a0b02; 
-            font-size: 3.4rem; 
-            font-weight: bold;
-            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9);
-            margin-bottom: 12px;
-            z-index: 2;
-        }
-
-        .energy-wrapper {
-            width: 65%; 
-            background-color: rgba(10, 5, 0, 0.5); 
-            border: 1px solid rgba(0,0,0,0.8);
-            border-bottom: 1px solid rgba(255,255,255,0.15); 
-            border-radius: 8px; 
-            height: 12px; 
-            overflow: hidden;
-            box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); 
-            z-index: 2;
-        }
-
-        .energy-bar {
-            height: 100%; 
-            width: 100%;
-            background: linear-gradient(90deg, #2e7d32, #50b487, #81c784); 
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.5); 
-            transition: width 0.3s ease-out;
-        }
-
-        .energy-text {
-            color: #ffeba1; 
-            font-size: 0.85rem; 
-            margin-top: 8px;
-            font-weight: bold;
-            white-space: nowrap; 
-            text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8);
-            z-index: 2;
-        }
-
-        .ore-wrapper {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 10px;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .crystal-img {
-            width: 280px; 
-            height: auto;
-            filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4));
-            transition: transform 0.1s ease, filter 0.1s ease;
-            cursor: pointer; 
-        }
-
-        .crystal-img:active {
-            transform: scale(0.95) translateY(5px);
-            filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8));
-        }
-
-        .floating-text {
-            position: absolute;
-            color: #a5d6a7;
-            font-size: 1.8rem;
-            font-weight: bold;
-            pointer-events: none;
-            animation: floatUp 1s ease-out forwards;
-            text-shadow: 0 0 10px #50b487, 1px 1px 2px #000;
-            z-index: 10;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
-        }
-
-        .pickaxe-effect {
-            position: absolute;
-            width: 100px; 
-            height: auto;
-            pointer-events: none;
-            z-index: 50;
-            transform-origin: bottom right; 
-            animation: mineStrike ease-in-out forwards;
-            filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7));
-        }
-        @keyframes mineStrike {
-            0% { transform: rotate(-30deg) scale(1.1); opacity: 0; }
-            30% { transform: rotate(-70deg) scale(1.2); opacity: 1; } 
-            60% { transform: rotate(15deg) scale(1.1); opacity: 1; }  
-            100% { transform: rotate(25deg) scale(0.9); opacity: 0; } 
-        }
-
-        .spark {
-            position: absolute;
-            width: 8px; height: 8px;
-            background-color: #ffffff; 
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 45;
-            box-shadow: 0 0 8px #fff, 0 0 15px #ffd700, 0 0 25px #ff8c00;
-            animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
-        }
-        @keyframes sparkFly {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            50% { opacity: 1; } 
-            100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
-        }
-
-        .open-shop-btn {
-            position: absolute;
-            bottom: 30px;
-            right: 20px;
-            background: linear-gradient(to bottom, #8b5a2b, #4e342e);
-            border: 2px solid #2a1610;
-            color: #ffeba1;
-            padding: 12px 25px;
-            font-family: 'Georgia', serif;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.2);
-            cursor: pointer;
-            text-shadow: 1px 1px 2px #000;
-            z-index: 20;
-            transition: transform 0.1s;
-        }
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; box-sizing: border-box; outline: none; }
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Georgia', serif; background-image: url('1772901742360.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: rgba(0, 0, 0, 0.6); background-blend-mode: overlay; overflow: hidden; }
+        .guild-board { background-image: url('1000019094-removebg-preview.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; width: 390px; padding-top: 90px; padding-bottom: 80px; padding-left: 40px; padding-right: 40px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8)); margin-bottom: 20px; position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .score-container { color: #1a0b02; font-size: 3.4rem; font-weight: bold; text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9); margin-bottom: 12px; z-index: 2; }
+        .energy-wrapper { width: 65%; background-color: rgba(10, 5, 0, 0.5); border: 1px solid rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.15); border-radius: 8px; height: 12px; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); z-index: 2; }
+        .energy-bar { height: 100%; width: 100%; background: linear-gradient(90deg, #2e7d32, #50b487, #81c784); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); transition: width 0.3s ease-out; }
+        .energy-text { color: #ffeba1; font-size: 0.85rem; margin-top: 8px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
+        .ore-wrapper { position: relative; display: flex; justify-content: center; align-items: center; margin-top: 10px; -webkit-tap-highlight-color: transparent; }
+        .crystal-img { width: 280px; height: auto; filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4)); transition: transform 0.1s ease, filter 0.1s ease; cursor: pointer; }
+        .crystal-img:active { transform: scale(0.95) translateY(5px); filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8)); }
+        .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 10; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.5); opacity: 0; } }
+        .pickaxe-effect { position: absolute; width: 100px; height: auto; pointer-events: none; z-index: 50; transform-origin: bottom right; animation: mineStrike ease-in-out forwards; filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7)); }
+        @keyframes mineStrike { 0% { transform: rotate(-30deg) scale(1.1); opacity: 0; } 30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 60% { transform: rotate(15deg) scale(1.1); opacity: 1; } 100% { transform: rotate(35deg) scale(0.9); opacity: 0; } }
+        .spark { position: absolute; width: 8px; height: 8px; background-color: #ffffff; border-radius: 50%; pointer-events: none; z-index: 45; box-shadow: 0 0 8px #fff, 0 0 15px #ffd700, 0 0 25px #ff8c00; animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        @keyframes sparkFly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 50% { opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; } }
+        .open-shop-btn { position: absolute; bottom: 30px; right: 20px; background: linear-gradient(to bottom, #8b5a2b, #4e342e); border: 2px solid #2a1610; color: #ffeba1; padding: 12px 25px; font-family: 'Georgia', serif; font-size: 1.2rem; font-weight: bold; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.2); cursor: pointer; text-shadow: 1px 1px 2px #000; z-index: 20; transition: transform 0.1s; }
         .open-shop-btn:active { transform: scale(0.95); }
-
-        .shop-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            backdrop-filter: blur(3px); 
-        }
-
-        .shop-modal {
-            background: linear-gradient(to bottom, #5c3a21, #3e2723);
-            border: 4px solid #1a0b02;
-            border-radius: 15px;
-            width: 90%; 
-            max-width: 400px;
-            max-height: 85vh; 
-            overflow-y: auto; 
-            padding: 20px;
-            color: #ffeba1;
-            box-shadow: 0 10px 30px rgba(0,0,0,1), inset 0 0 20px rgba(0,0,0,0.6);
-            text-align: center;
-            position: relative;
-        }
-
+        .shop-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
+        .shop-modal { background: linear-gradient(to bottom, #5c3a21, #3e2723); border: 4px solid #1a0b02; border-radius: 15px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; padding: 20px; color: #ffeba1; box-shadow: 0 10px 30px rgba(0,0,0,1), inset 0 0 20px rgba(0,0,0,0.6); text-align: center; position: relative; }
         .shop-modal::-webkit-scrollbar { width: 6px; }
         .shop-modal::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
         .shop-modal::-webkit-scrollbar-thumb { background: #8b5a2b; border-radius: 10px; }
-
-        .close-shop-btn {
-            position: absolute;
-            top: 10px; right: 15px;
-            font-size: 1.8rem; 
-            color: #ff5252; 
-            cursor: pointer; 
-            font-weight: bold;
-            text-shadow: 1px 1px 2px #000;
-            z-index: 10;
-        }
-
-        .shop-title {
-            font-size: 1.8rem; 
-            margin-top: 0; margin-bottom: 20px;
-            text-shadow: 2px 2px 4px #000; 
-            border-bottom: 2px solid #8b5a2b; 
-            padding-bottom: 10px;
-            color: #ffd700;
-        }
-
-        .shop-item {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            background: rgba(0, 0, 0, 0.4); 
-            padding: 12px; 
-            border-radius: 10px; 
-            margin-bottom: 15px;
-            border: 1px solid #8b5a2b; 
-            text-align: left;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-
+        .close-shop-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; color: #ff5252; cursor: pointer; font-weight: bold; text-shadow: 1px 1px 2px #000; z-index: 10; }
+        .shop-title { font-size: 1.8rem; margin-top: 0; margin-bottom: 20px; text-shadow: 2px 2px 4px #000; border-bottom: 2px solid #8b5a2b; padding-bottom: 10px; color: #ffd700; }
+        .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #8b5a2b; text-align: left; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
         .shop-item-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #ffd700; text-shadow: 1px 1px 2px #000; }
         .shop-item-info p { margin: 0; font-size: 0.85rem; color: #a5d6a7; text-shadow: 1px 1px 1px #000; }
-
-        .shop-buy-btn {
-            background: linear-gradient(to bottom, #2e7d32, #1b5e20);
-            border: 1px solid #000; 
-            color: #fff; 
-            padding: 10px 15px; 
-            border-radius: 8px;
-            font-weight: bold; 
-            font-family: 'Georgia', serif;
-            cursor: pointer; 
-            box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.3);
-            text-shadow: 1px 1px 1px #000;
-            min-width: 80px;
-        }
+        .shop-buy-btn { background: linear-gradient(to bottom, #2e7d32, #1b5e20); border: 1px solid #000; color: #fff; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-family: 'Georgia', serif; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.3); text-shadow: 1px 1px 1px #000; min-width: 80px; }
         .shop-buy-btn:active { transform: scale(0.95); }
-        .shop-buy-btn:disabled { 
-            background: linear-gradient(to bottom, #555, #333); 
-            color: #888; cursor: not-allowed; box-shadow: none;
-        }
+        .shop-buy-btn:disabled { background: linear-gradient(to bottom, #555, #333); color: #888; cursor: not-allowed; box-shadow: none; }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
@@ -281,7 +49,7 @@
         <div class="energy-wrapper">
             <div class="energy-bar" id="energy-bar"></div>
         </div>
-        <div class="energy-text" id="energy-text">Вход в игру...</div>
+        <div class="energy-text" id="energy-text">Инициализация...</div>
     </div>
 
     <div class="ore-wrapper">
@@ -325,6 +93,8 @@
     </div>
 
     <script>
+        const textEl = document.getElementById('energy-text');
+        
         try {
             document.addEventListener('contextmenu', e => e.preventDefault());
             document.addEventListener('dragstart', e => e.preventDefault());
@@ -333,31 +103,45 @@
             let tg = window.Telegram ? window.Telegram.WebApp : null;
             try { if (tg) tg.expand(); } catch(e) {}
 
-            function getSave(key, defValue) {
-                try {
-                    let val = localStorage.getItem(key);
-                    if (val !== null && val !== 'NaN') {
-                        let p = parseInt(val);
-                        if (!isNaN(p)) return p;
+            // === БРОНЕБОЙНАЯ СИСТЕМА ПАМЯТИ ===
+            // Если Chrome запретит доступ, данные сохранятся во временную память, и игра не зависнет!
+            const SafeMemory = {
+                ram: {},
+                get: function(key, defValue) {
+                    try {
+                        let val = localStorage.getItem(key);
+                        if (val !== null && val !== 'NaN' && val !== 'undefined') {
+                            let parsed = parseInt(val);
+                            if (!isNaN(parsed)) return parsed;
+                        }
+                    } catch (e) {
+                        if (this.ram[key] !== undefined) return this.ram[key];
                     }
-                } catch (e) {}
-                return defValue;
-            }
+                    return defValue;
+                },
+                set: function(key, val) {
+                    try {
+                        localStorage.setItem(key, val);
+                    } catch (e) {
+                        this.ram[key] = val;
+                    }
+                }
+            };
 
-            let score = getSave('mithrilScore', 0);
-            
-            let clickPower = getSave('mithrilClickPower', 1);
-            let costPickaxe = getSave('mithrilCostPickaxe', 2500);
+            // Загрузка переменных через новую безопасную память
+            let score = SafeMemory.get('mithrilScore', 0);
+            let clickPower = SafeMemory.get('mithrilClickPower', 1);
+            let costPickaxe = SafeMemory.get('mithrilCostPickaxe', 2500);
             if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500; 
 
-            let maxEnergy = getSave('mithrilMaxEnergy', 500);
-            let costEnergy = getSave('mithrilCostEnergy', 100);
+            let maxEnergy = SafeMemory.get('mithrilMaxEnergy', 500);
+            let costEnergy = SafeMemory.get('mithrilCostEnergy', 100);
             
-            let regenLevel = getSave('mithrilRegenLevel', 1);
-            let costRegen = getSave('mithrilCostRegen', 8000);
+            let regenLevel = SafeMemory.get('mithrilRegenLevel', 1);
+            let costRegen = SafeMemory.get('mithrilCostRegen', 8000);
 
-            let energy = getSave('mithrilEnergy', maxEnergy);
-            let lastTickTime = getSave('lastTickTime', Date.now());
+            let energy = SafeMemory.get('mithrilEnergy', maxEnergy);
+            let lastTickTime = SafeMemory.get('lastTickTime', Date.now());
             let lastClickAnimTime = 0;
 
             const regenAmount = 100;
@@ -368,25 +152,20 @@
             const MAX_REGEN_LEVEL = 9; 
 
             function saveData() {
-                try {
-                    localStorage.setItem('mithrilScore', score);
-                    localStorage.setItem('mithrilEnergy', energy);
-                    localStorage.setItem('lastTickTime', lastTickTime);
-                    localStorage.setItem('mithrilClickPower', clickPower);
-                    localStorage.setItem('mithrilMaxEnergy', maxEnergy);
-                    localStorage.setItem('mithrilCostPickaxe', costPickaxe);
-                    localStorage.setItem('mithrilCostEnergy', costEnergy);
-                    localStorage.setItem('mithrilRegenLevel', regenLevel);
-                    localStorage.setItem('mithrilCostRegen', costRegen);
-                } catch(e) {}
+                SafeMemory.set('mithrilScore', score);
+                SafeMemory.set('mithrilEnergy', energy);
+                SafeMemory.set('lastTickTime', lastTickTime);
+                SafeMemory.set('mithrilClickPower', clickPower);
+                SafeMemory.set('mithrilMaxEnergy', maxEnergy);
+                SafeMemory.set('mithrilCostPickaxe', costPickaxe);
+                SafeMemory.set('mithrilCostEnergy', costEnergy);
+                SafeMemory.set('mithrilRegenLevel', regenLevel);
+                SafeMemory.set('mithrilCostRegen', costRegen);
             }
 
             function updateUI() {
                 document.getElementById('score').innerText = score;
                 document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
-                
-                let textEl = document.getElementById('energy-text');
-                textEl.style.color = "#ffeba1";
                 
                 if (energy >= maxEnergy) {
                     textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Макс)`;
@@ -442,9 +221,11 @@
                 updateUI();
             }
 
+            // ПЕРВЫЙ ЗАПУСК ИГРЫ
             checkRegen();
             setInterval(checkRegen, 1000);
 
+            // КНОПКИ
             document.getElementById('open-shop').onclick = function() {
                 updateUI();
                 document.getElementById('shop-modal').style.display = 'flex';
@@ -488,6 +269,7 @@
                 }
             };
 
+            // КЛИК ПО РУДЕ
             document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
                 if (energy >= 1) {
                     if (energy === maxEnergy) lastTickTime = Date.now();
@@ -507,4 +289,43 @@
                     const pickaxe = document.createElement('img');
                     pickaxe.src = '1000019118-removebg-preview.png'; 
                     pickaxe.className = 'pickaxe-effect';
-                    pickaxe.style.left = `${e.
+                    pickaxe.style.left = `${e.clientX - 60}px`;
+                    pickaxe.style.top = `${e.clientY - 80}px`;
+                    pickaxe.style.animationDuration = `${animDuration}s`;
+                    document.body.appendChild(pickaxe);
+
+                    const plusOne = document.createElement('div');
+                    plusOne.className = 'floating-text';
+                    plusOne.innerText = `+${clickPower}`;
+                    plusOne.style.left = `${e.clientX - 15}px`;
+                    plusOne.style.top = `${e.clientY - 40}px`;
+                    document.body.appendChild(plusOne);
+
+                    const sparkCount = 6 + Math.floor(Math.random() * 3);
+                    for (let i = 0; i < sparkCount; i++) {
+                        const spark = document.createElement('div');
+                        spark.className = 'spark';
+                        spark.style.left = `${e.clientX + (Math.random() - 0.5) * 30}px`;
+                        spark.style.top = `${e.clientY - 10 + (Math.random() - 0.5) * 30}px`;
+                        spark.style.setProperty('--tx', `${(Math.random() - 0.5) * 160}px`);
+                        spark.style.setProperty('--ty', `${(Math.random() - 0.5) * 160}px`);
+                        document.body.appendChild(spark);
+                        setTimeout(() => spark.remove(), 600);
+                    }
+
+                    setTimeout(() => pickaxe.remove(), animDuration * 1000);
+                    setTimeout(() => plusOne.remove(), 1000);
+                } else {
+                    textEl.style.color = '#ff5252';
+                    setTimeout(() => textEl.style.color = '#ffeba1', 300);
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                }
+            });
+
+        } catch (err) {
+            textEl.innerText = "ОШИБКА: " + err.message; 
+            textEl.style.color = "red"; 
+        }
+    </script>
+</body>
+</html>
