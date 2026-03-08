@@ -8,19 +8,16 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
-        /* --- ТОТАЛЬНАЯ ЗАЩИТА ВСЕХ ЭЛЕМЕНТОВ --- */
+        /* --- БАЗОВЫЕ НАСТРОЙКИ И ЗАЩИТА --- */
         * {
             -webkit-touch-callout: none; 
             -webkit-user-select: none;   
-            -khtml-user-select: none;    
-            -moz-user-select: none;      
-            -ms-user-select: none;       
             user-select: none;           
             -webkit-user-drag: none;     
             box-sizing: border-box;
+            outline: none;
         }
 
-        /* --- ЗАДНИЙ ФОН (Город) --- */
         body {
             margin: 0;
             height: 100vh;
@@ -40,11 +37,8 @@
             overflow: hidden; 
         }
 
-        /* --- ТАБЛИЧКА --- */
+        /* --- ТАБЛИЧКА И СЧЕТ --- */
         .guild-board {
-            background: none;
-            border: none;
-            box-shadow: none;
             background-image: url('1000019094-removebg-preview.png');
             background-size: 100% 100%; 
             background-position: center;
@@ -64,7 +58,6 @@
             justify-content: center;
         }
 
-        /* Счет */
         .score-container {
             color: #1a0b02; 
             font-size: 3.4rem; 
@@ -74,7 +67,7 @@
             z-index: 2;
         }
 
-        /* --- ПОЛОСКА ЭНЕРГИИ --- */
+        /* --- ЭНЕРГИЯ --- */
         .energy-wrapper {
             width: 65%; 
             background-color: rgba(10, 5, 0, 0.5); 
@@ -100,13 +93,12 @@
             font-size: 0.85rem; 
             margin-top: 8px;
             font-weight: bold;
-            letter-spacing: 0.5px; 
             white-space: nowrap; 
             text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8);
             z-index: 2;
         }
 
-        /* --- КАРТИНКА РУДЫ --- */
+        /* --- РУДА --- */
         .ore-wrapper {
             position: relative;
             display: flex;
@@ -129,7 +121,7 @@
             filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8));
         }
 
-        /* --- ЛЕТАЮЩИЕ ЦИФРЫ --- */
+        /* --- ЭФФЕКТЫ --- */
         .floating-text {
             position: absolute;
             color: #a5d6a7;
@@ -140,13 +132,11 @@
             text-shadow: 0 0 10px #50b487, 1px 1px 2px #000;
             z-index: 10;
         }
-
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
         }
 
-        /* --- АНИМАЦИЯ РЕАЛИСТИЧНОЙ КИРКИ --- */
         .pickaxe-effect {
             position: absolute;
             width: 100px; 
@@ -157,7 +147,6 @@
             animation: mineStrike ease-in-out forwards;
             filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7));
         }
-
         @keyframes mineStrike {
             0% { transform: rotate(-30deg) scale(1.1); opacity: 0; }
             30% { transform: rotate(-70deg) scale(1.2); opacity: 1; } 
@@ -165,11 +154,9 @@
             100% { transform: rotate(25deg) scale(0.9); opacity: 0; } 
         }
 
-        /* --- ИСКРЫ --- */
         .spark {
             position: absolute;
-            width: 8px; 
-            height: 8px;
+            width: 8px; height: 8px;
             background-color: #ffffff; 
             border-radius: 50%;
             pointer-events: none;
@@ -177,17 +164,13 @@
             box-shadow: 0 0 8px #fff, 0 0 15px #ffd700, 0 0 25px #ff8c00;
             animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
         }
-
         @keyframes sparkFly {
             0% { transform: translate(0, 0) scale(1); opacity: 1; }
             50% { opacity: 1; } 
             100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
         }
 
-        /* =========================================
-           МАГАЗИН (ФЭНТЕЗИ СТИЛЬ)
-           ========================================= */
-        
+        /* --- МАГАЗИН --- */
         .open-shop-btn {
             position: absolute;
             bottom: 30px;
@@ -244,8 +227,7 @@
 
         .shop-title {
             font-size: 1.8rem; 
-            margin-top: 0;
-            margin-bottom: 20px;
+            margin-top: 0; margin-bottom: 20px;
             text-shadow: 2px 2px 4px #000; 
             border-bottom: 2px solid #8b5a2b; 
             padding-bottom: 10px;
@@ -266,17 +248,10 @@
         }
 
         .shop-item-info h3 { 
-            margin: 0 0 5px 0; 
-            font-size: 1.1rem; 
-            color: #ffd700; 
-            text-shadow: 1px 1px 2px #000;
+            margin: 0 0 5px 0; font-size: 1.1rem; color: #ffd700; text-shadow: 1px 1px 2px #000;
         }
-        
         .shop-item-info p { 
-            margin: 0; 
-            font-size: 0.85rem; 
-            color: #a5d6a7; 
-            text-shadow: 1px 1px 1px #000;
+            margin: 0; font-size: 0.85rem; color: #a5d6a7; text-shadow: 1px 1px 1px #000;
         }
 
         .shop-buy-btn {
@@ -292,16 +267,11 @@
             text-shadow: 1px 1px 1px #000;
             min-width: 80px;
         }
-
         .shop-buy-btn:active { transform: scale(0.95); }
-        
         .shop-buy-btn:disabled { 
             background: linear-gradient(to bottom, #555, #333); 
-            color: #888; 
-            cursor: not-allowed; 
-            box-shadow: none;
+            color: #888; cursor: not-allowed; box-shadow: none;
         }
-
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
@@ -343,193 +313,203 @@
                 </div>
                 <button class="shop-buy-btn" id="buy-energy">100 💎</button>
             </div>
-
         </div>
     </div>
 
     <script>
-        // --- ЗАЩИТА КОДА ---
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('selectstart', event => event.preventDefault());
-        document.addEventListener('dragstart', event => event.preventDefault());
+        // 1. Инициализация Telegram
+        let tg = null;
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                tg = window.Telegram.WebApp;
+                tg.expand();
+                tg.ready();
+            }
+        } catch (e) { console.log("Работа вне Telegram"); }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'F12' || 
-               (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) || 
-               (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
+        // 2. Безопасное получение данных из памяти
+        function getSave(key, defValue) {
+            try {
+                let val = localStorage.getItem(key);
+                if (val !== null && !isNaN(parseInt(val))) {
+                    return parseInt(val);
+                }
+            } catch (e) {}
+            return defValue;
+        }
+
+        // Загрузка переменных
+        let score = getSave('mithrilScore', 0);
+        let clickPower = getSave('mithrilClickPower', 1);
+        let maxEnergy = getSave('mithrilMaxEnergy', 500);
+        let costPickaxe = getSave('mithrilCostPickaxe', 2500);
+        if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500; // Фикс старой цены
+        let costEnergy = getSave('mithrilCostEnergy', 100);
+        let energy = getSave('mithrilEnergy', maxEnergy);
+        let lastTickTime = getSave('lastTickTime', Date.now());
+
+        const regenAmount = 100;
+        const regenIntervalMs = 5 * 60 * 1000;
+        let lastClickAnimTime = 0;
+
+        // Элементы
+        const elScore = document.getElementById('score');
+        const elEnergyBar = document.getElementById('energy-bar');
+        const elEnergyText = document.getElementById('energy-text');
+        
+        const shopModal = document.getElementById('shop-modal');
+        const elLvlPickaxe = document.getElementById('lvl-pickaxe');
+        const elLvlEnergy = document.getElementById('lvl-energy');
+        const btnBuyPickaxe = document.getElementById('buy-pickaxe');
+        const btnBuyEnergy = document.getElementById('buy-energy');
+
+        // 3. Функции обновления
+        function saveData() {
+            try {
+                localStorage.setItem('mithrilScore', score);
+                localStorage.setItem('mithrilEnergy', energy);
+                localStorage.setItem('lastTickTime', lastTickTime);
+                localStorage.setItem('mithrilClickPower', clickPower);
+                localStorage.setItem('mithrilMaxEnergy', maxEnergy);
+                localStorage.setItem('mithrilCostPickaxe', costPickaxe);
+                localStorage.setItem('mithrilCostEnergy', costEnergy);
+            } catch(e) {}
+        }
+
+        function updateUI() {
+            elScore.innerText = score;
+            elEnergyBar.style.width = `${(energy / maxEnergy) * 100}%`;
+
+            if (energy >= maxEnergy) {
+                elEnergyText.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
+            } else {
+                let timeLeftMs = Math.max(0, regenIntervalMs - (Date.now() - lastTickTime));
+                let minutes = Math.floor(timeLeftMs / 60000);
+                let seconds = Math.floor((timeLeftMs % 60000) / 1000);
+                let timeStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                elEnergyText.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${timeStr})`;
+            }
+
+            // Магазин
+            elLvlPickaxe.innerText = clickPower;
+            elLvlEnergy.innerText = maxEnergy;
+            
+            btnBuyPickaxe.innerText = `${costPickaxe} 💎`;
+            btnBuyEnergy.innerText = `${costEnergy} 💎`;
+            
+            btnBuyPickaxe.disabled = score < costPickaxe;
+            btnBuyEnergy.disabled = score < costEnergy;
+        }
+
+        function checkRegen() {
+            let now = Date.now();
+            if (energy < maxEnergy) {
+                let passed = now - lastTickTime;
+                if (passed >= regenIntervalMs) {
+                    let ticks = Math.floor(passed / regenIntervalMs);
+                    energy = Math.min(maxEnergy, energy + (ticks * regenAmount));
+                    lastTickTime += ticks * regenIntervalMs; 
+                    saveData();
+                }
+            } else {
+                lastTickTime = now;
+            }
+            updateUI();
+        }
+
+        // Запуск интерфейса
+        checkRegen();
+        setInterval(checkRegen, 1000);
+
+        // --- ЛОГИКА МАГАЗИНА (ПЕРЕПИСАНО НА .onclick) ---
+        
+        document.getElementById('open-shop').onclick = function() {
+            updateUI();
+            shopModal.style.display = 'flex';
+        };
+
+        document.getElementById('close-shop').onclick = function() {
+            shopModal.style.display = 'none';
+        };
+
+        btnBuyPickaxe.onclick = function() {
+            if (score >= costPickaxe) {
+                score -= costPickaxe;
+                clickPower += 1;
+                costPickaxe = Math.floor(costPickaxe * 1.5);
+                saveData();
+                updateUI();
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
+        };
+
+        btnBuyEnergy.onclick = function() {
+            if (score >= costEnergy) {
+                score -= costEnergy;
+                maxEnergy += 50;
+                costEnergy = Math.floor(costEnergy * 1.5);
+                saveData();
+                updateUI();
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
+        };
+
+        // --- ЛОГИКА КЛИКА ПО КРИСТАЛЛУ ---
+        document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
+            if (energy >= 1) {
+                if (energy === maxEnergy) lastTickTime = Date.now();
+                
+                energy--;
+                score += clickPower;
+                saveData();
+                updateUI();
+
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+
+                // Скорость кирки
+                let nowAnim = Date.now();
+                let timeSinceLastClick = nowAnim - (lastClickAnimTime || nowAnim - 1000);
+                lastClickAnimTime = nowAnim;
+                let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
+
+                // Кирка
+                const pickaxe = document.createElement('img');
+                pickaxe.src = 'ТВОЯ_КИРКА.png'; // <- НЕ ЗАБУДЬ ВСТАВИТЬ НАЗВАНИЕ
+                pickaxe.className = 'pickaxe-effect';
+                pickaxe.style.left = `${e.clientX - 60}px`;
+                pickaxe.style.top = `${e.clientY - 80}px`;
+                pickaxe.style.animationDuration = `${animDuration}s`;
+                document.body.appendChild(pickaxe);
+
+                // Цифра +
+                const plusOne = document.createElement('div');
+                plusOne.className = 'floating-text';
+                plusOne.innerText = `+${clickPower}`;
+                plusOne.style.left = `${e.clientX - 15}px`;
+                plusOne.style.top = `${e.clientY - 40}px`;
+                document.body.appendChild(plusOne);
+
+                // Искры
+                const sparkCount = 6 + Math.floor(Math.random() * 3);
+                for (let i = 0; i < sparkCount; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'spark';
+                    spark.style.left = `${e.clientX + (Math.random() - 0.5) * 30}px`;
+                    spark.style.top = `${e.clientY - 10 + (Math.random() - 0.5) * 30}px`;
+                    spark.style.setProperty('--tx', `${(Math.random() - 0.5) * 160}px`);
+                    spark.style.setProperty('--ty', `${(Math.random() - 0.5) * 160}px`);
+                    document.body.appendChild(spark);
+                    setTimeout(() => spark.remove(), 600);
+                }
+
+                setTimeout(() => pickaxe.remove(), animDuration * 1000);
+                setTimeout(() => plusOne.remove(), 1000);
+            } else {
+                elEnergyText.style.color = '#ff5252';
+                setTimeout(() => elEnergyText.style.color = '#ffeba1', 300);
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
             }
         });
-
-        // САМАЯ ГЛАВНАЯ СТРОЧКА! Ждем пока прогрузится HTML, прежде чем выполнять скрипт
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
-                let tg = null;
-                try {
-                    if (window.Telegram && window.Telegram.WebApp) {
-                        tg = window.Telegram.WebApp;
-                        tg.expand();
-                        tg.ready();
-                    }
-                } catch (e) {}
-
-                // Ищем элементы. Если чего-то нет, код не упадет.
-                const scoreElement = document.getElementById('score');
-                const oreImgElement = document.getElementById('ore-img');
-                const energyBar = document.getElementById('energy-bar');
-                const energyTextElement = document.getElementById('energy-text');
-
-                const shopOverlay = document.getElementById('shop-modal');
-                const btnOpenShop = document.getElementById('open-shop');
-                const btnCloseShop = document.getElementById('close-shop');
-                
-                const btnBuyPickaxe = document.getElementById('buy-pickaxe');
-                const btnBuyEnergy = document.getElementById('buy-energy');
-                const lblLvlPickaxe = document.getElementById('lvl-pickaxe');
-                const lblLvlEnergy = document.getElementById('lvl-energy');
-
-                // БЕЗОПАСНАЯ ПАМЯТЬ
-                const Memory = {
-                    load: function(key, def) {
-                        try {
-                            let val = localStorage.getItem(key);
-                            if (val === null) return def;
-                            let parsed = parseInt(val);
-                            return isNaN(parsed) ? def : parsed;
-                        } catch(e) {
-                            return def; 
-                        }
-                    },
-                    save: function(key, val) {
-                        try { localStorage.setItem(key, val); } catch(e) {}
-                    }
-                };
-
-                // ЗАГРУЗКА ДАННЫХ
-                let score = Memory.load('mithrilScore', 0);
-                let clickPower = Memory.load('mithrilClickPower', 1);
-                let maxEnergy = Memory.load('mithrilMaxEnergy', 500);
-                
-                let costPickaxe = Memory.load('mithrilCostPickaxe', 2500);
-                if (clickPower === 1 && costPickaxe < 2500) {
-                    costPickaxe = 2500; 
-                }
-                
-                let costEnergy = Memory.load('mithrilCostEnergy', 100);
-                let energy = Memory.load('mithrilEnergy', maxEnergy);
-
-                const regenAmount = 100;
-                const regenIntervalMs = 5 * 60 * 1000;
-                let lastTickTime = Memory.load('lastTickTime', Date.now());
-                let lastClickAnimTime = 0;
-
-                function checkEnergyRegen() {
-                    let now = Date.now();
-                    if (energy < maxEnergy) {
-                        let timePassed = now - lastTickTime;
-                        
-                        if (timePassed >= regenIntervalMs) {
-                            let ticks = Math.floor(timePassed / regenIntervalMs);
-                            energy += ticks * regenAmount;
-                            if (energy > maxEnergy) energy = maxEnergy;
-                            
-                            lastTickTime += ticks * regenIntervalMs; 
-                            saveData();
-                        }
-                    } else {
-                        lastTickTime = now;
-                    }
-                }
-
-                function updateUI() {
-                    if (scoreElement) scoreElement.innerText = score;
-                    if (energyBar) energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
-
-                    if (energyTextElement) {
-                        if (energy >= maxEnergy) {
-                            energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
-                        } else {
-                            let now = Date.now();
-                            let timeLeftMs = regenIntervalMs - (now - lastTickTime);
-                            if (timeLeftMs < 0) timeLeftMs = 0;
-                            
-                            let minutes = Math.floor(timeLeftMs / 60000);
-                            let seconds = Math.floor((timeLeftMs % 60000) / 1000);
-                            let timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                            
-                            energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${timeString})`;
-                        }
-                    }
-
-                    if (lblLvlPickaxe) lblLvlPickaxe.innerText = clickPower;
-                    if (lblLvlEnergy) lblLvlEnergy.innerText = maxEnergy;
-                    
-                    if (btnBuyPickaxe) {
-                        btnBuyPickaxe.innerText = `${costPickaxe} 💎`;
-                        btnBuyPickaxe.disabled = score < costPickaxe;
-                    }
-                    if (btnBuyEnergy) {
-                        btnBuyEnergy.innerText = `${costEnergy} 💎`;
-                        btnBuyEnergy.disabled = score < costEnergy;
-                    }
-                }
-
-                function saveData() {
-                    Memory.save('mithrilScore', score);
-                    Memory.save('mithrilEnergy', energy);
-                    Memory.save('lastTickTime', lastTickTime);
-                    Memory.save('mithrilClickPower', clickPower);
-                    Memory.save('mithrilMaxEnergy', maxEnergy);
-                    Memory.save('mithrilCostPickaxe', costPickaxe);
-                    Memory.save('mithrilCostEnergy', costEnergy);
-                }
-
-                checkEnergyRegen();
-                updateUI(); // Эта строчка стирает слово "Загрузка..."
-                
-                setInterval(() => {
-                    checkEnergyRegen();
-                    updateUI();
-                }, 1000);
-
-                // Слушатели событий магазина (защищенные)
-                if (btnOpenShop) {
-                    btnOpenShop.addEventListener('pointerdown', () => {
-                        if (shopOverlay) shopOverlay.style.display = 'flex';
-                        updateUI(); 
-                    });
-                }
-
-                if (btnCloseShop) {
-                    btnCloseShop.addEventListener('pointerdown', () => {
-                        if (shopOverlay) shopOverlay.style.display = 'none';
-                    });
-                }
-
-                if (btnBuyPickaxe) {
-                    btnBuyPickaxe.addEventListener('pointerdown', () => {
-                        if (score >= costPickaxe) {
-                            score -= costPickaxe;
-                            clickPower += 1;
-                            costPickaxe = Math.floor(costPickaxe * 1.5); 
-                            saveData();
-                            updateUI();
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                        }
-                    });
-                }
-
-                if (btnBuyEnergy) {
-                    btnBuyEnergy.addEventListener('pointerdown', () => {
-                        if (score >= costEnergy) {
-                            score -= costEnergy;
-                            maxEnergy += 50;
-                            costEnergy = Math.floor(costEnergy * 1.5); 
-                            saveData();
-                            updateUI();
-                            if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                        }
-                    });
-                }
-
-         
+    </script>
+</body>
+</html>
