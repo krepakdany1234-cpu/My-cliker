@@ -348,208 +348,201 @@
     </div>
 
     <script>
-        // --- ЗАЩИТА КОДА ---
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('selectstart', event => event.preventDefault());
-        document.addEventListener('dragstart', event => event.preventDefault());
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'F12' || 
-               (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) || 
-               (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-            }
-        });
-
-        // --- БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ TELEGRAM ---
-        // (теперь не зависает, если открыть просто в браузере)
-        let tg = null;
+        // Мы оборачиваем ВЕСЬ код в try-catch, чтобы поймать любую ошибку
         try {
-            if (window.Telegram && window.Telegram.WebApp) {
-                tg = window.Telegram.WebApp;
-                tg.expand();
-                tg.ready();
-            }
-        } catch (e) {
-            console.log("Телеграм не найден, работаем в режиме браузера");
-        }
+            // --- ЗАЩИТА КОДА ---
+            document.addEventListener('contextmenu', event => event.preventDefault());
+            document.addEventListener('selectstart', event => event.preventDefault());
+            document.addEventListener('dragstart', event => event.preventDefault());
 
-        const scoreElement = document.getElementById('score');
-        const oreImgElement = document.getElementById('ore-img');
-        const energyBar = document.getElementById('energy-bar');
-        const energyTextElement = document.getElementById('energy-text');
-
-        const shopOverlay = document.getElementById('shop-modal');
-        const btnOpenShop = document.getElementById('open-shop');
-        const btnCloseShop = document.getElementById('close-shop');
-        
-        const btnBuyPickaxe = document.getElementById('buy-pickaxe');
-        const btnBuyEnergy = document.getElementById('buy-energy');
-        const lblLvlPickaxe = document.getElementById('lvl-pickaxe');
-        const lblLvlEnergy = document.getElementById('lvl-energy');
-
-        // Вспомогательная функция, чтобы безопасно доставать цифры из памяти
-        function getSavedInt(key, defaultValue) {
-            const val = parseInt(localStorage.getItem(key));
-            return isNaN(val) ? defaultValue : val;
-        }
-
-        // ЗАГРУЗКА ДАННЫХ ИЗ ПАМЯТИ
-        let score = getSavedInt('mithrilScore', 0);
-        let clickPower = getSavedInt('mithrilClickPower', 1);
-        let maxEnergy = getSavedInt('mithrilMaxEnergy', 500);
-        
-        // Устанавливаем цену кирки на 2500
-        let costPickaxe = getSavedInt('mithrilCostPickaxe', 2500);
-        if (clickPower === 1 && costPickaxe < 2500) {
-            costPickaxe = 2500; // Лечит старые сохранения, если цена была меньше
-        }
-        
-        let costEnergy = getSavedInt('mithrilCostEnergy', 100);
-        let energy = getSavedInt('mithrilEnergy', maxEnergy);
-
-        const regenAmount = 100;
-        const regenIntervalMs = 5 * 60 * 1000;
-        let lastTickTime = getSavedInt('lastTickTime', Date.now());
-        let lastClickAnimTime = 0;
-
-        function checkEnergyRegen() {
-            let now = Date.now();
-            if (energy < maxEnergy) {
-                let timePassed = now - lastTickTime;
-                
-                if (timePassed >= regenIntervalMs) {
-                    let ticks = Math.floor(timePassed / regenIntervalMs);
-                    energy += ticks * regenAmount;
-                    if (energy > maxEnergy) energy = maxEnergy;
-                    
-                    lastTickTime += ticks * regenIntervalMs; 
-                    saveData();
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F12' || 
+                   (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) || 
+                   (e.ctrlKey && e.key === 'U')) {
+                    e.preventDefault();
                 }
-            } else {
-                lastTickTime = now;
-            }
-        }
+            });
 
-        function updateUI() {
-            scoreElement.innerText = score;
-            energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
+            let tg = null;
+            try {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    tg = window.Telegram.WebApp;
+                    tg.expand();
+                    tg.ready();
+                }
+            } catch (e) {}
 
-            if (energy >= maxEnergy) {
-                energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
-            } else {
-                let now = Date.now();
-                let timeLeftMs = regenIntervalMs - (now - lastTickTime);
-                if (timeLeftMs < 0) timeLeftMs = 0;
-                
-                let minutes = Math.floor(timeLeftMs / 60000);
-                let seconds = Math.floor((timeLeftMs % 60000) / 1000);
-                let timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                
-                energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${timeString})`;
-            }
+            const scoreElement = document.getElementById('score');
+            const oreImgElement = document.getElementById('ore-img');
+            const energyBar = document.getElementById('energy-bar');
+            const energyTextElement = document.getElementById('energy-text');
 
-            lblLvlPickaxe.innerText = clickPower;
-            lblLvlEnergy.innerText = maxEnergy;
+            const shopOverlay = document.getElementById('shop-modal');
+            const btnOpenShop = document.getElementById('open-shop');
+            const btnCloseShop = document.getElementById('close-shop');
             
-            btnBuyPickaxe.innerText = `${costPickaxe} 💎`;
-            btnBuyEnergy.innerText = `${costEnergy} 💎`;
+            const btnBuyPickaxe = document.getElementById('buy-pickaxe');
+            const btnBuyEnergy = document.getElementById('buy-energy');
+            const lblLvlPickaxe = document.getElementById('lvl-pickaxe');
+            const lblLvlEnergy = document.getElementById('lvl-energy');
 
-            btnBuyPickaxe.disabled = score < costPickaxe;
-            btnBuyEnergy.disabled = score < costEnergy;
-        }
-
-        function saveData() {
-            localStorage.setItem('mithrilScore', score);
-            localStorage.setItem('mithrilEnergy', energy);
-            localStorage.setItem('lastTickTime', lastTickTime);
-            localStorage.setItem('mithrilClickPower', clickPower);
-            localStorage.setItem('mithrilMaxEnergy', maxEnergy);
-            localStorage.setItem('mithrilCostPickaxe', costPickaxe);
-            localStorage.setItem('mithrilCostEnergy', costEnergy);
-        }
-
-        checkEnergyRegen();
-        updateUI(); // Эта строчка стирает "Загрузка..."
-        
-        setInterval(() => {
-            checkEnergyRegen();
-            updateUI();
-        }, 1000);
-
-        btnOpenShop.addEventListener('pointerdown', () => {
-            shopOverlay.style.display = 'flex';
-            updateUI(); 
-        });
-
-        btnCloseShop.addEventListener('pointerdown', () => {
-            shopOverlay.style.display = 'none';
-        });
-
-        btnBuyPickaxe.addEventListener('pointerdown', () => {
-            if (score >= costPickaxe) {
-                score -= costPickaxe;
-                clickPower += 1;
-                costPickaxe = Math.floor(costPickaxe * 1.5); 
-                saveData();
-                updateUI();
-                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            }
-        });
-
-        btnBuyEnergy.addEventListener('pointerdown', () => {
-            if (score >= costEnergy) {
-                score -= costEnergy;
-                maxEnergy += 50;
-                costEnergy = Math.floor(costEnergy * 1.5); 
-                saveData();
-                updateUI();
-                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            }
-        });
-
-        oreImgElement.addEventListener('pointerdown', (e) => {
-            if (energy >= 1) {
-                if (energy === maxEnergy) {
-                    lastTickTime = Date.now();
+            // --- БЕЗОПАСНАЯ ПАМЯТЬ ---
+            // Если браузер телефона заблокирует память, код не зависнет!
+            const Memory = {
+                load: function(key, def) {
+                    try {
+                        let val = localStorage.getItem(key);
+                        if (val === null) return def;
+                        let parsed = parseInt(val);
+                        return isNaN(parsed) ? def : parsed;
+                    } catch(e) {
+                        return def; // Игнорируем блокировку
+                    }
+                },
+                save: function(key, val) {
+                    try { localStorage.setItem(key, val); } catch(e) {}
                 }
+            };
 
-                energy--;
-                score += clickPower; 
-                
-                saveData();
-                updateUI();
+            // ЗАГРУЗКА ДАННЫХ
+            let score = Memory.load('mithrilScore', 0);
+            let clickPower = Memory.load('mithrilClickPower', 1);
+            let maxEnergy = Memory.load('mithrilMaxEnergy', 500);
+            
+            let costPickaxe = Memory.load('mithrilCostPickaxe', 2500);
+            // Жестко устанавливаем 2500 для старых сохранений
+            if (clickPower === 1 && costPickaxe < 2500) {
+                costPickaxe = 2500; 
+            }
+            
+            let costEnergy = Memory.load('mithrilCostEnergy', 100);
+            let energy = Memory.load('mithrilEnergy', maxEnergy);
 
-                // Вибрация сработает только если открыто внутри Telegram
-                if (tg && tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('heavy');
-                }
+            const regenAmount = 100;
+            const regenIntervalMs = 5 * 60 * 1000;
+            let lastTickTime = Memory.load('lastTickTime', Date.now());
+            let lastClickAnimTime = 0;
 
-                let nowAnim = Date.now();
-                let timeSinceLastClick = nowAnim - (lastClickAnimTime === 0 ? (nowAnim - 1000) : lastClickAnimTime);
-                lastClickAnimTime = nowAnim;
-
-                let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
-
-                const pickaxe = document.createElement('img');
-                pickaxe.src = 'ТВОЯ_КИРКА.png'; // <- НЕ ЗАБУДЬ ВСТАВИТЬ НАЗВАНИЕ КАРТИНКИ КИРКИ
-                pickaxe.classList.add('pickaxe-effect');
-                pickaxe.style.left = `${e.clientX - 60}px`;
-                pickaxe.style.top = `${e.clientY - 80}px`;
-                pickaxe.style.animationDuration = `${animDuration}s`;
-                document.body.appendChild(pickaxe);
-
-                const plusOne = document.createElement('div');
-                plusOne.classList.add('floating-text');
-                plusOne.innerText = `+${clickPower}`; 
-                plusOne.style.left = `${e.clientX - 15}px`;
-                plusOne.style.top = `${e.clientY - 40}px`;
-                document.body.appendChild(plusOne);
-
-                const sparkCount = 6 + Math.floor(Math.random() * 3);
-                for (let i = 0; i < sparkCount; i++) {
-                    const spark = document.createElement('div');
-                    spark.classList.add('spark');
+            function checkEnergyRegen() {
+                let now = Date.now();
+                if (energy < maxEnergy) {
+                    let timePassed = now - lastTickTime;
                     
-                    const offsetX = (Math.random() - 0.5) * 30;
-                    const offsetY = (Math.random
+                    if (timePassed >= regenIntervalMs) {
+                        let ticks = Math.floor(timePassed / regenIntervalMs);
+                        energy += ticks * regenAmount;
+                        if (energy > maxEnergy) energy = maxEnergy;
+                        
+                        lastTickTime += ticks * regenIntervalMs; 
+                        saveData();
+                    }
+                } else {
+                    lastTickTime = now;
+                }
+            }
+
+            function updateUI() {
+                scoreElement.innerText = score;
+                energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
+
+                if (energy >= maxEnergy) {
+                    energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (Максимум)`;
+                } else {
+                    let now = Date.now();
+                    let timeLeftMs = regenIntervalMs - (now - lastTickTime);
+                    if (timeLeftMs < 0) timeLeftMs = 0;
+                    
+                    let minutes = Math.floor(timeLeftMs / 60000);
+                    let seconds = Math.floor((timeLeftMs % 60000) / 1000);
+                    let timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    
+                    energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${timeString})`;
+                }
+
+                lblLvlPickaxe.innerText = clickPower;
+                lblLvlEnergy.innerText = maxEnergy;
+                
+                btnBuyPickaxe.innerText = `${costPickaxe} 💎`;
+                btnBuyEnergy.innerText = `${costEnergy} 💎`;
+
+                btnBuyPickaxe.disabled = score < costPickaxe;
+                btnBuyEnergy.disabled = score < costEnergy;
+            }
+
+            function saveData() {
+                Memory.save('mithrilScore', score);
+                Memory.save('mithrilEnergy', energy);
+                Memory.save('lastTickTime', lastTickTime);
+                Memory.save('mithrilClickPower', clickPower);
+                Memory.save('mithrilMaxEnergy', maxEnergy);
+                Memory.save('mithrilCostPickaxe', costPickaxe);
+                Memory.save('mithrilCostEnergy', costEnergy);
+            }
+
+            checkEnergyRegen();
+            updateUI(); // ЭТА СТРОЧКА УБИРАЕТ ЗАГРУЗКУ
+            
+            setInterval(() => {
+                checkEnergyRegen();
+                updateUI();
+            }, 1000);
+
+            btnOpenShop.addEventListener('pointerdown', () => {
+                shopOverlay.style.display = 'flex';
+                updateUI(); 
+            });
+
+            btnCloseShop.addEventListener('pointerdown', () => {
+                shopOverlay.style.display = 'none';
+            });
+
+            btnBuyPickaxe.addEventListener('pointerdown', () => {
+                if (score >= costPickaxe) {
+                    score -= costPickaxe;
+                    clickPower += 1;
+                    costPickaxe = Math.floor(costPickaxe * 1.5); 
+                    saveData();
+                    updateUI();
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                }
+            });
+
+            btnBuyEnergy.addEventListener('pointerdown', () => {
+                if (score >= costEnergy) {
+                    score -= costEnergy;
+                    maxEnergy += 50;
+                    costEnergy = Math.floor(costEnergy * 1.5); 
+                    saveData();
+                    updateUI();
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                }
+            });
+
+            oreImgElement.addEventListener('pointerdown', (e) => {
+                if (energy >= 1) {
+                    if (energy === maxEnergy) {
+                        lastTickTime = Date.now();
+                    }
+
+                    energy--;
+                    score += clickPower; 
+                    
+                    saveData();
+                    updateUI();
+
+                    if (tg && tg.HapticFeedback) {
+                        tg.HapticFeedback.impactOccurred('heavy');
+                    }
+
+                    let nowAnim = Date.now();
+                    let timeSinceLastClick = nowAnim - (lastClickAnimTime === 0 ? (nowAnim - 1000) : lastClickAnimTime);
+                    lastClickAnimTime = nowAnim;
+
+                    let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
+
+                    const pickaxe = document.createElement('img');
+                    pickaxe.src = 'ТВОЯ_КИРКА.png'; // <- НЕ ЗАБУДЬ ВСТАВИТЬ НАЗВАНИЕ КАРТИНКИ КИРКИ
+                    pickaxe.classList.add('pickaxe-effect');
+                    pickaxe.style.left = `${e.clientX - 60}px`;
+                    pickaxe.style.top = `${e.clientY - 80}px`;
+                    pickaxe.style.animationDuration
