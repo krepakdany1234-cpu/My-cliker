@@ -17,6 +17,7 @@
             -ms-user-select: none;       
             user-select: none;           
             -webkit-user-drag: none;     
+            box-sizing: border-box;
         }
 
         /* --- ЗАДНИЙ ФОН (Город) --- */
@@ -44,22 +45,16 @@
             background: none;
             border: none;
             box-shadow: none;
-            
             background-image: url('1000019094-removebg-preview.png');
             background-size: 100% 100%; 
             background-position: center;
             background-repeat: no-repeat;
-            
             width: 390px; 
-            
-            box-sizing: border-box; 
             padding-top: 90px;    
             padding-bottom: 80px; 
             padding-left: 40px;   
             padding-right: 40px;
-            
             filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8));
-            
             margin-bottom: 20px; 
             position: relative;
             text-align: center;
@@ -100,12 +95,10 @@
             transition: width 0.3s ease-out;
         }
 
-        /* Текст энергии */
         .energy-text {
             color: #ffeba1; 
             font-size: 0.85rem; 
             margin-top: 8px;
-            font-family: 'Georgia', serif; 
             font-weight: bold;
             letter-spacing: 0.5px; 
             white-space: nowrap; 
@@ -156,15 +149,12 @@
         /* --- АНИМАЦИЯ РЕАЛИСТИЧНОЙ КИРКИ --- */
         .pickaxe-effect {
             position: absolute;
-            /* Задаем размер картинки кирки */
             width: 100px; 
             height: auto;
             pointer-events: none;
             z-index: 50;
-            /* Точка вращения теперь зависит от картинки, обычно это правый нижний угол (рукоять) */
             transform-origin: bottom right; 
             animation: mineStrike ease-in-out forwards;
-            /* Добавил тень самой картинке, чтобы она выглядела объемнее */
             filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7));
         }
 
@@ -193,6 +183,132 @@
             50% { opacity: 1; } 
             100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
         }
+
+        /* =========================================
+           МАГАЗИН (ФЭНТЕЗИ СТИЛЬ)
+           ========================================= */
+        
+        /* Кнопка открытия магазина */
+        .open-shop-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            background: linear-gradient(to bottom, #8b5a2b, #4e342e);
+            border: 2px solid #2a1610;
+            color: #ffeba1;
+            padding: 12px 25px;
+            font-family: 'Georgia', serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.2);
+            cursor: pointer;
+            text-shadow: 1px 1px 2px #000;
+            z-index: 20;
+            transition: transform 0.1s;
+        }
+        .open-shop-btn:active { transform: scale(0.95); }
+
+        /* Затемнение фона при открытом магазине */
+        .shop-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none; /* Скрыто по умолчанию */
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(3px); /* Размытие заднего фона */
+        }
+
+        /* Сама доска магазина */
+        .shop-modal {
+            background: linear-gradient(to bottom, #5c3a21, #3e2723);
+            border: 4px solid #1a0b02;
+            border-radius: 15px;
+            width: 90%; 
+            max-width: 400px;
+            padding: 20px;
+            color: #ffeba1;
+            box-shadow: 0 10px 30px rgba(0,0,0,1), inset 0 0 20px rgba(0,0,0,0.6);
+            text-align: center;
+            position: relative;
+        }
+
+        /* Крестик закрытия */
+        .close-shop-btn {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 1.8rem; 
+            color: #ff5252; 
+            cursor: pointer; 
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .shop-title {
+            font-size: 1.8rem; 
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px #000; 
+            border-bottom: 2px solid #8b5a2b; 
+            padding-bottom: 10px;
+            color: #ffd700;
+        }
+
+        /* Карточка товара */
+        .shop-item {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4); 
+            padding: 12px; 
+            border-radius: 10px; 
+            margin-bottom: 15px;
+            border: 1px solid #8b5a2b; 
+            text-align: left;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .shop-item-info h3 { 
+            margin: 0 0 5px 0; 
+            font-size: 1.1rem; 
+            color: #ffd700; 
+            text-shadow: 1px 1px 2px #000;
+        }
+        
+        .shop-item-info p { 
+            margin: 0; 
+            font-size: 0.85rem; 
+            color: #a5d6a7; 
+            text-shadow: 1px 1px 1px #000;
+        }
+
+        /* Кнопка покупки */
+        .shop-buy-btn {
+            background: linear-gradient(to bottom, #2e7d32, #1b5e20);
+            border: 1px solid #000; 
+            color: #fff; 
+            padding: 10px 15px; 
+            border-radius: 8px;
+            font-weight: bold; 
+            font-family: 'Georgia', serif;
+            cursor: pointer; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.3);
+            text-shadow: 1px 1px 1px #000;
+            min-width: 80px;
+        }
+
+        .shop-buy-btn:active { transform: scale(0.95); }
+        
+        /* Если не хватает денег */
+        .shop-buy-btn:disabled { 
+            background: linear-gradient(to bottom, #555, #333); 
+            color: #888; 
+            cursor: not-allowed; 
+            box-shadow: none;
+        }
+
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
@@ -208,6 +324,34 @@
 
     <div class="ore-wrapper">
         <img src="1000019091-removebg-preview.png" alt="Кристалл" class="crystal-img" id="ore-img" draggable="false">
+    </div>
+
+    <button class="open-shop-btn" id="open-shop">🛒 Лавка</button>
+
+    <div class="shop-overlay" id="shop-modal">
+        <div class="shop-modal">
+            <div class="close-shop-btn" id="close-shop">✖</div>
+            <h2 class="shop-title">Торговая Лавка</h2>
+
+            <div class="shop-item">
+                <div class="shop-item-info">
+                    <h3>⚒️ Острая кирка</h3>
+                    <p>Добыча за клик: +1</p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Текущий уровень: <span id="lvl-pickaxe">1</span></p>
+                </div>
+                <button class="shop-buy-btn" id="buy-pickaxe">50 💎</button>
+            </div>
+
+            <div class="shop-item">
+                <div class="shop-item-info">
+                    <h3>🎒 Гномья сумка</h3>
+                    <p>Макс. энергия: +50</p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Текущий запас: <span id="lvl-energy">500</span></p>
+                </div>
+                <button class="shop-buy-btn" id="buy-energy">100 💎</button>
+            </div>
+
+        </div>
     </div>
 
     <script>
@@ -238,14 +382,31 @@
         const energyBar = document.getElementById('energy-bar');
         const energyTextElement = document.getElementById('energy-text');
 
-        const maxEnergy = 500;
-        const regenAmount = 100;
-        const regenIntervalMs = 5 * 60 * 1000;
+        // Элементы магазина
+        const shopOverlay = document.getElementById('shop-modal');
+        const btnOpenShop = document.getElementById('open-shop');
+        const btnCloseShop = document.getElementById('close-shop');
+        
+        const btnBuyPickaxe = document.getElementById('buy-pickaxe');
+        const btnBuyEnergy = document.getElementById('buy-energy');
+        const lblLvlPickaxe = document.getElementById('lvl-pickaxe');
+        const lblLvlEnergy = document.getElementById('lvl-energy');
 
+        // Загрузка сохранений или базовые значения
         let score = parseInt(localStorage.getItem('mithrilScore')) || 0;
+        
+        // НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ МАГАЗИНА
+        let clickPower = parseInt(localStorage.getItem('mithrilClickPower')) || 1;
+        let maxEnergy = parseInt(localStorage.getItem('mithrilMaxEnergy')) || 500;
+        
+        let costPickaxe = parseInt(localStorage.getItem('mithrilCostPickaxe')) || 50;
+        let costEnergy = parseInt(localStorage.getItem('mithrilCostEnergy')) || 100;
+
         let energy = parseInt(localStorage.getItem('mithrilEnergy'));
         if (isNaN(energy)) energy = maxEnergy;
 
+        const regenAmount = 100;
+        const regenIntervalMs = 5 * 60 * 1000;
         let lastTickTime = parseInt(localStorage.getItem('lastTickTime')) || Date.now();
         let lastClickAnimTime = 0;
 
@@ -267,6 +428,7 @@
             }
         }
 
+        // Обновление интерфейса игры и магазина
         function updateUI() {
             scoreElement.innerText = score;
             energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
@@ -284,12 +446,28 @@
                 
                 energyTextElement.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${timeString})`;
             }
+
+            // Обновляем магазин
+            lblLvlPickaxe.innerText = clickPower;
+            lblLvlEnergy.innerText = maxEnergy;
+            
+            btnBuyPickaxe.innerText = `${costPickaxe} 💎`;
+            btnBuyEnergy.innerText = `${costEnergy} 💎`;
+
+            // Выключаем кнопки, если не хватает денег
+            btnBuyPickaxe.disabled = score < costPickaxe;
+            btnBuyEnergy.disabled = score < costEnergy;
         }
 
         function saveData() {
             localStorage.setItem('mithrilScore', score);
             localStorage.setItem('mithrilEnergy', energy);
             localStorage.setItem('lastTickTime', lastTickTime);
+            // Сохраняем прокачку
+            localStorage.setItem('mithrilClickPower', clickPower);
+            localStorage.setItem('mithrilMaxEnergy', maxEnergy);
+            localStorage.setItem('mithrilCostPickaxe', costPickaxe);
+            localStorage.setItem('mithrilCostEnergy', costEnergy);
         }
 
         checkEnergyRegen();
@@ -300,14 +478,53 @@
             updateUI();
         }, 1000);
 
+        // Логика Магазина
+        btnOpenShop.addEventListener('pointerdown', () => {
+            shopOverlay.style.display = 'flex';
+            updateUI(); // Обновляем цены перед открытием
+        });
+
+        btnCloseShop.addEventListener('pointerdown', () => {
+            shopOverlay.style.display = 'none';
+        });
+
+        // Покупка кирки
+        btnBuyPickaxe.addEventListener('pointerdown', () => {
+            if (score >= costPickaxe) {
+                score -= costPickaxe;
+                clickPower += 1;
+                // Увеличиваем цену в 1.5 раза
+                costPickaxe = Math.floor(costPickaxe * 1.5); 
+                saveData();
+                updateUI();
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
+        });
+
+        // Покупка энергии
+        btnBuyEnergy.addEventListener('pointerdown', () => {
+            if (score >= costEnergy) {
+                score -= costEnergy;
+                maxEnergy += 50;
+                // Увеличиваем цену в 1.5 раза
+                costEnergy = Math.floor(costEnergy * 1.5); 
+                saveData();
+                updateUI();
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
+        });
+
+
+        // Клик по руде
         oreImgElement.addEventListener('pointerdown', (e) => {
             if (energy >= 1) {
                 if (energy === maxEnergy) {
                     lastTickTime = Date.now();
                 }
 
+                // ТЕПЕРЬ ОТНИМАЕМ 1 ЭНЕРГИЮ, НО ПРИБАВЛЯЕМ СИЛУ КЛИКА!
                 energy--;
-                score++;
+                score += clickPower; 
                 
                 saveData();
                 updateUI();
@@ -322,62 +539,19 @@
 
                 let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
-                // --- 1. РЕАЛИСТИЧНАЯ КИРКА (КАРТИНКА) ---
+                // --- 1. РЕАЛИСТИЧНАЯ КИРКА ---
                 const pickaxe = document.createElement('img');
-                
-                // ВНИМАНИЕ: СЮДА ВПИШИ НАЗВАНИЕ СВОЕЙ КАРТИНКИ КИРКИ!
-                // Например: 'real_pickaxe.png'
-                pickaxe.src = '1000019118-removebg-preview.png'; 
-                
+                pickaxe.src = 'ТВОЯ_КИРКА.png'; // НЕ ЗАБУДЬ ВСТАВИТЬ НАЗВАНИЕ!
                 pickaxe.classList.add('pickaxe-effect');
-                // Сдвигаем координаты так, чтобы острие кирки попадало примерно в место клика
                 pickaxe.style.left = `${e.clientX - 60}px`;
                 pickaxe.style.top = `${e.clientY - 80}px`;
                 pickaxe.style.animationDuration = `${animDuration}s`;
                 document.body.appendChild(pickaxe);
 
-                // --- 2. ЛЕТАЮЩАЯ ЦИФРА ---
+                // --- 2. ЛЕТАЮЩАЯ ЦИФРА (Теперь показывает Силу Клика) ---
                 const plusOne = document.createElement('div');
                 plusOne.classList.add('floating-text');
-                plusOne.innerText = '+1';
+                plusOne.innerText = `+${clickPower}`; // Показывает +2, +3 и т.д.
                 plusOne.style.left = `${e.clientX - 15}px`;
                 plusOne.style.top = `${e.clientY - 40}px`;
-                document.body.appendChild(plusOne);
-
-                // --- 3. ИСКРЫ ---
-                const sparkCount = 6 + Math.floor(Math.random() * 3);
-                for (let i = 0; i < sparkCount; i++) {
-                    const spark = document.createElement('div');
-                    spark.classList.add('spark');
-                    
-                    const offsetX = (Math.random() - 0.5) * 30;
-                    const offsetY = (Math.random() - 0.5) * 30;
-                    spark.style.left = `${e.clientX + offsetX}px`;
-                    spark.style.top = `${e.clientY - 10 + offsetY}px`;
-
-                    const tx = (Math.random() - 0.5) * 160;
-                    const ty = (Math.random() - 0.5) * 160;
-                    
-                    spark.style.setProperty('--tx', `${tx}px`);
-                    spark.style.setProperty('--ty', `${ty}px`);
-
-                    document.body.appendChild(spark);
-
-                    setTimeout(() => { spark.remove(); }, 600);
-                }
-
-                setTimeout(() => { pickaxe.remove(); }, animDuration * 1000);
-                setTimeout(() => { plusOne.remove(); }, 1000);
-
-            } else {
-                energyTextElement.style.color = '#ff5252';
-                setTimeout(() => energyTextElement.style.color = '#ffeba1', 300);
-                
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('error');
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+                do
