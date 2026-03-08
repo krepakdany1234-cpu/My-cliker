@@ -174,21 +174,21 @@
         /* --- ИСКРЫ --- */
         .spark {
             position: absolute;
-            width: 6px;
-            height: 6px;
-            background-color: #ffd700; /* Золотисто-желтый цвет искры */
+            width: 8px; /* Увеличили размер искры */
+            height: 8px;
+            background-color: #ffffff; /* Белая ослепительная сердцевина */
             border-radius: 50%;
             pointer-events: none;
             z-index: 45;
-            /* Горячее свечение вокруг искры */
-            box-shadow: 0 0 6px #ff8c00, 0 0 10px #ff0000;
-            animation: sparkFly 0.4s ease-out forwards;
+            /* Мощное многослойное свечение */
+            box-shadow: 0 0 8px #fff, 0 0 15px #ffd700, 0 0 25px #ff8c00;
+            animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; /* Увеличили время жизни искры */
         }
 
         @keyframes sparkFly {
             0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            /* Разлетаются по координатам, которые мы зададим в JavaScript */
-            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+            50% { opacity: 1; } /* Дольше остаются яркими */
+            100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
         }
     </style>
 </head>
@@ -310,7 +310,7 @@
                 updateUI();
 
                 if (tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('medium');
+                    tg.HapticFeedback.impactOccurred('heavy'); // Сделали вибрацию мощнее (heavy)
                 }
 
                 let nowAnim = Date.now();
@@ -336,27 +336,29 @@
                 plusOne.style.top = `${e.clientY - 40}px`;
                 document.body.appendChild(plusOne);
 
-                // --- 3. ИСКРЫ (Генерируем 4 искры за один клик) ---
-                for (let i = 0; i < 4; i++) {
+                // --- 3. ИСКРЫ (Теперь от 6 до 8 крупных искр за клик) ---
+                const sparkCount = 6 + Math.floor(Math.random() * 3);
+                for (let i = 0; i < sparkCount; i++) {
                     const spark = document.createElement('div');
                     spark.classList.add('spark');
                     
-                    // Появляются в месте клика
-                    spark.style.left = `${e.clientX}px`;
-                    spark.style.top = `${e.clientY - 10}px`;
+                    // Небольшой разброс в точке появления
+                    const offsetX = (Math.random() - 0.5) * 30;
+                    const offsetY = (Math.random() - 0.5) * 30;
+                    spark.style.left = `${e.clientX + offsetX}px`;
+                    spark.style.top = `${e.clientY - 10 + offsetY}px`;
 
-                    // Случайный вектор разлета (от -40px до +40px по X и Y)
-                    const tx = (Math.random() - 0.5) * 80;
-                    const ty = (Math.random() - 0.5) * 80;
+                    // Увеличили дальность разлета (от -80px до +80px)
+                    const tx = (Math.random() - 0.5) * 160;
+                    const ty = (Math.random() - 0.5) * 160;
                     
-                    // Передаем координаты в CSS-анимацию
                     spark.style.setProperty('--tx', `${tx}px`);
                     spark.style.setProperty('--ty', `${ty}px`);
 
                     document.body.appendChild(spark);
 
-                    // Удаляем искры после завершения их анимации (0.4 сек)
-                    setTimeout(() => { spark.remove(); }, 400);
+                    // Удаляем искры после завершения анимации
+                    setTimeout(() => { spark.remove(); }, 600);
                 }
 
                 // Удаляем кирку и цифру
