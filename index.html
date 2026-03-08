@@ -146,9 +146,9 @@
         }
         @keyframes mineStrike {
             0% { transform: rotate(-30deg) scale(1.1); opacity: 0; }
-            30% { transform: rotate(-70deg) scale(1.2); opacity: 1; } 
+            30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 
             60% { transform: rotate(15deg) scale(1.1); opacity: 1; }  
-            100% { transform: rotate(25deg) scale(0.9); opacity: 0; } 
+            100% { transform: rotate(35deg) scale(0.9); opacity: 0; } 
         }
 
         .spark {
@@ -281,7 +281,7 @@
         <div class="energy-wrapper">
             <div class="energy-bar" id="energy-bar"></div>
         </div>
-        <div class="energy-text" id="energy-text">Подключение...</div>
+        <div class="energy-text" id="energy-text">Старт системы...</div>
     </div>
 
     <div class="ore-wrapper">
@@ -325,174 +325,186 @@
     </div>
 
     <script>
-        // Запускаем всё ТОЛЬКО после полной загрузки страницы
-        window.onload = function() {
-            try {
-                // Сразу даем знать, что скрипт начал работу
-                let txtEl = document.getElementById('energy-text');
-                if(txtEl) txtEl.innerText = "Запуск системы...";
+        try {
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('dragstart', e => e.preventDefault());
+            document.addEventListener('selectstart', e => e.preventDefault());
 
-                document.addEventListener('contextmenu', e => e.preventDefault());
-                document.addEventListener('dragstart', e => e.preventDefault());
-                document.addEventListener('selectstart', e => e.preventDefault());
+            let tg = window.Telegram ? window.Telegram.WebApp : null;
+            try { if (tg) tg.expand(); } catch(e) {}
 
-                let tg = window.Telegram ? window.Telegram.WebApp : null;
-                try { if (tg) tg.expand(); } catch(e) {}
+            function getSave(key, defValue) {
+                try {
+                    let val = localStorage.getItem(key);
+                    if (val !== null && val !== 'NaN') {
+                        let p = parseInt(val);
+                        if (!isNaN(p)) return p;
+                    }
+                } catch (e) {}
+                return defValue;
+            }
 
-                function getSave(key, defValue) {
-                    try {
-                        let val = localStorage.getItem(key);
-                        if (val !== null && val !== 'NaN') {
-                            let p = parseInt(val);
-                            if (!isNaN(p)) return p;
-                        }
-                    } catch (e) {}
-                    return defValue;
-                }
+            let score = getSave('mithrilScore', 0);
+            
+            let clickPower = getSave('mithrilClickPower', 1);
+            let costPickaxe = getSave('mithrilCostPickaxe', 2500);
+            if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500; 
 
-                let score = getSave('mithrilScore', 0);
+            let maxEnergy = getSave('mithrilMaxEnergy', 500);
+            let costEnergy = getSave('mithrilCostEnergy', 100);
+            
+            let regenLevel = getSave('mithrilRegenLevel', 1);
+            let costRegen = getSave('mithrilCostRegen', 8000);
+
+            let energy = getSave('mithrilEnergy', maxEnergy);
+            let lastTickTime = getSave('lastTickTime', Date.now());
+            let lastClickAnimTime = 0;
+
+            const regenAmount = 100;
+            let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
+
+            const MAX_CLICK_POWER = 100;
+            const MAX_ENERGY_LIMIT = 2000;
+            const MAX_REGEN_LEVEL = 9; 
+
+            function saveData() {
+                try {
+                    localStorage.setItem('mithrilScore', score);
+                    localStorage.setItem('mithrilEnergy', energy);
+                    localStorage.setItem('lastTickTime', lastTickTime);
+                    localStorage.setItem('mithrilClickPower', clickPower);
+                    localStorage.setItem('mithrilMaxEnergy', maxEnergy);
+                    localStorage.setItem('mithrilCostPickaxe', costPickaxe);
+                    localStorage.setItem('mithrilCostEnergy', costEnergy);
+                    localStorage.setItem('mithrilRegenLevel', regenLevel);
+                    localStorage.setItem('mithrilCostRegen', costRegen);
+                } catch(e) {}
+            }
+
+            function updateUI() {
+                document.getElementById('score').innerText = score;
+                document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
                 
-                let clickPower = getSave('mithrilClickPower', 1);
-                let costPickaxe = getSave('mithrilCostPickaxe', 2500);
-                if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500; 
-
-                let maxEnergy = getSave('mithrilMaxEnergy', 500);
-                let costEnergy = getSave('mithrilCostEnergy', 100);
+                let textEl = document.getElementById('energy-text');
+                textEl.style.color = "#ffeba1";
                 
-                let regenLevel = getSave('mithrilRegenLevel', 1);
-                let costRegen = getSave('mithrilCostRegen', 8000);
-
-                let energy = getSave('mithrilEnergy', maxEnergy);
-                let lastTickTime = getSave('lastTickTime', Date.now());
-                let lastClickAnimTime = 0;
-
-                const regenAmount = 100;
-                let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
-
-                const MAX_CLICK_POWER = 100;
-                const MAX_ENERGY_LIMIT = 2000;
-                const MAX_REGEN_LEVEL = 9; 
-
-                function saveData() {
-                    try {
-                        localStorage.setItem('mithrilScore', score);
-                        localStorage.setItem('mithrilEnergy', energy);
-                        localStorage.setItem('lastTickTime', lastTickTime);
-                        localStorage.setItem('mithrilClickPower', clickPower);
-                        localStorage.setItem('mithrilMaxEnergy', maxEnergy);
-                        localStorage.setItem('mithrilCostPickaxe', costPickaxe);
-                        localStorage.setItem('mithrilCostEnergy', costEnergy);
-                        localStorage.setItem('mithrilRegenLevel', regenLevel);
-                        localStorage.setItem('mithrilCostRegen', costRegen);
-                    } catch(e) {}
+                if (energy >= maxEnergy) {
+                    textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Макс)`;
+                } else {
+                    let timeLeft = Math.max(0, regenIntervalMs - (Date.now() - lastTickTime));
+                    let m = Math.floor(timeLeft / 60000);
+                    let s = Math.floor((timeLeft % 60000) / 1000);
+                    textEl.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${m}:${s < 10 ? '0' : ''}${s})`;
                 }
 
-                function updateUI() {
-                    document.getElementById('score').innerText = score;
-                    document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
-                    
-                    let textEl = document.getElementById('energy-text');
-                    textEl.style.color = "#ffeba1";
-                    
-                    if (energy >= maxEnergy) {
-                        textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Макс)`;
-                    } else {
-                        let timeLeft = Math.max(0, regenIntervalMs - (Date.now() - lastTickTime));
-                        let m = Math.floor(timeLeft / 60000);
-                        let s = Math.floor((timeLeft % 60000) / 1000);
-                        textEl.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${m}:${s < 10 ? '0' : ''}${s})`;
-                    }
-
-                    document.getElementById('lvl-pickaxe').innerText = clickPower;
-                    document.getElementById('lvl-energy').innerText = maxEnergy;
-                    document.getElementById('lvl-regen').innerText = regenLevel;
-                    
-                    if (clickPower >= MAX_CLICK_POWER) {
-                        document.getElementById('buy-pickaxe').innerText = "МАКС";
-                        document.getElementById('buy-pickaxe').disabled = true;
-                    } else {
-                        document.getElementById('buy-pickaxe').innerText = `${costPickaxe} 💎`;
-                        document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
-                    }
-
-                    if (maxEnergy >= MAX_ENERGY_LIMIT) {
-                        document.getElementById('buy-energy').innerText = "МАКС";
-                        document.getElementById('buy-energy').disabled = true;
-                    } else {
-                        document.getElementById('buy-energy').innerText = `${costEnergy} 💎`;
-                        document.getElementById('buy-energy').disabled = score < costEnergy;
-                    }
-
-                    if (regenLevel >= MAX_REGEN_LEVEL) {
-                        document.getElementById('buy-regen').innerText = "МАКС";
-                        document.getElementById('buy-regen').disabled = true;
-                    } else {
-                        document.getElementById('buy-regen').innerText = `${costRegen} 💎`;
-                        document.getElementById('buy-regen').disabled = score < costRegen;
-                    }
+                document.getElementById('lvl-pickaxe').innerText = clickPower;
+                document.getElementById('lvl-energy').innerText = maxEnergy;
+                document.getElementById('lvl-regen').innerText = regenLevel;
+                
+                if (clickPower >= MAX_CLICK_POWER) {
+                    document.getElementById('buy-pickaxe').innerText = "МАКС";
+                    document.getElementById('buy-pickaxe').disabled = true;
+                } else {
+                    document.getElementById('buy-pickaxe').innerText = `${costPickaxe} 💎`;
+                    document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
                 }
 
-                function checkRegen() {
-                    let now = Date.now();
-                    if (energy < maxEnergy) {
-                        let passed = now - lastTickTime;
-                        if (passed >= regenIntervalMs) {
-                            let ticks = Math.floor(passed / regenIntervalMs);
-                            energy = Math.min(maxEnergy, energy + (ticks * regenAmount));
-                            lastTickTime += ticks * regenIntervalMs; 
-                            saveData();
-                        }
-                    } else {
-                        lastTickTime = now;
+                if (maxEnergy >= MAX_ENERGY_LIMIT) {
+                    document.getElementById('buy-energy').innerText = "МАКС";
+                    document.getElementById('buy-energy').disabled = true;
+                } else {
+                    document.getElementById('buy-energy').innerText = `${costEnergy} 💎`;
+                    document.getElementById('buy-energy').disabled = score < costEnergy;
+                }
+
+                if (regenLevel >= MAX_REGEN_LEVEL) {
+                    document.getElementById('buy-regen').innerText = "МАКС";
+                    document.getElementById('buy-regen').disabled = true;
+                } else {
+                    document.getElementById('buy-regen').innerText = `${costRegen} 💎`;
+                    document.getElementById('buy-regen').disabled = score < costRegen;
+                }
+            }
+
+            function checkRegen() {
+                let now = Date.now();
+                if (energy < maxEnergy) {
+                    let passed = now - lastTickTime;
+                    if (passed >= regenIntervalMs) {
+                        let ticks = Math.floor(passed / regenIntervalMs);
+                        energy = Math.min(maxEnergy, energy + (ticks * regenAmount));
+                        lastTickTime += ticks * regenIntervalMs; 
+                        saveData();
                     }
+                } else {
+                    lastTickTime = now;
+                }
+                updateUI();
+            }
+
+            // ЗАПУСКАЕМ ЛОГИКУ НЕМЕДЛЕННО
+            checkRegen();
+            setInterval(checkRegen, 1000);
+
+            document.getElementById('open-shop').onclick = function() {
+                updateUI();
+                document.getElementById('shop-modal').style.display = 'flex';
+            };
+            
+            document.getElementById('close-shop').onclick = function() {
+                document.getElementById('shop-modal').style.display = 'none';
+            };
+
+            document.getElementById('buy-pickaxe').onclick = function() {
+                if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
+                    score -= costPickaxe;
+                    clickPower++;
+                    costPickaxe = Math.floor(costPickaxe * 1.5);
+                    saveData();
                     updateUI();
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
                 }
+            };
 
-                checkRegen();
-                setInterval(checkRegen, 1000);
-
-                document.getElementById('open-shop').onclick = function() {
+            document.getElementById('buy-energy').onclick = function() {
+                if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
+                    score -= costEnergy;
+                    maxEnergy += 50;
+                    costEnergy = Math.floor(costEnergy * 1.5);
+                    saveData();
                     updateUI();
-                    document.getElementById('shop-modal').style.display = 'flex';
-                };
-                
-                document.getElementById('close-shop').onclick = function() {
-                    document.getElementById('shop-modal').style.display = 'none';
-                };
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                }
+            };
 
-                document.getElementById('buy-pickaxe').onclick = function() {
-                    if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
-                        score -= costPickaxe;
-                        clickPower++;
-                        costPickaxe = Math.floor(costPickaxe * 1.5);
-                        saveData();
-                        updateUI();
-                        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                    }
-                };
+            document.getElementById('buy-regen').onclick = function() {
+                if (score >= costRegen && regenLevel < MAX_REGEN_LEVEL) {
+                    score -= costRegen;
+                    regenLevel++;
+                    costRegen += 450; 
+                    regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); 
+                    saveData();
+                    updateUI();
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                }
+            };
 
-                document.getElementById('buy-energy').onclick = function() {
-                    if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
-                        score -= costEnergy;
-                        maxEnergy += 50;
-                        costEnergy = Math.floor(costEnergy * 1.5);
-                        saveData();
-                        updateUI();
-                        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                    }
-                };
+            document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
+                if (energy >= 1) {
+                    if (energy === maxEnergy) lastTickTime = Date.now();
+                    
+                    energy--;
+                    score += clickPower;
+                    saveData();
+                    updateUI();
 
-                document.getElementById('buy-regen').onclick = function() {
-                    if (score >= costRegen && regenLevel < MAX_REGEN_LEVEL) {
-                        score -= costRegen;
-                        regenLevel++;
-                        costRegen += 450; 
-                        regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); 
-                        saveData();
-                        updateUI();
-                        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                    }
-                };
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
-                document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
-                 
+                    let nowAnim = Date.now();
+                    let timeSinceLastClick = nowAnim - (lastClickAnimTime || nowAnim - 1000);
+                    lastClickAnimTime = nowAnim;
+                    let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
+
+                    const pickaxe = document.createElement('img');
+                    // Если картинки кирки нет, она просто будет пустой, но игра НЕ сломается!
+                    pickaxe.src = '10000
