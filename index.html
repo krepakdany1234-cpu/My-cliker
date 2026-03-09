@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мифриловый Кликер</title>
     
-    <script async src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; box-sizing: border-box; outline: none; }
@@ -22,94 +22,73 @@
             align-items: center; 
             justify-content: center; 
             font-family: 'Georgia', serif; 
-            overflow: hidden;
-            /* Старый фон убрали, теперь фон управляется через #sky-container */
-            background-color: #000; 
-        }
-        
-        /* === НОВЫЙ АНИМИРОВАННЫЙ ФОН === */
-        #sky-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2; /* Самый задний план */
-            transition: background 5s ease-in-out; /* Плавная смена дня и ночи за 5 секунд */
+            
+            /* ВОЗВРАЩАЕМ ТВОЙ ФОН В ПОЛНОЙ КРАСОТЕ */
+            background-image: url('1772901742360.png'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            overflow: hidden; 
         }
 
-        /* Дневное небо */
-        #sky-container.day {
-            background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
-        }
-
-        /* Ночное небо */
-        #sky-container.night {
-            background: linear-gradient(to bottom, #0f2027 0%, #203a43 50%, #2c5364 100%);
-        }
-
-        /* Старый фон теперь как полупрозрачная текстура поверх неба */
-        .bg-overlay {
+        /* --- НОВАЯ СИСТЕМА ДНЯ И НОЧИ (ТЕНЬ ПОВЕРХ ФОНА) --- */
+        #day-night-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('1772901742360.png');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.3; /* Делаем его полупрозрачным, чтобы было видно небо */
-            z-index: -1;
             pointer-events: none;
+            z-index: 1; /* Слой над фоном, но под кнопками */
+            transition: background-color 5s ease-in-out;
+        }
+
+        #day-night-overlay.day {
+            background-color: rgba(255, 210, 150, 0.05); /* Легкий теплый дневной свет */
+        }
+
+        #day-night-overlay.night {
+            background-color: rgba(5, 15, 35, 0.75); /* Густая ночная тень */
         }
 
         /* --- СВЕТЛЯЧКИ (НОЧЬ) --- */
         .firefly {
             position: absolute;
-            width: 6px;
-            height: 6px;
+            width: 6px; height: 6px;
             background-color: #ffff00;
             border-radius: 50%;
             box-shadow: 0 0 10px #ffff00, 0 0 20px #ffeb3b;
             opacity: 0;
             animation: fireflyMove 10s infinite alternate, fireflyTwinkle 2s infinite alternate;
             pointer-events: none;
-            z-index: -1;
+            z-index: 2;
         }
         @keyframes fireflyMove {
             0% { transform: translate(0, 0); }
             100% { transform: translate(var(--tx), var(--ty)); }
         }
         @keyframes fireflyTwinkle {
-            0%, 100% { opacity: 0.2; scale: 0.8; }
-            50% { opacity: 1; scale: 1.2; }
+            0%, 100% { opacity: 0.1; scale: 0.8; }
+            50% { opacity: 0.8; scale: 1.2; }
         }
 
         /* --- ПТИЦЫ (ДЕНЬ) --- */
         .bird {
             position: absolute;
-            width: 20px; height: 10px;
+            width: 18px; height: 10px;
             background: transparent;
-            border-bottom: 3px solid #333;
-            border-left: 3px solid transparent;
-            border-right: 3px solid transparent;
-            transform: rotate(45deg); /* Простой силуэт птички-галочки */
+            border-bottom: 4px solid rgba(0, 0, 0, 0.8);
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            transform: rotate(45deg); 
             pointer-events: none;
-            z-index: -1;
+            z-index: 2;
             top: var(--startY);
         }
-        .bird.fly-right {
-            left: -30px;
-            animation: flyRight var(--speed) linear forwards;
-        }
-        .bird.fly-left {
-            right: -30px;
-            transform: rotate(-45deg) scaleX(-1); /* Разворачиваем птицу */
-            animation: flyLeft var(--speed) linear forwards;
-        }
-
+        .bird.fly-right { left: -30px; animation: flyRight var(--speed) linear forwards; }
+        .bird.fly-left { right: -30px; transform: rotate(-45deg) scaleX(-1); animation: flyLeft var(--speed) linear forwards; }
         @keyframes flyRight { to { left: 110%; } }
         @keyframes flyLeft { to { right: 110%; } }
 
 
-        /* === ИНТЕРФЕЙС ИГРЫ (БЕЗ ИЗМЕНЕНИЙ) === */
+        /* === ИНТЕРФЕЙС ИГРЫ === */
         .guild-board { background-image: url('1000019094-removebg-preview.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; width: 390px; padding-top: 90px; padding-bottom: 80px; padding-left: 40px; padding-right: 40px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8)); margin-bottom: 20px; position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
         
         .level-container { color: #ffd700; font-size: 1.5rem; font-weight: bold; text-shadow: 1px 1px 2px #000; margin-bottom: 5px; z-index: 2; transition: transform 0.2s; }
@@ -139,8 +118,7 @@
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <div id="sky-container" class="day"></div>
-    <div class="bg-overlay"></div>
+    <div id="day-night-overlay" class="day"></div>
 
     <div class="guild-board">
         <div class="level-container" id="level-container">Уровень <span id="level-text">1</span></div>
@@ -149,7 +127,7 @@
         <div class="energy-wrapper">
             <div class="energy-bar" id="energy-bar"></div>
         </div>
-        <div class="energy-text" id="energy-text">Инициализация...</div>
+        <div class="energy-text" id="energy-text">Загрузка...</div>
 
         <div class="xp-wrapper">
             <div class="xp-bar" id="xp-bar"></div>
@@ -164,10 +142,6 @@
     <script>
         const textEl = document.getElementById('energy-text');
 
-        window.onerror = function(msg) {
-            if(textEl) { textEl.innerText = "ОШИБКА: " + msg; textEl.style.color = "red"; }
-        };
-
         try {
             document.addEventListener('contextmenu', e => e.preventDefault());
             document.addEventListener('dragstart', e => e.preventDefault());
@@ -177,121 +151,105 @@
             try { if (window.Telegram && window.Telegram.WebApp) { tg = window.Telegram.WebApp; tg.expand(); } } catch(e) {}
 
             // === ЛОГИКА ДНЯ И НОЧИ ===
-            const sky = document.getElementById('sky-container');
-            let isDay = true; // Начинаем с дня
+            const overlay = document.getElementById('day-night-overlay');
+            let isDay = true; 
 
             function toggleDayNight() {
                 isDay = !isDay;
                 if (isDay) {
-                    sky.classList.remove('night');
-                    sky.classList.add('day');
+                    overlay.className = 'day';
                 } else {
-                    sky.classList.remove('day');
-                    sky.classList.add('night');
+                    overlay.className = 'night';
                 }
-                // Очищаем старых существ при смене времени суток
                 document.querySelectorAll('.firefly, .bird').forEach(el => el.remove());
             }
 
-            // Меняем день/ночь каждые 30 секунд (для теста, потом можно увеличить)
-            setInterval(toggleDayNight, 30000);
-
+            setInterval(toggleDayNight, 30000); // Смена каждые 30 секунд
 
             // === СПАВН СУЩЕСТВ ===
             function createFirefly() {
                 const firefly = document.createElement('div');
                 firefly.className = 'firefly';
-                // Случайная позиция
                 firefly.style.left = Math.random() * 100 + 'vw';
                 firefly.style.top = Math.random() * 100 + 'vh';
-                // Случайный вектор движения
                 firefly.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
                 firefly.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
-                // Случайная задержка анимации для естественности
                 firefly.style.animationDelay = Math.random() * 5 + 's';
-                sky.appendChild(firefly);
-                // Удаляем через время, чтобы не забивать память
+                document.body.appendChild(firefly);
                 setTimeout(() => firefly.remove(), 15000);
             }
 
             function createBird() {
                 const bird = document.createElement('div');
                 bird.className = 'bird';
-                // Случайная высота полета (в верхней половине экрана)
-                bird.style.setProperty('--startY', Math.random() * 50 + '%');
-                // Случайная скорость
+                bird.style.setProperty('--startY', Math.random() * 40 + '%');
                 bird.style.setProperty('--speed', 5 + Math.random() * 5 + 's');
-                
-                // Случайное направление (слева направо или наоборот)
                 if (Math.random() > 0.5) {
                     bird.classList.add('fly-right');
                 } else {
                     bird.classList.add('fly-left');
                 }
-                sky.appendChild(bird);
+                document.body.appendChild(bird);
                 setTimeout(() => bird.remove(), 10000);
             }
 
-            // Главный цикл спавна (раз в 1.5 секунды пытается создать существо)
             setInterval(() => {
-                // Если сейчас день и птиц меньше 5 - создать птицу
                 if (isDay && document.querySelectorAll('.bird').length < 5) {
-                    if(Math.random() > 0.3) createBird();
-                } 
-                // Если сейчас ночь и светлячков меньше 15 - создать светлячка
-                else if (!isDay && document.querySelectorAll('.firefly').length < 15) {
+                    if(Math.random() > 0.4) createBird();
+                } else if (!isDay && document.querySelectorAll('.firefly').length < 20) {
                     createFirefly();
                 }
             }, 1500);
 
 
-            // === ДАЛЕЕ ИДЕТ ТВОЙ СТАРЫЙ КОД ИГРЫ БЕЗ ИЗМЕНЕНИЙ ===
-            let virtualMemory = {};
-            function getMem(key, defValue) {
+            // === АВТО-ЛЕЧЕНИЕ ПАМЯТИ (ЗАЩИТА ОТ ЗАВИСАНИЙ) ===
+            function getSafeNumber(key, fallback) {
                 try {
                     let val = localStorage.getItem(key);
-                    if (val !== null && val !== undefined && val !== 'NaN') {
-                        let parsed = parseInt(val);
-                        if (!isNaN(parsed)) return parsed;
-                    }
-                } catch(e) {
-                    if (virtualMemory[key] !== undefined) return virtualMemory[key];
-                }
-                return defValue;
+                    if (val === null || val === undefined || val === 'NaN') return fallback;
+                    let num = parseInt(val);
+                    return isNaN(num) ? fallback : num;
+                } catch(e) { return fallback; }
             }
 
-            function setMem(key, val) {
-                try { localStorage.setItem(key, val); } 
-                catch(e) { virtualMemory[key] = val; }
-            }
+            let score = getSafeNumber('mithrilScore', 0);
+            let level = getSafeNumber('mithrilLevel', 1);
+            let xp = getSafeNumber('mithrilXP', 0);
+            let lastTickTime = getSafeNumber('lastTickTime', Date.now());
 
+            // Если сейв критически поврежден (уровень 0 или отрицательный) — обнуляем
+            if (level < 1 || score < 0 || xp < 0) {
+                localStorage.clear();
+                score = 0; level = 1; xp = 0; lastTickTime = Date.now();
+            }
+            
+            // ЛИМИТЫ
             const MAX_CLICK_POWER = 100000;
             const MAX_ENERGY_LIMIT = 3500;
             const MIN_REGEN_MS = 60000; 
 
-            let score = getMem('mithrilScore', 0);
-            let level = getMem('mithrilLevel', 1);
-            let xp = getMem('mithrilXP', 0);
-            let lastTickTime = getMem('lastTickTime', Date.now());
-            
+            // ВЫСЧИТЫВАЕМ ХАРАКТЕРИСТИКИ
             let clickPower = Math.min(1 + (level - 1), MAX_CLICK_POWER);
             let maxEnergy = Math.min(500 + (level - 1) * 10, MAX_ENERGY_LIMIT);
             let regenIntervalMs = Math.max(300000 - (level - 1) * 200, MIN_REGEN_MS);
             
-            let energy = getMem('mithrilEnergy', maxEnergy);
+            let energy = getSafeNumber('mithrilEnergy', maxEnergy);
+            if (energy > maxEnergy || energy < 0) energy = maxEnergy;
             
-            // Формула опыта с коэффициентом 1.2
             let xpNeeded = Math.floor(150 * Math.pow(1.2, level - 1)); 
+            if (isNaN(xpNeeded) || xpNeeded < 150) xpNeeded = 150; // Железобетонная защита формулы
 
             const regenAmount = 100;
             let lastClickAnimTime = 0;
 
             function saveData() {
-                setMem('mithrilScore', score);
-                setMem('mithrilLevel', level);
-                setMem('mithrilXP', xp);
-                setMem('mithrilEnergy', energy);
-                setMem('lastTickTime', lastTickTime);
+                try {
+                    localStorage.setItem('mithrilScore', score);
+                    localStorage.setItem('mithrilLevel', level);
+                    localStorage.setItem('mithrilXP', xp);
+                    localStorage.setItem('mithrilEnergy', energy);
+                    localStorage.setItem('lastTickTime', lastTickTime);
+                } catch(e) {}
             }
 
             function updateUI() {
@@ -330,9 +288,11 @@
                 updateUI();
             }
 
+            // МГНОВЕННЫЙ ЗАПУСК
             checkRegen();
             setInterval(checkRegen, 1000);
 
+            // КЛИК ПО РУДЕ
             document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
                 if (energy >= 1) {
                     if (energy === maxEnergy) lastTickTime = Date.now();
@@ -378,7 +338,7 @@
                     let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
                     const pickaxe = document.createElement('img');
-                    pickaxe.src = '1000019118-removebg-preview.png?v=101'; 
+                    pickaxe.src = '1000019118-removebg-preview.png?v=fixed'; 
                     pickaxe.className = 'pickaxe-effect';
                     pickaxe.style.left = `${e.clientX - 60}px`;
                     pickaxe.style.top = `${e.clientY - 80}px`;
@@ -404,4 +364,18 @@
                         setTimeout(() => spark.remove(), 600);
                     }
 
-       
+                    setTimeout(() => pickaxe.remove(), animDuration * 1000);
+                    setTimeout(() => plusOne.remove(), 1000);
+                } else {
+                    textEl.style.color = '#ff5252';
+                    setTimeout(() => textEl.style.color = '#ffeba1', 300);
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                }
+            });
+
+        } catch (err) {
+            if(textEl) { textEl.innerText = "ОШИБКА: " + err.message; textEl.style.color = "red"; }
+        }
+    </script>
+</body>
+</html>
