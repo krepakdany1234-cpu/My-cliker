@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мифриловый Кликер</title>
@@ -67,18 +71,18 @@
                 <div class="shop-item-info">
                     <h3>⚒️ Острая кирка</h3>
                     <p>Добыча за клик: +1</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Уровень: <span id="lvl-pickaxe">1</span> / 100</p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Уровень: <span id="lvl-pickaxe">1</span> / 100000</p>
                 </div>
-                <button class="shop-buy-btn" id="buy-pickaxe">2500 💎</button>
+                <button class="shop-buy-btn" id="buy-pickaxe">3500 💎</button>
             </div>
 
             <div class="shop-item">
                 <div class="shop-item-info">
                     <h3>🎒 Гномья сумка</h3>
                     <p>Макс. энергия: +50</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Запас: <span id="lvl-energy">500</span> / 2000</p>
+                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Запас: <span id="lvl-energy">500</span> / 3500</p>
                 </div>
-                <button class="shop-buy-btn" id="buy-energy">100 💎</button>
+                <button class="shop-buy-btn" id="buy-energy">2500 💎</button>
             </div>
 
             <div class="shop-item">
@@ -87,7 +91,7 @@
                     <p>Регенерация: -30 сек</p>
                     <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Уровень: <span id="lvl-regen">1</span> / 9</p>
                 </div>
-                <button class="shop-buy-btn" id="buy-regen">8000 💎</button>
+                <button class="shop-buy-btn" id="buy-regen">5000 💎</button>
             </div>
         </div>
     </div>
@@ -103,8 +107,6 @@
             let tg = window.Telegram ? window.Telegram.WebApp : null;
             try { if (tg) tg.expand(); } catch(e) {}
 
-            // === БРОНЕБОЙНАЯ СИСТЕМА ПАМЯТИ ===
-            // Если Chrome запретит доступ, данные сохранятся во временную память, и игра не зависнет!
             const SafeMemory = {
                 ram: {},
                 get: function(key, defValue) {
@@ -128,17 +130,23 @@
                 }
             };
 
-            // Загрузка переменных через новую безопасную память
             let score = SafeMemory.get('mithrilScore', 0);
-            let clickPower = SafeMemory.get('mithrilClickPower', 1);
-            let costPickaxe = SafeMemory.get('mithrilCostPickaxe', 2500);
-            if (clickPower === 1 && costPickaxe < 2500) costPickaxe = 2500; 
-
-            let maxEnergy = SafeMemory.get('mithrilMaxEnergy', 500);
-            let costEnergy = SafeMemory.get('mithrilCostEnergy', 100);
             
+            // НОВЫЕ ЦЕНЫ ДЛЯ КИРКИ
+            let clickPower = SafeMemory.get('mithrilClickPower', 1);
+            let costPickaxe = SafeMemory.get('mithrilCostPickaxe', 3500);
+            // Если старая цена сохранилась, сбрасываем на новую стартовую
+            if (clickPower === 1 && costPickaxe < 3500) costPickaxe = 3500; 
+
+            // НОВЫЕ ЦЕНЫ ДЛЯ СУМКИ
+            let maxEnergy = SafeMemory.get('mithrilMaxEnergy', 500);
+            let costEnergy = SafeMemory.get('mithrilCostEnergy', 2500);
+            if (maxEnergy === 500 && costEnergy < 2500) costEnergy = 2500;
+            
+            // НОВЫЕ ЦЕНЫ ДЛЯ ВРЕМЕНИ
             let regenLevel = SafeMemory.get('mithrilRegenLevel', 1);
-            let costRegen = SafeMemory.get('mithrilCostRegen', 8000);
+            let costRegen = SafeMemory.get('mithrilCostRegen', 5000);
+            if (regenLevel === 1 && costRegen !== 5000) costRegen = 5000;
 
             let energy = SafeMemory.get('mithrilEnergy', maxEnergy);
             let lastTickTime = SafeMemory.get('lastTickTime', Date.now());
@@ -147,8 +155,9 @@
             const regenAmount = 100;
             let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
 
-            const MAX_CLICK_POWER = 100;
-            const MAX_ENERGY_LIMIT = 2000;
+            // НОВЫЕ ЛИМИТЫ
+            const MAX_CLICK_POWER = 100000;
+            const MAX_ENERGY_LIMIT = 3500;
             const MAX_REGEN_LEVEL = 9; 
 
             function saveData() {
@@ -221,11 +230,9 @@
                 updateUI();
             }
 
-            // ПЕРВЫЙ ЗАПУСК ИГРЫ
             checkRegen();
             setInterval(checkRegen, 1000);
 
-            // КНОПКИ
             document.getElementById('open-shop').onclick = function() {
                 updateUI();
                 document.getElementById('shop-modal').style.display = 'flex';
@@ -239,7 +246,7 @@
                 if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
                     score -= costPickaxe;
                     clickPower++;
-                    costPickaxe = Math.floor(costPickaxe * 1.5);
+                    costPickaxe += 500; // ЛИНЕЙНОЕ ПРИБАВЛЕНИЕ ЦЕНЫ +500
                     saveData();
                     updateUI();
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
@@ -250,7 +257,7 @@
                 if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
                     score -= costEnergy;
                     maxEnergy += 50;
-                    costEnergy = Math.floor(costEnergy * 1.5);
+                    costEnergy += 500; // ЛИНЕЙНОЕ ПРИБАВЛЕНИЕ ЦЕНЫ +500
                     saveData();
                     updateUI();
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
@@ -261,7 +268,7 @@
                 if (score >= costRegen && regenLevel < MAX_REGEN_LEVEL) {
                     score -= costRegen;
                     regenLevel++;
-                    costRegen += 450; 
+                    costRegen += 1000; // ЛИНЕЙНОЕ ПРИБАВЛЕНИЕ ЦЕНЫ +1000
                     regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); 
                     saveData();
                     updateUI();
@@ -269,7 +276,6 @@
                 }
             };
 
-            // КЛИК ПО РУДЕ
             document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
                 if (energy >= 1) {
                     if (energy === maxEnergy) lastTickTime = Date.now();
@@ -287,7 +293,7 @@
                     let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
                     const pickaxe = document.createElement('img');
-                    pickaxe.src = '1000019118-removebg-preview.png'; 
+                    pickaxe.src = '1000019118-removebg-preview.png?v=6'; 
                     pickaxe.className = 'pickaxe-effect';
                     pickaxe.style.left = `${e.clientX - 60}px`;
                     pickaxe.style.top = `${e.clientY - 80}px`;
@@ -318,14 +324,4 @@
                 } else {
                     textEl.style.color = '#ff5252';
                     setTimeout(() => textEl.style.color = '#ffeba1', 300);
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                }
-            });
-
-        } catch (err) {
-            textEl.innerText = "ОШИБКА: " + err.message; 
-            textEl.style.color = "red"; 
-        }
-    </script>
-</body>
-</html>
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notifi
