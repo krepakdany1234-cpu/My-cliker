@@ -15,110 +15,63 @@
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; box-sizing: border-box; outline: none; }
         body { margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Georgia', serif; background-image: url('1772901742360.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: rgba(0, 0, 0, 0.6); background-blend-mode: overlay; overflow: hidden; }
         
-        #hard-reset-btn { position: absolute; top: 15px; left: 15px; background: #ff3333; color: white; border: 2px solid #fff; padding: 10px 15px; border-radius: 8px; font-weight: bold; z-index: 9999; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
-        #hard-reset-btn:active { transform: scale(0.95); }
-
         .guild-board { background-image: url('1000019094-removebg-preview.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; width: 390px; padding-top: 90px; padding-bottom: 80px; padding-left: 40px; padding-right: 40px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8)); margin-bottom: 20px; position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* УРОВЕНЬ */
+        .level-container { color: #ffd700; font-size: 1.5rem; font-weight: bold; text-shadow: 1px 1px 2px #000; margin-bottom: 5px; z-index: 2; transition: transform 0.2s; }
+        
         .score-container { color: #1a0b02; font-size: 3.4rem; font-weight: bold; text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9); margin-bottom: 12px; z-index: 2; }
+        
+        /* ЭНЕРГИЯ */
         .energy-wrapper { width: 65%; background-color: rgba(10, 5, 0, 0.5); border: 1px solid rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.15); border-radius: 8px; height: 12px; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); z-index: 2; }
         .energy-bar { height: 100%; width: 100%; background: linear-gradient(90deg, #2e7d32, #50b487, #81c784); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); transition: width 0.3s ease-out; }
-        .energy-text { color: #ffeba1; font-size: 0.85rem; margin-top: 8px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
+        .energy-text { color: #ffeba1; font-size: 0.85rem; margin-top: 5px; margin-bottom: 10px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
+        
+        /* ОПЫТ */
+        .xp-wrapper { width: 65%; background-color: rgba(10, 5, 0, 0.5); border: 1px solid rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.15); border-radius: 8px; height: 12px; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); z-index: 2; }
+        .xp-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1976d2, #42a5f5, #90caf9); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); transition: width 0.2s ease-out; }
+        .xp-text { color: #90caf9; font-size: 0.85rem; margin-top: 5px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
+
         .ore-wrapper { position: relative; display: flex; justify-content: center; align-items: center; margin-top: 10px; -webkit-tap-highlight-color: transparent; }
         .crystal-img { width: 280px; height: auto; filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4)); transition: transform 0.1s ease, filter 0.1s ease; cursor: pointer; }
         .crystal-img:active { transform: scale(0.95) translateY(5px); filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8)); }
+        
         .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 10; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.5); opacity: 0; } }
+        
         .pickaxe-effect { position: absolute; width: 100px; height: auto; pointer-events: none; z-index: 50; transform-origin: bottom right; animation: mineStrike ease-in-out forwards; filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7)); }
         @keyframes mineStrike { 0% { transform: rotate(-30deg) scale(1.1); opacity: 0; } 30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 60% { transform: rotate(15deg) scale(1.1); opacity: 1; } 100% { transform: rotate(35deg) scale(0.9); opacity: 0; } }
+        
         .spark { position: absolute; width: 8px; height: 8px; background-color: #ffffff; border-radius: 50%; pointer-events: none; z-index: 45; box-shadow: 0 0 8px #fff, 0 0 15px #ffd700, 0 0 25px #ff8c00; animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes sparkFly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 50% { opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; } }
-        .open-shop-btn { position: absolute; bottom: 30px; right: 20px; background: linear-gradient(to bottom, #8b5a2b, #4e342e); border: 2px solid #2a1610; color: #ffeba1; padding: 12px 25px; font-family: 'Georgia', serif; font-size: 1.2rem; font-weight: bold; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.2); cursor: pointer; text-shadow: 1px 1px 2px #000; z-index: 20; transition: transform 0.1s; }
-        .open-shop-btn:active { transform: scale(0.95); }
-        .shop-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
-        .shop-modal { background: linear-gradient(to bottom, #5c3a21, #3e2723); border: 4px solid #1a0b02; border-radius: 15px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; padding: 20px; color: #ffeba1; box-shadow: 0 10px 30px rgba(0,0,0,1), inset 0 0 20px rgba(0,0,0,0.6); text-align: center; position: relative; }
-        .shop-modal::-webkit-scrollbar { width: 6px; }
-        .shop-modal::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
-        .shop-modal::-webkit-scrollbar-thumb { background: #8b5a2b; border-radius: 10px; }
-        .close-shop-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; color: #ff5252; cursor: pointer; font-weight: bold; text-shadow: 1px 1px 2px #000; z-index: 10; }
-        .shop-title { font-size: 1.8rem; margin-top: 0; margin-bottom: 20px; text-shadow: 2px 2px 4px #000; border-bottom: 2px solid #8b5a2b; padding-bottom: 10px; color: #ffd700; }
-        .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #8b5a2b; text-align: left; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-        .shop-item-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #ffd700; text-shadow: 1px 1px 2px #000; }
-        .shop-item-info p { margin: 0; font-size: 0.85rem; color: #a5d6a7; text-shadow: 1px 1px 1px #000; }
-        .shop-buy-btn { background: linear-gradient(to bottom, #2e7d32, #1b5e20); border: 1px solid #000; color: #fff; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-family: 'Georgia', serif; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.3); text-shadow: 1px 1px 1px #000; min-width: 80px; }
-        .shop-buy-btn:active { transform: scale(0.95); }
-        .shop-buy-btn:disabled { background: linear-gradient(to bottom, #555, #333); color: #888; cursor: not-allowed; box-shadow: none; }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <button id="hard-reset-btn">УДАЛИТЬ СЕЙВ</button>
-
     <div class="guild-board">
+        <div class="level-container" id="level-container">Уровень <span id="level-text">1</span></div>
         <div class="score-container" id="score">0</div>
         
         <div class="energy-wrapper">
             <div class="energy-bar" id="energy-bar"></div>
         </div>
-        <div class="energy-text" id="energy-text">Загрузка ядра...</div>
+        <div class="energy-text" id="energy-text">Инициализация...</div>
+
+        <div class="xp-wrapper">
+            <div class="xp-bar" id="xp-bar"></div>
+        </div>
+        <div class="xp-text" id="xp-text">Опыт: 0 / 150</div>
     </div>
 
     <div class="ore-wrapper">
         <img src="1000019091-removebg-preview.png" alt="Кристалл" class="crystal-img" id="ore-img" draggable="false">
     </div>
 
-    <button class="open-shop-btn" id="open-shop">🛒 Лавка</button>
-
-    <div class="shop-overlay" id="shop-modal">
-        <div class="shop-modal">
-            <div class="close-shop-btn" id="close-shop">✖</div>
-            <h2 class="shop-title">Торговая Лавка</h2>
-
-            <div class="shop-item">
-                <div class="shop-item-info">
-                    <h3>⚒️ Острая кирка</h3>
-                    <p>Добыча за клик: +1</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Уровень: <span id="lvl-pickaxe">1</span> / 100000</p>
-                </div>
-                <button class="shop-buy-btn" id="buy-pickaxe">3500 💎</button>
-            </div>
-
-            <div class="shop-item">
-                <div class="shop-item-info">
-                    <h3>🎒 Гномья сумка</h3>
-                    <p>Макс. энергия: +50</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Запас: <span id="lvl-energy">500</span> / 3500</p>
-                </div>
-                <button class="shop-buy-btn" id="buy-energy">2500 💎</button>
-            </div>
-
-            <div class="shop-item">
-                <div class="shop-item-info">
-                    <h3>⏳ Древние часы</h3>
-                    <p>Регенерация: -30 сек</p>
-                    <p style="color: #ffb74d; font-size: 0.8rem; margin-top: 3px;">Уровень: <span id="lvl-regen">1</span> / 9</p>
-                </div>
-                <button class="shop-buy-btn" id="buy-regen">5000 💎</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const textEl = document.getElementById('energy-text');
 
-        // Отлов любых системных ошибок с выводом на экран
         window.onerror = function(msg) {
             if(textEl) { textEl.innerText = "ОШИБКА: " + msg; textEl.style.color = "red"; }
-        };
-
-        // Кнопка сброса (Если игра зависла из-за сломанной памяти в Хроме)
-        document.getElementById('hard-reset-btn').onclick = function() {
-            try {
-                localStorage.clear();
-                alert("Память очищена! Игра сейчас перезапустится.");
-                location.reload();
-            } catch(e) {
-                alert("Ошибка Хрома: не могу удалить память.");
-            }
         };
 
         try {
@@ -129,7 +82,7 @@
             let tg = null;
             try { if (window.Telegram && window.Telegram.WebApp) { tg = window.Telegram.WebApp; tg.expand(); } } catch(e) {}
 
-            // Безопасная память (спасает от блокировок Google Chrome)
+            // Безопасная память
             let virtualMemory = {};
             function getMem(key, defValue) {
                 try {
@@ -149,47 +102,44 @@
                 catch(e) { virtualMemory[key] = val; }
             }
 
-            // Загрузка
-            let score = getMem('mithrilScore', 0);
-            
-            let clickPower = getMem('mithrilClickPower', 1);
-            let costPickaxe = getMem('mithrilCostPickaxe', 3500);
-            if (clickPower === 1 && costPickaxe < 3500) costPickaxe = 3500; 
-
-            let maxEnergy = getMem('mithrilMaxEnergy', 500);
-            let costEnergy = getMem('mithrilCostEnergy', 2500);
-            if (maxEnergy === 500 && costEnergy < 2500) costEnergy = 2500;
-            
-            let regenLevel = getMem('mithrilRegenLevel', 1);
-            let costRegen = getMem('mithrilCostRegen', 5000);
-            if (regenLevel === 1 && costRegen !== 5000) costRegen = 5000;
-
-            let energy = getMem('mithrilEnergy', maxEnergy);
-            let lastTickTime = getMem('lastTickTime', Date.now());
-            let lastClickAnimTime = 0;
-
-            const regenAmount = 100;
-            let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
-
-            // ЛИМИТЫ ИЗ ТВОЕГО ЗАПРОСА
+            // ЛИМИТЫ
             const MAX_CLICK_POWER = 100000;
             const MAX_ENERGY_LIMIT = 3500;
-            const MAX_REGEN_LEVEL = 9; 
+            const MIN_REGEN_MS = 60000; // 1 минута
+
+            // ЗАГРУЗКА ОСНОВНЫХ ДАННЫХ
+            let score = getMem('mithrilScore', 0);
+            let level = getMem('mithrilLevel', 1);
+            let xp = getMem('mithrilXP', 0);
+            let lastTickTime = getMem('lastTickTime', Date.now());
+            
+            // ВЫСЧИТЫВАЕМ ХАРАКТЕРИСТИКИ ИСХОДЯ ИЗ УРОВНЯ
+            let clickPower = Math.min(1 + (level - 1), MAX_CLICK_POWER);
+            let maxEnergy = Math.min(500 + (level - 1) * 10, MAX_ENERGY_LIMIT);
+            let regenIntervalMs = Math.max(300000 - (level - 1) * 200, MIN_REGEN_MS);
+            
+            let energy = getMem('mithrilEnergy', maxEnergy);
+            
+            // НОВАЯ ФОРМУЛА ОПЫТА: 150 * (1.2 в степени: уровень - 1)
+            // Использование Math.floor убирает дробные числа
+            let xpNeeded = Math.floor(150 * Math.pow(1.2, level - 1)); 
+
+            const regenAmount = 100;
+            let lastClickAnimTime = 0;
 
             function saveData() {
                 setMem('mithrilScore', score);
+                setMem('mithrilLevel', level);
+                setMem('mithrilXP', xp);
                 setMem('mithrilEnergy', energy);
                 setMem('lastTickTime', lastTickTime);
-                setMem('mithrilClickPower', clickPower);
-                setMem('mithrilMaxEnergy', maxEnergy);
-                setMem('mithrilCostPickaxe', costPickaxe);
-                setMem('mithrilCostEnergy', costEnergy);
-                setMem('mithrilRegenLevel', regenLevel);
-                setMem('mithrilCostRegen', costRegen);
             }
 
             function updateUI() {
                 document.getElementById('score').innerText = score;
+                document.getElementById('level-text').innerText = level;
+                
+                // Обновление полоски энергии
                 document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
                 
                 textEl.style.color = "#ffeba1";
@@ -202,33 +152,9 @@
                     textEl.innerText = `${energy} / ${maxEnergy} ⚡ (+100 через ${m}:${s < 10 ? '0' : ''}${s})`;
                 }
 
-                document.getElementById('lvl-pickaxe').innerText = clickPower;
-                document.getElementById('lvl-energy').innerText = maxEnergy;
-                document.getElementById('lvl-regen').innerText = regenLevel;
-                
-                if (clickPower >= MAX_CLICK_POWER) {
-                    document.getElementById('buy-pickaxe').innerText = "МАКС";
-                    document.getElementById('buy-pickaxe').disabled = true;
-                } else {
-                    document.getElementById('buy-pickaxe').innerText = `${costPickaxe} 💎`;
-                    document.getElementById('buy-pickaxe').disabled = score < costPickaxe;
-                }
-
-                if (maxEnergy >= MAX_ENERGY_LIMIT) {
-                    document.getElementById('buy-energy').innerText = "МАКС";
-                    document.getElementById('buy-energy').disabled = true;
-                } else {
-                    document.getElementById('buy-energy').innerText = `${costEnergy} 💎`;
-                    document.getElementById('buy-energy').disabled = score < costEnergy;
-                }
-
-                if (regenLevel >= MAX_REGEN_LEVEL) {
-                    document.getElementById('buy-regen').innerText = "МАКС";
-                    document.getElementById('buy-regen').disabled = true;
-                } else {
-                    document.getElementById('buy-regen').innerText = `${costRegen} 💎`;
-                    document.getElementById('buy-regen').disabled = score < costRegen;
-                }
+                // Обновление полоски опыта
+                document.getElementById('xp-bar').style.width = Math.min(100, (xp / xpNeeded) * 100) + '%';
+                document.getElementById('xp-text').innerText = `Опыт: ${xp} / ${xpNeeded}`;
             }
 
             function checkRegen() {
@@ -251,67 +177,59 @@
             checkRegen();
             setInterval(checkRegen, 1000);
 
-            document.getElementById('open-shop').onclick = function() {
-                updateUI();
-                document.getElementById('shop-modal').style.display = 'flex';
-            };
-            
-            document.getElementById('close-shop').onclick = function() {
-                document.getElementById('shop-modal').style.display = 'none';
-            };
-
-            document.getElementById('buy-pickaxe').onclick = function() {
-                if (score >= costPickaxe && clickPower < MAX_CLICK_POWER) {
-                    score -= costPickaxe;
-                    clickPower++;
-                    costPickaxe += 500;
-                    saveData();
-                    updateUI();
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                }
-            };
-
-            document.getElementById('buy-energy').onclick = function() {
-                if (score >= costEnergy && maxEnergy < MAX_ENERGY_LIMIT) {
-                    score -= costEnergy;
-                    maxEnergy += 50;
-                    costEnergy += 500;
-                    saveData();
-                    updateUI();
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                }
-            };
-
-            document.getElementById('buy-regen').onclick = function() {
-                if (score >= costRegen && regenLevel < MAX_REGEN_LEVEL) {
-                    score -= costRegen;
-                    regenLevel++;
-                    costRegen += 1000;
-                    regenIntervalMs = 300000 - ((regenLevel - 1) * 30000); 
-                    saveData();
-                    updateUI();
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                }
-            };
-
+            // КЛИК ПО РУДЕ
             document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
                 if (energy >= 1) {
                     if (energy === maxEnergy) lastTickTime = Date.now();
                     
                     energy--;
                     score += clickPower;
+                    xp += clickPower; // Получаем опыт, равный силе клика
+                    
+                    let leveledUp = false;
+
+                    // ПРОВЕРКА ПОВЫШЕНИЯ УРОВНЯ
+                    while (xp >= xpNeeded) {
+                        xp -= xpNeeded; // Переносим остаток опыта
+                        level++;
+                        // Пересчитываем нужное количество опыта для нового уровня (+20% каждый раз)
+                        xpNeeded = Math.floor(150 * Math.pow(1.2, level - 1)); 
+                        leveledUp = true;
+                    }
+
+                    // ЕСЛИ УРОВЕНЬ ПОВЫСИЛСЯ, ОБНОВЛЯЕМ ХАРАКТЕРИСТИКИ
+                    if (leveledUp) {
+                        clickPower = Math.min(1 + (level - 1), MAX_CLICK_POWER);
+                        maxEnergy = Math.min(500 + (level - 1) * 10, MAX_ENERGY_LIMIT);
+                        regenIntervalMs = Math.max(300000 - (level - 1) * 200, MIN_REGEN_MS);
+                        
+                        energy = maxEnergy; // Восстанавливаем энергию при получении уровня
+
+                        // Эффект левелапа
+                        let lvlContainer = document.getElementById('level-container');
+                        lvlContainer.style.transform = "scale(1.3)";
+                        lvlContainer.style.color = "#fff";
+                        setTimeout(() => {
+                            lvlContainer.style.transform = "scale(1)";
+                            lvlContainer.style.color = "#ffd700";
+                        }, 300);
+                        
+                        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    }
+
                     saveData();
                     updateUI();
 
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
+                    // АНИМАЦИИ
                     let nowAnim = Date.now();
                     let timeSinceLastClick = nowAnim - (lastClickAnimTime || nowAnim - 1000);
                     lastClickAnimTime = nowAnim;
                     let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
                     const pickaxe = document.createElement('img');
-                    pickaxe.src = '1000019118-removebg-preview.png?v=99'; 
+                    pickaxe.src = '1000019118-removebg-preview.png?v=100'; 
                     pickaxe.className = 'pickaxe-effect';
                     pickaxe.style.left = `${e.clientX - 60}px`;
                     pickaxe.style.top = `${e.clientY - 80}px`;
@@ -331,4 +249,24 @@
                         spark.className = 'spark';
                         spark.style.left = `${e.clientX + (Math.random() - 0.5) * 30}px`;
                         spark.style.top = `${e.clientY - 10 + (Math.random() - 0.5) * 30}px`;
-                        spark.style.setProperty('--tx', 
+                        spark.style.setProperty('--tx', `${(Math.random() - 0.5) * 160}px`);
+                        spark.style.setProperty('--ty', `${(Math.random() - 0.5) * 160}px`);
+                        document.body.appendChild(spark);
+                        setTimeout(() => spark.remove(), 600);
+                    }
+
+                    setTimeout(() => pickaxe.remove(), animDuration * 1000);
+                    setTimeout(() => plusOne.remove(), 1000);
+                } else {
+                    textEl.style.color = '#ff5252';
+                    setTimeout(() => textEl.style.color = '#ffeba1', 300);
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                }
+            });
+
+        } catch (err) {
+            if(textEl) { textEl.innerText = "СБОЙ ИГРЫ: " + err.message; textEl.style.color = "red"; }
+        }
+    </script>
+</body>
+</html>
