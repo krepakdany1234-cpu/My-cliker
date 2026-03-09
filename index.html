@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мифриловый Кликер</title>
     
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script async src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; box-sizing: border-box; outline: none; }
@@ -22,30 +22,35 @@
             align-items: center; 
             justify-content: center; 
             font-family: 'Georgia', serif; 
-            
-            /* ВОЗВРАЩАЕМ ТВОЙ ФОН В ПОЛНОЙ КРАСОТЕ */
-            background-image: url('1772901742360.png'); 
-            background-size: cover; 
-            background-position: center; 
-            background-repeat: no-repeat; 
             overflow: hidden; 
+            background-color: #000;
         }
 
-        /* --- НОВАЯ СИСТЕМА ДНЯ И НОЧИ (ТЕНЬ ПОВЕРХ ФОНА) --- */
+        /* === НАШЕ ВИДЕО НА ФОНЕ === */
+        #bg-video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; /* Растягиваем на весь экран */
+            z-index: -3; /* Самый-самый задний план */
+            pointer-events: none;
+        }
+
+        /* === ФИЛЬТР ЗАКАТА / РАССВЕТА === */
         #day-night-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            z-index: 1; /* Слой над фоном, но под кнопками */
-            transition: background-color 5s ease-in-out;
+            z-index: -2; /* Поверх видео, но под интерфейсом */
+            transition: background-color 10s ease-in-out; /* Плавне затемнение длится 10 секунд */
         }
 
         #day-night-overlay.day {
-            background-color: rgba(255, 210, 150, 0.05); /* Легкий теплый дневной свет */
+            background-color: rgba(255, 210, 150, 0.05); /* Легкий теплый фильтр днем */
         }
 
         #day-night-overlay.night {
-            background-color: rgba(5, 15, 35, 0.75); /* Густая ночная тень */
+            background-color: rgba(5, 15, 35, 0.75); /* Темно-синяя ночная мгла */
         }
 
         /* --- СВЕТЛЯЧКИ (НОЧЬ) --- */
@@ -58,7 +63,7 @@
             opacity: 0;
             animation: fireflyMove 10s infinite alternate, fireflyTwinkle 2s infinite alternate;
             pointer-events: none;
-            z-index: 2;
+            z-index: -1;
         }
         @keyframes fireflyMove {
             0% { transform: translate(0, 0); }
@@ -79,7 +84,7 @@
             border-right: 4px solid transparent;
             transform: rotate(45deg); 
             pointer-events: none;
-            z-index: 2;
+            z-index: -1;
             top: var(--startY);
         }
         .bird.fly-right { left: -30px; animation: flyRight var(--speed) linear forwards; }
@@ -87,51 +92,41 @@
         @keyframes flyRight { to { left: 110%; } }
         @keyframes flyLeft { to { right: 110%; } }
 
-
         /* === ИНТЕРФЕЙС ИГРЫ === */
         .guild-board { background-image: url('1000019094-removebg-preview.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; width: 390px; padding-top: 90px; padding-bottom: 80px; padding-left: 40px; padding-right: 40px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8)); margin-bottom: 20px; position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
-        
         .level-container { color: #ffd700; font-size: 1.5rem; font-weight: bold; text-shadow: 1px 1px 2px #000; margin-bottom: 5px; z-index: 2; transition: transform 0.2s; }
         .score-container { color: #1a0b02; font-size: 3.4rem; font-weight: bold; text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9); margin-bottom: 12px; z-index: 2; }
-        
         .energy-wrapper { width: 65%; background-color: rgba(10, 5, 0, 0.5); border: 1px solid rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.15); border-radius: 8px; height: 12px; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); z-index: 2; }
         .energy-bar { height: 100%; width: 100%; background: linear-gradient(90deg, #2e7d32, #50b487, #81c784); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); transition: width 0.3s ease-out; }
         .energy-text { color: #ffeba1; font-size: 0.85rem; margin-top: 5px; margin-bottom: 10px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
-        
         .xp-wrapper { width: 65%; background-color: rgba(10, 5, 0, 0.5); border: 1px solid rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.15); border-radius: 8px; height: 12px; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); z-index: 2; }
         .xp-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1976d2, #42a5f5, #90caf9); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); transition: width 0.2s ease-out; }
         .xp-text { color: #90caf9; font-size: 0.85rem; margin-top: 5px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
-
         .ore-wrapper { position: relative; display: flex; justify-content: center; align-items: center; margin-top: 10px; -webkit-tap-highlight-color: transparent; z-index: 10; }
         .crystal-img { width: 280px; height: auto; filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4)); transition: transform 0.1s ease, filter 0.1s ease; cursor: pointer; }
         .crystal-img:active { transform: scale(0.95) translateY(5px); filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8)); }
-        
         .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 15; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.5); opacity: 0; } }
-        
         .pickaxe-effect { position: absolute; width: 100px; height: auto; pointer-events: none; z-index: 50; transform-origin: bottom right; animation: mineStrike ease-in-out forwards; filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7)); }
         @keyframes mineStrike { 0% { transform: rotate(-30deg) scale(1.1); opacity: 0; } 30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 60% { transform: rotate(15deg) scale(1.1); opacity: 1; } 100% { transform: rotate(35deg) scale(0.9); opacity: 0; } }
-        
         .spark { position: absolute; width: 8px; height: 8px; background-color: #ffffff; border-radius: 50%; pointer-events: none; z-index: 45; box-shadow: 0 0 8px #fff, 0 0 15px #ffd700, 0 0 25px #ff8c00; animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes sparkFly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 50% { opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; } }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
+    <video autoplay muted loop playsinline id="bg-video">
+        <source src="bg_video.mp4" type="video/mp4">
+    </video>
+
     <div id="day-night-overlay" class="day"></div>
 
     <div class="guild-board">
         <div class="level-container" id="level-container">Уровень <span id="level-text">1</span></div>
         <div class="score-container" id="score">0</div>
-        
-        <div class="energy-wrapper">
-            <div class="energy-bar" id="energy-bar"></div>
-        </div>
-        <div class="energy-text" id="energy-text">Загрузка...</div>
-
-        <div class="xp-wrapper">
-            <div class="xp-bar" id="xp-bar"></div>
-        </div>
+        <div class="energy-wrapper"><div class="energy-bar" id="energy-bar"></div></div>
+        <div class="energy-text" id="energy-text"></div>
+        <div class="xp-wrapper"><div class="xp-bar" id="xp-bar"></div></div>
         <div class="xp-text" id="xp-text">Опыт: 0 / 150</div>
     </div>
 
@@ -161,10 +156,12 @@
                 } else {
                     overlay.className = 'night';
                 }
+                // Удаляем старых существ
                 document.querySelectorAll('.firefly, .bird').forEach(el => el.remove());
             }
 
-            setInterval(toggleDayNight, 30000); // Смена каждые 30 секунд
+            // 10 минут = 10 * 60 * 1000 = 600000 миллисекунд
+            setInterval(toggleDayNight, 600000); 
 
             // === СПАВН СУЩЕСТВ ===
             function createFirefly() {
@@ -201,8 +198,7 @@
                 }
             }, 1500);
 
-
-            // === АВТО-ЛЕЧЕНИЕ ПАМЯТИ (ЗАЩИТА ОТ ЗАВИСАНИЙ) ===
+            // === БАЗОВАЯ ЛОГИКА ИГРЫ ===
             function getSafeNumber(key, fallback) {
                 try {
                     let val = localStorage.getItem(key);
@@ -217,18 +213,15 @@
             let xp = getSafeNumber('mithrilXP', 0);
             let lastTickTime = getSafeNumber('lastTickTime', Date.now());
 
-            // Если сейв критически поврежден (уровень 0 или отрицательный) — обнуляем
             if (level < 1 || score < 0 || xp < 0) {
                 localStorage.clear();
                 score = 0; level = 1; xp = 0; lastTickTime = Date.now();
             }
             
-            // ЛИМИТЫ
             const MAX_CLICK_POWER = 100000;
             const MAX_ENERGY_LIMIT = 3500;
             const MIN_REGEN_MS = 60000; 
 
-            // ВЫСЧИТЫВАЕМ ХАРАКТЕРИСТИКИ
             let clickPower = Math.min(1 + (level - 1), MAX_CLICK_POWER);
             let maxEnergy = Math.min(500 + (level - 1) * 10, MAX_ENERGY_LIMIT);
             let regenIntervalMs = Math.max(300000 - (level - 1) * 200, MIN_REGEN_MS);
@@ -237,7 +230,7 @@
             if (energy > maxEnergy || energy < 0) energy = maxEnergy;
             
             let xpNeeded = Math.floor(150 * Math.pow(1.2, level - 1)); 
-            if (isNaN(xpNeeded) || xpNeeded < 150) xpNeeded = 150; // Железобетонная защита формулы
+            if (isNaN(xpNeeded) || xpNeeded < 150) xpNeeded = 150;
 
             const regenAmount = 100;
             let lastClickAnimTime = 0;
@@ -255,7 +248,6 @@
             function updateUI() {
                 document.getElementById('score').innerText = score;
                 document.getElementById('level-text').innerText = level;
-                
                 document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
                 
                 textEl.style.color = "#ffeba1";
@@ -288,11 +280,9 @@
                 updateUI();
             }
 
-            // МГНОВЕННЫЙ ЗАПУСК
             checkRegen();
             setInterval(checkRegen, 1000);
 
-            // КЛИК ПО РУДЕ
             document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
                 if (energy >= 1) {
                     if (energy === maxEnergy) lastTickTime = Date.now();
@@ -338,7 +328,7 @@
                     let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
                     const pickaxe = document.createElement('img');
-                    pickaxe.src = '1000019118-removebg-preview.png?v=fixed'; 
+                    pickaxe.src = '1000019118-removebg-preview.png?v=fixed2'; 
                     pickaxe.className = 'pickaxe-effect';
                     pickaxe.style.left = `${e.clientX - 60}px`;
                     pickaxe.style.top = `${e.clientY - 80}px`;
@@ -378,4 +368,5 @@
         }
     </script>
 </body>
-</html>
+    </html>
+    
