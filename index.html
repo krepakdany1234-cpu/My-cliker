@@ -9,11 +9,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мифриловый Кликер</title>
     
+    <script async src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <style>
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; box-sizing: border-box; outline: none; }
         body { margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Georgia', serif; background-image: url('1772901742360.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: rgba(0, 0, 0, 0.6); background-blend-mode: overlay; overflow: hidden; }
         
-        /* КРАСНАЯ КНОПКА СБРОСА ПАМЯТИ */
         #hard-reset-btn { position: absolute; top: 15px; left: 15px; background: #ff3333; color: white; border: 2px solid #fff; padding: 10px 15px; border-radius: 8px; font-weight: bold; z-index: 9999; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
         #hard-reset-btn:active { transform: scale(0.95); }
 
@@ -58,7 +59,7 @@
         <div class="energy-wrapper">
             <div class="energy-bar" id="energy-bar"></div>
         </div>
-        <div class="energy-text" id="energy-text">Анализ памяти...</div>
+        <div class="energy-text" id="energy-text">Загрузка ядра...</div>
     </div>
 
     <div class="ore-wrapper">
@@ -101,21 +102,24 @@
         </div>
     </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
     <script>
-        // Функция очистки сломанной памяти
+        const textEl = document.getElementById('energy-text');
+
+        // Отлов любых системных ошибок с выводом на экран
+        window.onerror = function(msg) {
+            if(textEl) { textEl.innerText = "ОШИБКА: " + msg; textEl.style.color = "red"; }
+        };
+
+        // Кнопка сброса (Если игра зависла из-за сломанной памяти в Хроме)
         document.getElementById('hard-reset-btn').onclick = function() {
             try {
                 localStorage.clear();
-                alert("Сейв удален! Игра запускается заново.");
+                alert("Память очищена! Игра сейчас перезапустится.");
                 location.reload();
             } catch(e) {
-                alert("Не удалось удалить сейв. Chrome блокирует доступ.");
+                alert("Ошибка Хрома: не могу удалить память.");
             }
         };
-
-        const textEl = document.getElementById('energy-text');
 
         try {
             document.addEventListener('contextmenu', e => e.preventDefault());
@@ -125,61 +129,70 @@
             let tg = null;
             try { if (window.Telegram && window.Telegram.WebApp) { tg = window.Telegram.WebApp; tg.expand(); } } catch(e) {}
 
-            // Супер-безопасное чтение памяти
-            function getSafeInt(key, defValue) {
+            // Безопасная память (спасает от блокировок Google Chrome)
+            let virtualMemory = {};
+            function getMem(key, defValue) {
                 try {
                     let val = localStorage.getItem(key);
-                    if (val) {
+                    if (val !== null && val !== undefined && val !== 'NaN') {
                         let parsed = parseInt(val);
                         if (!isNaN(parsed)) return parsed;
                     }
-                } catch(e) {}
+                } catch(e) {
+                    if (virtualMemory[key] !== undefined) return virtualMemory[key];
+                }
                 return defValue;
             }
 
-            // Загрузка (если тут была ошибка, после нажатия кнопки "Удалить сейв" она исчезнет)
-            let score = getSafeInt('mithrilScore', 0);
-            let clickPower = getSafeInt('mithrilClickPower', 1);
-            let costPickaxe = getSafeInt('mithrilCostPickaxe', 3500);
+            function setMem(key, val) {
+                try { localStorage.setItem(key, val); } 
+                catch(e) { virtualMemory[key] = val; }
+            }
+
+            // Загрузка
+            let score = getMem('mithrilScore', 0);
+            
+            let clickPower = getMem('mithrilClickPower', 1);
+            let costPickaxe = getMem('mithrilCostPickaxe', 3500);
             if (clickPower === 1 && costPickaxe < 3500) costPickaxe = 3500; 
 
-            let maxEnergy = getSafeInt('mithrilMaxEnergy', 500);
-            let costEnergy = getSafeInt('mithrilCostEnergy', 2500);
+            let maxEnergy = getMem('mithrilMaxEnergy', 500);
+            let costEnergy = getMem('mithrilCostEnergy', 2500);
             if (maxEnergy === 500 && costEnergy < 2500) costEnergy = 2500;
             
-            let regenLevel = getSafeInt('mithrilRegenLevel', 1);
-            let costRegen = getSafeInt('mithrilCostRegen', 5000);
+            let regenLevel = getMem('mithrilRegenLevel', 1);
+            let costRegen = getMem('mithrilCostRegen', 5000);
             if (regenLevel === 1 && costRegen !== 5000) costRegen = 5000;
 
-            let energy = getSafeInt('mithrilEnergy', maxEnergy);
-            let lastTickTime = getSafeInt('lastTickTime', Date.now());
+            let energy = getMem('mithrilEnergy', maxEnergy);
+            let lastTickTime = getMem('lastTickTime', Date.now());
             let lastClickAnimTime = 0;
 
             const regenAmount = 100;
             let regenIntervalMs = 300000 - ((regenLevel - 1) * 30000);
 
+            // ЛИМИТЫ ИЗ ТВОЕГО ЗАПРОСА
             const MAX_CLICK_POWER = 100000;
             const MAX_ENERGY_LIMIT = 3500;
             const MAX_REGEN_LEVEL = 9; 
 
             function saveData() {
-                try {
-                    localStorage.setItem('mithrilScore', score);
-                    localStorage.setItem('mithrilEnergy', energy);
-                    localStorage.setItem('lastTickTime', lastTickTime);
-                    localStorage.setItem('mithrilClickPower', clickPower);
-                    localStorage.setItem('mithrilMaxEnergy', maxEnergy);
-                    localStorage.setItem('mithrilCostPickaxe', costPickaxe);
-                    localStorage.setItem('mithrilCostEnergy', costEnergy);
-                    localStorage.setItem('mithrilRegenLevel', regenLevel);
-                    localStorage.setItem('mithrilCostRegen', costRegen);
-                } catch(e) {}
+                setMem('mithrilScore', score);
+                setMem('mithrilEnergy', energy);
+                setMem('lastTickTime', lastTickTime);
+                setMem('mithrilClickPower', clickPower);
+                setMem('mithrilMaxEnergy', maxEnergy);
+                setMem('mithrilCostPickaxe', costPickaxe);
+                setMem('mithrilCostEnergy', costEnergy);
+                setMem('mithrilRegenLevel', regenLevel);
+                setMem('mithrilCostRegen', costRegen);
             }
 
             function updateUI() {
                 document.getElementById('score').innerText = score;
                 document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
                 
+                textEl.style.color = "#ffeba1";
                 if (energy >= maxEnergy) {
                     textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Макс)`;
                 } else {
@@ -234,7 +247,7 @@
                 updateUI();
             }
 
-            // Игра начинается здесь! Надпись должна исчезнуть.
+            // МГНОВЕННЫЙ ЗАПУСК
             checkRegen();
             setInterval(checkRegen, 1000);
 
@@ -298,7 +311,7 @@
                     let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
 
                     const pickaxe = document.createElement('img');
-                    pickaxe.src = '1000019118-removebg-preview.png?v=7'; 
+                    pickaxe.src = '1000019118-removebg-preview.png?v=99'; 
                     pickaxe.className = 'pickaxe-effect';
                     pickaxe.style.left = `${e.clientX - 60}px`;
                     pickaxe.style.top = `${e.clientY - 80}px`;
@@ -318,10 +331,4 @@
                         spark.className = 'spark';
                         spark.style.left = `${e.clientX + (Math.random() - 0.5) * 30}px`;
                         spark.style.top = `${e.clientY - 10 + (Math.random() - 0.5) * 30}px`;
-                        spark.style.setProperty('--tx', `${(Math.random() - 0.5) * 160}px`);
-                        spark.style.setProperty('--ty', `${(Math.random() - 0.5) * 160}px`);
-                        document.body.appendChild(spark);
-                        setTimeout(() => spark.remove(), 600);
-                    }
-
-                    setTimeout(() => pickaxe
+                        spark.style.setProperty('--tx', 
