@@ -23,74 +23,43 @@
             justify-content: center; 
             font-family: 'Georgia', serif; 
             overflow: hidden; 
-            background-color: #000;
+            
+            /* НОВЫЙ ФОН */
+            background-image: url('IMG_20260311_002626.png');
+            background-size: cover;
+            background-position: center;
+            background-color: #1a2f24;
         }
 
-        /* === НАШЕ ВИДЕО НА ФОНЕ === */
-        #bg-video {
+        /* === ЭФФЕКТ ПАДАЮЩИХ ЛИСТЬЕВ === */
+        .leaf {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover; /* Растягиваем на весь экран */
-            z-index: -3; /* Самый-самый задний план */
+            top: -10%;
+            /* Форма листика */
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(135deg, #81c784, #2e7d32);
+            border-radius: 0 50% 0 50%;
+            opacity: 0.8;
             pointer-events: none;
+            z-index: 1; /* Листья падают за табличкой, но поверх фона */
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            animation: fall linear forwards;
         }
 
-        /* === ФИЛЬТР ЗАКАТА / РАССВЕТА === */
-        #day-night-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: -2; /* Поверх видео, но под интерфейсом */
-            transition: background-color 10s ease-in-out; /* Плавне затемнение длится 10 секунд */
+        @keyframes fall {
+            0% { 
+                transform: translate(0, 0) rotate(0deg); 
+                opacity: 0; 
+            }
+            10% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { 
+                transform: translate(var(--end-x), 110vh) rotate(var(--rotation)); 
+                opacity: 0; 
+            }
         }
 
-        #day-night-overlay.day {
-            background-color: rgba(255, 210, 150, 0.05); /* Легкий теплый фильтр днем */
-        }
-
-        #day-night-overlay.night {
-            background-color: rgba(5, 15, 35, 0.75); /* Темно-синяя ночная мгла */
-        }
-
-        /* --- СВЕТЛЯЧКИ (НОЧЬ) --- */
-        .firefly {
-            position: absolute;
-            width: 6px; height: 6px;
-            background-color: #ffff00;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #ffff00, 0 0 20px #ffeb3b;
-            opacity: 0;
-            animation: fireflyMove 10s infinite alternate, fireflyTwinkle 2s infinite alternate;
-            pointer-events: none;
-            z-index: -1;
-        }
-        @keyframes fireflyMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(var(--tx), var(--ty)); }
-        }
-        @keyframes fireflyTwinkle {
-            0%, 100% { opacity: 0.1; scale: 0.8; }
-            50% { opacity: 0.8; scale: 1.2; }
-        }
-
-        /* --- ПТИЦЫ (ДЕНЬ) --- */
-        .bird {
-            position: absolute;
-            width: 18px; height: 10px;
-            background: transparent;
-            border-bottom: 4px solid rgba(0, 0, 0, 0.8);
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            transform: rotate(45deg); 
-            pointer-events: none;
-            z-index: -1;
-            top: var(--startY);
-        }
-        .bird.fly-right { left: -30px; animation: flyRight var(--speed) linear forwards; }
-        .bird.fly-left { right: -30px; transform: rotate(-45deg) scaleX(-1); animation: flyLeft var(--speed) linear forwards; }
-        @keyframes flyRight { to { left: 110%; } }
-        @keyframes flyLeft { to { right: 110%; } }
 
         /* === ИНТЕРФЕЙС ИГРЫ === */
         .guild-board { background-image: url('1000019094-removebg-preview.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; width: 390px; padding-top: 90px; padding-bottom: 80px; padding-left: 40px; padding-right: 40px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8)); margin-bottom: 20px; position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
@@ -102,31 +71,35 @@
         .xp-wrapper { width: 65%; background-color: rgba(10, 5, 0, 0.5); border: 1px solid rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.15); border-radius: 8px; height: 12px; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); z-index: 2; }
         .xp-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1976d2, #42a5f5, #90caf9); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); transition: width 0.2s ease-out; }
         .xp-text { color: #90caf9; font-size: 0.85rem; margin-top: 5px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
+        
         .ore-wrapper { position: relative; display: flex; justify-content: center; align-items: center; margin-top: 10px; -webkit-tap-highlight-color: transparent; z-index: 10; }
         .crystal-img { width: 280px; height: auto; filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4)); transition: transform 0.1s ease, filter 0.1s ease; cursor: pointer; }
         .crystal-img:active { transform: scale(0.95) translateY(5px); filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8)); }
+        
         .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 15; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.5); opacity: 0; } }
+        
         .pickaxe-effect { position: absolute; width: 100px; height: auto; pointer-events: none; z-index: 50; transform-origin: bottom right; animation: mineStrike ease-in-out forwards; filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7)); }
         @keyframes mineStrike { 0% { transform: rotate(-30deg) scale(1.1); opacity: 0; } 30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 60% { transform: rotate(15deg) scale(1.1); opacity: 1; } 100% { transform: rotate(35deg) scale(0.9); opacity: 0; } }
+        
         .spark { position: absolute; width: 8px; height: 8px; background-color: #ffffff; border-radius: 50%; pointer-events: none; z-index: 45; box-shadow: 0 0 8px #fff, 0 0 15px #ffd700, 0 0 25px #ff8c00; animation: sparkFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes sparkFly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 50% { opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; } }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <video autoplay muted loop playsinline id="bg-video">
-        <source src="bg_video.mp4" type="video/mp4">
-    </video>
-
-    <div id="day-night-overlay" class="day"></div>
-
     <div class="guild-board">
         <div class="level-container" id="level-container">Уровень <span id="level-text">1</span></div>
         <div class="score-container" id="score">0</div>
-        <div class="energy-wrapper"><div class="energy-bar" id="energy-bar"></div></div>
-        <div class="energy-text" id="energy-text"></div>
-        <div class="xp-wrapper"><div class="xp-bar" id="xp-bar"></div></div>
+        
+        <div class="energy-wrapper">
+            <div class="energy-bar" id="energy-bar"></div>
+        </div>
+        <div class="energy-text" id="energy-text">Загрузка...</div>
+
+        <div class="xp-wrapper">
+            <div class="xp-bar" id="xp-bar"></div>
+        </div>
         <div class="xp-text" id="xp-text">Опыт: 0 / 150</div>
     </div>
 
@@ -145,58 +118,44 @@
             let tg = null;
             try { if (window.Telegram && window.Telegram.WebApp) { tg = window.Telegram.WebApp; tg.expand(); } } catch(e) {}
 
-            // === ЛОГИКА ДНЯ И НОЧИ ===
-            const overlay = document.getElementById('day-night-overlay');
-            let isDay = true; 
+            // === ГЕНЕРАТОР ПАДАЮЩИХ ЛИСТЬЕВ ===
+            function createLeaf() {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf';
+                
+                // Случайная стартовая позиция по ширине экрана
+                leaf.style.left = Math.random() * 100 + 'vw';
+                
+                // Случайный размер листика (от 0.6 до 1.2 от базового)
+                let scale = 0.6 + Math.random() * 0.6;
+                leaf.style.width = (15 * scale) + 'px';
+                leaf.style.height = (15 * scale) + 'px';
 
-            function toggleDayNight() {
-                isDay = !isDay;
-                if (isDay) {
-                    overlay.className = 'day';
-                } else {
-                    overlay.className = 'night';
-                }
-                // Удаляем старых существ
-                document.querySelectorAll('.firefly, .bird').forEach(el => el.remove());
+                // Настраиваем анимацию: куда улетит лист и как сильно будет крутиться
+                let endX = (Math.random() - 0.5) * 300; // Отклонение влево/вправо
+                let rotation = (Math.random() > 0.5 ? 1 : -1) * (180 + Math.random() * 360); // Вращение
+                let duration = 6 + Math.random() * 6; // Время падения от 6 до 12 секунд
+
+                leaf.style.setProperty('--end-x', endX + 'px');
+                leaf.style.setProperty('--rotation', rotation + 'deg');
+                leaf.style.animationDuration = duration + 's';
+
+                document.body.appendChild(leaf);
+
+                // Удаляем листик после падения, чтобы не засорять память
+                setTimeout(() => {
+                    leaf.remove();
+                }, duration * 1000);
             }
 
-            // 10 минут = 10 * 60 * 1000 = 600000 миллисекунд
-            setInterval(toggleDayNight, 600000); 
-
-            // === СПАВН СУЩЕСТВ ===
-            function createFirefly() {
-                const firefly = document.createElement('div');
-                firefly.className = 'firefly';
-                firefly.style.left = Math.random() * 100 + 'vw';
-                firefly.style.top = Math.random() * 100 + 'vh';
-                firefly.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
-                firefly.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
-                firefly.style.animationDelay = Math.random() * 5 + 's';
-                document.body.appendChild(firefly);
-                setTimeout(() => firefly.remove(), 15000);
+            // Создаем новый листик каждые 600 миллисекунд
+            setInterval(createLeaf, 600);
+            
+            // Сразу спавним несколько листиков при старте
+            for(let i = 0; i < 5; i++) {
+                setTimeout(createLeaf, i * 200);
             }
 
-            function createBird() {
-                const bird = document.createElement('div');
-                bird.className = 'bird';
-                bird.style.setProperty('--startY', Math.random() * 40 + '%');
-                bird.style.setProperty('--speed', 5 + Math.random() * 5 + 's');
-                if (Math.random() > 0.5) {
-                    bird.classList.add('fly-right');
-                } else {
-                    bird.classList.add('fly-left');
-                }
-                document.body.appendChild(bird);
-                setTimeout(() => bird.remove(), 10000);
-            }
-
-            setInterval(() => {
-                if (isDay && document.querySelectorAll('.bird').length < 5) {
-                    if(Math.random() > 0.4) createBird();
-                } else if (!isDay && document.querySelectorAll('.firefly').length < 20) {
-                    createFirefly();
-                }
-            }, 1500);
 
             // === БАЗОВАЯ ЛОГИКА ИГРЫ ===
             function getSafeNumber(key, fallback) {
@@ -368,5 +327,4 @@
         }
     </script>
 </body>
-    </html>
-    
+</html>
