@@ -15,59 +15,58 @@
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; box-sizing: border-box; outline: none; }
         
         body { 
-            margin: 0; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            font-family: 'Georgia', serif; 
-            overflow: hidden; 
-            
-            /* НОВЫЙ ФОН */
+            margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            font-family: 'Georgia', serif; overflow: hidden; 
             background-image: url('IMG_20260311_002626.png');
-            background-size: cover;
-            background-position: center;
-            background-color: #1a2f24;
+            background-size: cover; background-position: center; background-color: #1a2f24;
         }
 
-        /* === ЭФФЕКТ ПАДАЮЩИХ ЛИСТЬЕВ === */
+        /* === ПАДАЮЩИЕ ЛИСТЬЯ === */
         .leaf {
-            position: absolute;
-            top: -10%;
-            /* Форма листика */
-            width: 15px;
-            height: 15px;
+            position: absolute; top: -10%; width: 15px; height: 15px;
             background: linear-gradient(135deg, #81c784, #2e7d32);
-            border-radius: 0 50% 0 50%;
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: 1; /* Листья падают за табличкой, но поверх фона */
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-            animation: fall linear forwards;
+            border-radius: 0 50% 0 50%; opacity: 0.8; pointer-events: none; z-index: 1; 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); animation: fall linear forwards;
         }
-
         @keyframes fall {
-            0% { 
-                transform: translate(0, 0) rotate(0deg); 
-                opacity: 0; 
-            }
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
             10% { opacity: 0.8; }
             80% { opacity: 0.8; }
-            100% { 
-                transform: translate(var(--end-x), 110vh) rotate(var(--rotation)); 
-                opacity: 0; 
-            }
+            100% { transform: translate(var(--end-x), 110vh) rotate(var(--rotation)); opacity: 0; }
         }
 
+        /* === КНОПКА И МЕНЮ КВЕСТОВ === */
+        .quest-btn {
+            position: absolute; top: 20px; left: 20px; z-index: 100;
+            background: rgba(40, 20, 10, 0.85); color: #ffd700; border: 2px solid #a67c00;
+            padding: 10px 15px; border-radius: 8px; font-weight: bold; font-family: 'Georgia', serif;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.1s;
+        }
+        .quest-btn:active { transform: scale(0.95); }
+        
+        .quest-modal {
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 320px; background: rgba(30, 15, 5, 0.95); border: 3px solid #ffd700; border-radius: 12px;
+            z-index: 200; padding: 20px; color: #fff; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.9);
+        }
+        .quest-modal h2 { margin-top: 0; color: #ffeba1; font-size: 1.5rem; text-shadow: 1px 1px 2px #000; }
+        .quest-item { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #555; }
+        .quest-item.completed { border-color: #50b487; background: rgba(46, 125, 50, 0.3); }
+        .quest-title { font-size: 0.9rem; margin-bottom: 5px; color: #ccc; }
+        .quest-progress { font-weight: bold; color: #ffd700; }
+        .close-btn { background: #ff5252; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; margin-top: 10px; cursor: pointer; }
 
         /* === ИНТЕРФЕЙС ИГРЫ === */
         .guild-board { background-image: url('1000019094-removebg-preview.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; width: 390px; padding-top: 90px; padding-bottom: 80px; padding-left: 40px; padding-right: 40px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8)); margin-bottom: 20px; position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
         .level-container { color: #ffd700; font-size: 1.5rem; font-weight: bold; text-shadow: 1px 1px 2px #000; margin-bottom: 5px; z-index: 2; transition: transform 0.2s; }
-        .score-container { color: #1a0b02; font-size: 3.4rem; font-weight: bold; text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9); margin-bottom: 12px; z-index: 2; }
+        .score-container { color: #1a0b02; font-size: 3.4rem; font-weight: bold; text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.25), -1px -1px 2px rgba(0, 0, 0, 0.9); margin-bottom: 5px; z-index: 2; }
+        
+        .auto-mine-text { color: #a5d6a7; font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; text-shadow: 1px 1px 2px #000; z-index: 2; }
+
         .energy-wrapper { width: 65%; background-color: rgba(10, 5, 0, 0.5); border: 1px solid rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.15); border-radius: 8px; height: 12px; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); z-index: 2; }
         .energy-bar { height: 100%; width: 100%; background: linear-gradient(90deg, #2e7d32, #50b487, #81c784); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); transition: width 0.3s ease-out; }
         .energy-text { color: #ffeba1; font-size: 0.85rem; margin-top: 5px; margin-bottom: 10px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
+        
         .xp-wrapper { width: 65%; background-color: rgba(10, 5, 0, 0.5); border: 1px solid rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.15); border-radius: 8px; height: 12px; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.9); z-index: 2; }
         .xp-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1976d2, #42a5f5, #90caf9); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); transition: width 0.2s ease-out; }
         .xp-text { color: #90caf9; font-size: 0.85rem; margin-top: 5px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000, -1px -1px 1px rgba(0,0,0,0.8); z-index: 2; }
@@ -76,8 +75,13 @@
         .crystal-img { width: 280px; height: auto; filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 30px rgba(100, 255, 150, 0.4)); transition: transform 0.1s ease, filter 0.1s ease; cursor: pointer; }
         .crystal-img:active { transform: scale(0.95) translateY(5px); filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(100, 255, 150, 0.8)); }
         
-        .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 15; }
+        .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 15; white-space: nowrap; }
+        .floating-text.crit { color: #ff5252; font-size: 2.8rem; text-shadow: 0 0 15px #ff0000, 2px 2px 0px #000; animation: floatUpCrit 1.2s ease-out forwards; }
+        .floating-text.loot { color: #e040fb; font-size: 1.5rem; text-shadow: 0 0 15px #e040fb, 1px 1px 2px #000; animation: floatUpLoot 2s ease-out forwards; }
+        
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.5); opacity: 0; } }
+        @keyframes floatUpCrit { 0% { transform: translateY(0) scale(1.2); opacity: 1; } 20% { transform: translateY(-20px) scale(1.6); } 100% { transform: translateY(-100px) scale(1); opacity: 0; } }
+        @keyframes floatUpLoot { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
         
         .pickaxe-effect { position: absolute; width: 100px; height: auto; pointer-events: none; z-index: 50; transform-origin: bottom right; animation: mineStrike ease-in-out forwards; filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7)); }
         @keyframes mineStrike { 0% { transform: rotate(-30deg) scale(1.1); opacity: 0; } 30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 60% { transform: rotate(15deg) scale(1.1); opacity: 1; } 100% { transform: rotate(35deg) scale(0.9); opacity: 0; } }
@@ -88,18 +92,35 @@
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
+    <button class="quest-btn" onclick="toggleQuests()">📜 Квесты</button>
+
+    <div class="quest-modal" id="quest-modal">
+        <h2>Задания</h2>
+        <div class="quest-item" id="q1">
+            <div class="quest-title">Сделать 500 кликов (Награда: +500 XP)</div>
+            <div class="quest-progress" id="q1-prog">0 / 500</div>
+        </div>
+        <div class="quest-item" id="q2">
+            <div class="quest-title">Достичь 5 Уровня (Награда: +1000 XP)</div>
+            <div class="quest-progress" id="q2-prog">Ур. 1 / 5</div>
+        </div>
+        <div class="quest-item" id="q3">
+            <div class="quest-title">Потратить 1000 Энергии (Награда: +500 XP)</div>
+            <div class="quest-progress" id="q3-prog">0 / 1000</div>
+        </div>
+        <button class="close-btn" onclick="toggleQuests()">Закрыть</button>
+    </div>
+
     <div class="guild-board">
         <div class="level-container" id="level-container">Уровень <span id="level-text">1</span></div>
         <div class="score-container" id="score">0</div>
         
-        <div class="energy-wrapper">
-            <div class="energy-bar" id="energy-bar"></div>
-        </div>
+        <div class="auto-mine-text" id="auto-mine-text"></div>
+
+        <div class="energy-wrapper"><div class="energy-bar" id="energy-bar"></div></div>
         <div class="energy-text" id="energy-text">Загрузка...</div>
 
-        <div class="xp-wrapper">
-            <div class="xp-bar" id="xp-bar"></div>
-        </div>
+        <div class="xp-wrapper"><div class="xp-bar" id="xp-bar"></div></div>
         <div class="xp-text" id="xp-text">Опыт: 0 / 150</div>
     </div>
 
@@ -122,40 +143,21 @@
             function createLeaf() {
                 const leaf = document.createElement('div');
                 leaf.className = 'leaf';
-                
-                // Случайная стартовая позиция по ширине экрана
                 leaf.style.left = Math.random() * 100 + 'vw';
-                
-                // Случайный размер листика (от 0.6 до 1.2 от базового)
                 let scale = 0.6 + Math.random() * 0.6;
                 leaf.style.width = (15 * scale) + 'px';
                 leaf.style.height = (15 * scale) + 'px';
-
-                // Настраиваем анимацию: куда улетит лист и как сильно будет крутиться
-                let endX = (Math.random() - 0.5) * 300; // Отклонение влево/вправо
-                let rotation = (Math.random() > 0.5 ? 1 : -1) * (180 + Math.random() * 360); // Вращение
-                let duration = 6 + Math.random() * 6; // Время падения от 6 до 12 секунд
-
+                let endX = (Math.random() - 0.5) * 300; 
+                let rotation = (Math.random() > 0.5 ? 1 : -1) * (180 + Math.random() * 360); 
+                let duration = 6 + Math.random() * 6; 
                 leaf.style.setProperty('--end-x', endX + 'px');
                 leaf.style.setProperty('--rotation', rotation + 'deg');
                 leaf.style.animationDuration = duration + 's';
-
                 document.body.appendChild(leaf);
-
-                // Удаляем листик после падения, чтобы не засорять память
-                setTimeout(() => {
-                    leaf.remove();
-                }, duration * 1000);
+                setTimeout(() => { leaf.remove(); }, duration * 1000);
             }
-
-            // Создаем новый листик каждые 600 миллисекунд
             setInterval(createLeaf, 600);
-            
-            // Сразу спавним несколько листиков при старте
-            for(let i = 0; i < 5; i++) {
-                setTimeout(createLeaf, i * 200);
-            }
-
+            for(let i = 0; i < 5; i++) { setTimeout(createLeaf, i * 200); }
 
             // === БАЗОВАЯ ЛОГИКА ИГРЫ ===
             function getSafeNumber(key, fallback) {
@@ -171,10 +173,18 @@
             let level = getSafeNumber('mithrilLevel', 1);
             let xp = getSafeNumber('mithrilXP', 0);
             let lastTickTime = getSafeNumber('lastTickTime', Date.now());
+            
+            // Прогресс квестов
+            let qClicks = getSafeNumber('qClicks', 0);
+            let qEnergySpent = getSafeNumber('qEnergySpent', 0);
+            let q1Done = getSafeNumber('q1Done', 0);
+            let q2Done = getSafeNumber('q2Done', 0);
+            let q3Done = getSafeNumber('q3Done', 0);
 
             if (level < 1 || score < 0 || xp < 0) {
                 localStorage.clear();
                 score = 0; level = 1; xp = 0; lastTickTime = Date.now();
+                qClicks = 0; qEnergySpent = 0; q1Done = 0; q2Done = 0; q3Done = 0;
             }
             
             const MAX_CLICK_POWER = 100000;
@@ -188,11 +198,35 @@
             let energy = getSafeNumber('mithrilEnergy', maxEnergy);
             if (energy > maxEnergy || energy < 0) energy = maxEnergy;
             
-            let xpNeeded = Math.floor(150 * Math.pow(1.2, level - 1)); 
+            let xpNeeded = Math.floor(150 * Math.pow(2.5, level - 1)); 
             if (isNaN(xpNeeded) || xpNeeded < 150) xpNeeded = 150;
+
+            let autoMinePower = 0;
 
             const regenAmount = 100;
             let lastClickAnimTime = 0;
+
+            // === СИСТЕМА ЭВОЛЮЦИИ РУДЫ ===
+            function updateOreImage() {
+                let oreImg = document.getElementById('ore-img');
+                
+                // ТУТ ОСТАВЛЕНО МЕСТО ДЛЯ НОВОЙ РУДЫ!
+                // Просто загрузи картинку на Github и впиши её название в кавычки ниже:
+                if (level >= 100) {
+                    oreImg.src = '1000019091-removebg-preview.png'; // <--- Картинка для 100+ уровня
+                } else if (level >= 75) {
+                    oreImg.src = '1000019091-removebg-preview.png'; // <--- Картинка для 75+ уровня
+                } else if (level >= 50) {
+                    oreImg.src = '1000019091-removebg-preview.png'; // <--- Картинка для 50+ уровня
+                } else if (level >= 30) {
+                    oreImg.src = '1000019091-removebg-preview.png'; // <--- Картинка для 30+ уровня
+                } else if (level >= 15) {
+                    oreImg.src = '1000019091-removebg-preview.png'; // <--- Картинка для 15+ уровня
+                } else {
+                    oreImg.src = '1000019091-removebg-preview.png'; // Базовая руда (1-14 уровень)
+                }
+            }
+            updateOreImage();
 
             function saveData() {
                 try {
@@ -201,7 +235,62 @@
                     localStorage.setItem('mithrilXP', xp);
                     localStorage.setItem('mithrilEnergy', energy);
                     localStorage.setItem('lastTickTime', lastTickTime);
+                    
+                    localStorage.setItem('qClicks', qClicks);
+                    localStorage.setItem('qEnergySpent', qEnergySpent);
+                    localStorage.setItem('q1Done', q1Done);
+                    localStorage.setItem('q2Done', q2Done);
+                    localStorage.setItem('q3Done', q3Done);
                 } catch(e) {}
+            }
+
+            function toggleQuests() {
+                let m = document.getElementById('quest-modal');
+                m.style.display = m.style.display === 'block' ? 'none' : 'block';
+                updateQuestsUI();
+            }
+
+            function checkLevelUp() {
+                let leveledUp = false;
+                while (xp >= xpNeeded) {
+                    xp -= xpNeeded; 
+                    level++;
+                    xpNeeded = Math.floor(150 * Math.pow(2.5, level - 1)); 
+                    leveledUp = true;
+                }
+
+                if (leveledUp) {
+                    clickPower = Math.min(1 + (level - 1), MAX_CLICK_POWER);
+                    maxEnergy = Math.min(500 + (level - 1) * 10, MAX_ENERGY_LIMIT);
+                    regenIntervalMs = Math.max(300000 - (level - 1) * 200, MIN_REGEN_MS);
+                    // Энергия больше не восстанавливается автоматически!
+                    
+                    updateOreImage(); // Проверяем, не пора ли сменить картинку руды
+
+                    let lvlContainer = document.getElementById('level-container');
+                    lvlContainer.style.transform = "scale(1.3)";
+                    lvlContainer.style.color = "#fff";
+                    setTimeout(() => {
+                        lvlContainer.style.transform = "scale(1)";
+                        lvlContainer.style.color = "#ffd700";
+                    }, 300);
+                    
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                }
+            }
+
+            function updateQuestsUI() {
+                let q1p = document.getElementById('q1-prog');
+                if(q1Done) { q1p.innerText = "ВЫПОЛНЕНО"; document.getElementById('q1').className = "quest-item completed"; }
+                else { q1p.innerText = Math.min(qClicks, 500) + " / 500"; if(qClicks >= 500) { xp += 500; q1Done = 1; checkLevelUp(); updateQuestsUI(); } }
+                
+                let q2p = document.getElementById('q2-prog');
+                if(q2Done) { q2p.innerText = "ВЫПОЛНЕНО"; document.getElementById('q2').className = "quest-item completed"; }
+                else { q2p.innerText = "Ур. " + Math.min(level, 5) + " / 5"; if(level >= 5) { xp += 1000; q2Done = 1; checkLevelUp(); updateQuestsUI(); } }
+                
+                let q3p = document.getElementById('q3-prog');
+                if(q3Done) { q3p.innerText = "ВЫПОЛНЕНО"; document.getElementById('q3').className = "quest-item completed"; }
+                else { q3p.innerText = Math.min(qEnergySpent, 1000) + " / 1000"; if(qEnergySpent >= 1000) { xp += 500; q3Done = 1; checkLevelUp(); updateQuestsUI(); } }
             }
 
             function updateUI() {
@@ -209,6 +298,12 @@
                 document.getElementById('level-text').innerText = level;
                 document.getElementById('energy-bar').style.width = Math.min(100, (energy / maxEnergy) * 100) + '%';
                 
+                // АВТО-ДОБЫЧА UI
+                autoMinePower = level >= 5 ? Math.floor(level / 5) : 0;
+                let autoTxt = document.getElementById('auto-mine-text');
+                if(autoMinePower > 0) { autoTxt.innerText = `⛏ Авто-добыча: +${autoMinePower}/сек`; }
+                else { autoTxt.innerText = ''; }
+
                 textEl.style.color = "#ffeba1";
                 if (energy >= maxEnergy) {
                     textEl.innerText = `${energy} / ${maxEnergy} ⚡ (Макс)`;
@@ -220,7 +315,7 @@
                 }
 
                 document.getElementById('xp-bar').style.width = Math.min(100, (xp / xpNeeded) * 100) + '%';
-                document.getElementById('xp-text').innerText = `Опыт: ${xp} / ${xpNeeded}`;
+                document.getElementById('xp-text').innerText = `Опыт: ${Math.floor(xp)} / ${xpNeeded}`;
             }
 
             function checkRegen() {
@@ -230,101 +325,4 @@
                     if (passed >= regenIntervalMs) {
                         let ticks = Math.floor(passed / regenIntervalMs);
                         energy = Math.min(maxEnergy, energy + (ticks * regenAmount));
-                        lastTickTime += ticks * regenIntervalMs; 
-                        saveData();
-                    }
-                } else {
-                    lastTickTime = now;
-                }
-                updateUI();
-            }
-
-            checkRegen();
-            setInterval(checkRegen, 1000);
-
-            document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
-                if (energy >= 1) {
-                    if (energy === maxEnergy) lastTickTime = Date.now();
-                    
-                    energy--;
-                    score += clickPower;
-                    xp += clickPower; 
-                    
-                    let leveledUp = false;
-
-                    while (xp >= xpNeeded) {
-                        xp -= xpNeeded; 
-                        level++;
-                        xpNeeded = Math.floor(150 * Math.pow(1.2, level - 1)); 
-                        leveledUp = true;
-                    }
-
-                    if (leveledUp) {
-                        clickPower = Math.min(1 + (level - 1), MAX_CLICK_POWER);
-                        maxEnergy = Math.min(500 + (level - 1) * 10, MAX_ENERGY_LIMIT);
-                        regenIntervalMs = Math.max(300000 - (level - 1) * 200, MIN_REGEN_MS);
-                        energy = maxEnergy; 
-
-                        let lvlContainer = document.getElementById('level-container');
-                        lvlContainer.style.transform = "scale(1.3)";
-                        lvlContainer.style.color = "#fff";
-                        setTimeout(() => {
-                            lvlContainer.style.transform = "scale(1)";
-                            lvlContainer.style.color = "#ffd700";
-                        }, 300);
-                        
-                        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    }
-
-                    saveData();
-                    updateUI();
-
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
-
-                    let nowAnim = Date.now();
-                    let timeSinceLastClick = nowAnim - (lastClickAnimTime || nowAnim - 1000);
-                    lastClickAnimTime = nowAnim;
-                    let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
-
-                    const pickaxe = document.createElement('img');
-                    pickaxe.src = '1000019118-removebg-preview.png?v=fixed2'; 
-                    pickaxe.className = 'pickaxe-effect';
-                    pickaxe.style.left = `${e.clientX - 60}px`;
-                    pickaxe.style.top = `${e.clientY - 80}px`;
-                    pickaxe.style.animationDuration = `${animDuration}s`;
-                    document.body.appendChild(pickaxe);
-
-                    const plusOne = document.createElement('div');
-                    plusOne.className = 'floating-text';
-                    plusOne.innerText = `+${clickPower}`;
-                    plusOne.style.left = `${e.clientX - 15}px`;
-                    plusOne.style.top = `${e.clientY - 40}px`;
-                    document.body.appendChild(plusOne);
-
-                    const sparkCount = 6 + Math.floor(Math.random() * 3);
-                    for (let i = 0; i < sparkCount; i++) {
-                        const spark = document.createElement('div');
-                        spark.className = 'spark';
-                        spark.style.left = `${e.clientX + (Math.random() - 0.5) * 30}px`;
-                        spark.style.top = `${e.clientY - 10 + (Math.random() - 0.5) * 30}px`;
-                        spark.style.setProperty('--tx', `${(Math.random() - 0.5) * 160}px`);
-                        spark.style.setProperty('--ty', `${(Math.random() - 0.5) * 160}px`);
-                        document.body.appendChild(spark);
-                        setTimeout(() => spark.remove(), 600);
-                    }
-
-                    setTimeout(() => pickaxe.remove(), animDuration * 1000);
-                    setTimeout(() => plusOne.remove(), 1000);
-                } else {
-                    textEl.style.color = '#ff5252';
-                    setTimeout(() => textEl.style.color = '#ffeba1', 300);
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                }
-            });
-
-        } catch (err) {
-            if(textEl) { textEl.innerText = "ОШИБКА: " + err.message; textEl.style.color = "red"; }
-        }
-    </script>
-</body>
-</html>
+                        lastTickTime += ticks * regenI
