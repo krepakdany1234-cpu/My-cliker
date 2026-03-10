@@ -35,27 +35,6 @@
             100% { transform: translate(var(--end-x), 110vh) rotate(var(--rotation)); opacity: 0; }
         }
 
-        /* === КНОПКА И МЕНЮ КВЕСТОВ === */
-        .quest-btn {
-            position: absolute; top: 20px; left: 20px; z-index: 100;
-            background: rgba(40, 20, 10, 0.85); color: #ffd700; border: 2px solid #a67c00;
-            padding: 10px 15px; border-radius: 8px; font-weight: bold; font-family: 'Georgia', serif;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.1s;
-        }
-        .quest-btn:active { transform: scale(0.95); }
-        
-        .quest-modal {
-            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 320px; background: rgba(30, 15, 5, 0.95); border: 3px solid #ffd700; border-radius: 12px;
-            z-index: 200; padding: 20px; color: #fff; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.9);
-        }
-        .quest-modal h2 { margin-top: 0; color: #ffeba1; font-size: 1.5rem; text-shadow: 1px 1px 2px #000; }
-        .quest-item { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #555; }
-        .quest-item.completed { border-color: #50b487; background: rgba(46, 125, 50, 0.3); }
-        .quest-title { font-size: 0.9rem; margin-bottom: 5px; color: #ccc; }
-        .quest-progress { font-weight: bold; color: #ffd700; }
-        .close-btn { background: #ff5252; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; margin-top: 10px; cursor: pointer; }
-
         /* === ИНТЕРФЕЙС ИГРЫ === */
         .guild-board { background-image: url('1000019094-removebg-preview.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; width: 390px; padding-top: 90px; padding-bottom: 80px; padding-left: 40px; padding-right: 40px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8)); margin-bottom: 20px; position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
         .level-container { color: #ffd700; font-size: 1.5rem; font-weight: bold; text-shadow: 1px 1px 2px #000; margin-bottom: 5px; z-index: 2; transition: transform 0.2s; }
@@ -91,25 +70,6 @@
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
-
-    <button class="quest-btn" onclick="toggleQuests()">📜 Квесты</button>
-
-    <div class="quest-modal" id="quest-modal">
-        <h2>Задания</h2>
-        <div class="quest-item" id="q1">
-            <div class="quest-title">Сделать 500 кликов (Награда: +500 XP)</div>
-            <div class="quest-progress" id="q1-prog">0 / 500</div>
-        </div>
-        <div class="quest-item" id="q2">
-            <div class="quest-title">Достичь 5 Уровня (Награда: +1000 XP)</div>
-            <div class="quest-progress" id="q2-prog">Ур. 1 / 5</div>
-        </div>
-        <div class="quest-item" id="q3">
-            <div class="quest-title">Потратить 1000 Энергии (Награда: +500 XP)</div>
-            <div class="quest-progress" id="q3-prog">0 / 1000</div>
-        </div>
-        <button class="close-btn" onclick="toggleQuests()">Закрыть</button>
-    </div>
 
     <div class="guild-board">
         <div class="level-container" id="level-container">Уровень <span id="level-text">1</span></div>
@@ -173,18 +133,10 @@
             let level = getSafeNumber('mithrilLevel', 1);
             let xp = getSafeNumber('mithrilXP', 0);
             let lastTickTime = getSafeNumber('lastTickTime', Date.now());
-            
-            // Прогресс квестов
-            let qClicks = getSafeNumber('qClicks', 0);
-            let qEnergySpent = getSafeNumber('qEnergySpent', 0);
-            let q1Done = getSafeNumber('q1Done', 0);
-            let q2Done = getSafeNumber('q2Done', 0);
-            let q3Done = getSafeNumber('q3Done', 0);
 
             if (level < 1 || score < 0 || xp < 0) {
                 localStorage.clear();
                 score = 0; level = 1; xp = 0; lastTickTime = Date.now();
-                qClicks = 0; qEnergySpent = 0; q1Done = 0; q2Done = 0; q3Done = 0;
             }
             
             const MAX_CLICK_POWER = 100000;
@@ -211,7 +163,6 @@
                 let oreImg = document.getElementById('ore-img');
                 
                 // ТУТ ОСТАВЛЕНО МЕСТО ДЛЯ НОВОЙ РУДЫ!
-                // Просто загрузи картинку на Github и впиши её название в кавычки ниже:
                 if (level >= 100) {
                     oreImg.src = '1000019091-removebg-preview.png'; // <--- Картинка для 100+ уровня
                 } else if (level >= 75) {
@@ -235,19 +186,7 @@
                     localStorage.setItem('mithrilXP', xp);
                     localStorage.setItem('mithrilEnergy', energy);
                     localStorage.setItem('lastTickTime', lastTickTime);
-                    
-                    localStorage.setItem('qClicks', qClicks);
-                    localStorage.setItem('qEnergySpent', qEnergySpent);
-                    localStorage.setItem('q1Done', q1Done);
-                    localStorage.setItem('q2Done', q2Done);
-                    localStorage.setItem('q3Done', q3Done);
                 } catch(e) {}
-            }
-
-            function toggleQuests() {
-                let m = document.getElementById('quest-modal');
-                m.style.display = m.style.display === 'block' ? 'none' : 'block';
-                updateQuestsUI();
             }
 
             function checkLevelUp() {
@@ -277,20 +216,6 @@
                     
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 }
-            }
-
-            function updateQuestsUI() {
-                let q1p = document.getElementById('q1-prog');
-                if(q1Done) { q1p.innerText = "ВЫПОЛНЕНО"; document.getElementById('q1').className = "quest-item completed"; }
-                else { q1p.innerText = Math.min(qClicks, 500) + " / 500"; if(qClicks >= 500) { xp += 500; q1Done = 1; checkLevelUp(); updateQuestsUI(); } }
-                
-                let q2p = document.getElementById('q2-prog');
-                if(q2Done) { q2p.innerText = "ВЫПОЛНЕНО"; document.getElementById('q2').className = "quest-item completed"; }
-                else { q2p.innerText = "Ур. " + Math.min(level, 5) + " / 5"; if(level >= 5) { xp += 1000; q2Done = 1; checkLevelUp(); updateQuestsUI(); } }
-                
-                let q3p = document.getElementById('q3-prog');
-                if(q3Done) { q3p.innerText = "ВЫПОЛНЕНО"; document.getElementById('q3').className = "quest-item completed"; }
-                else { q3p.innerText = Math.min(qEnergySpent, 1000) + " / 1000"; if(qEnergySpent >= 1000) { xp += 500; q3Done = 1; checkLevelUp(); updateQuestsUI(); } }
             }
 
             function updateUI() {
@@ -325,4 +250,85 @@
                     if (passed >= regenIntervalMs) {
                         let ticks = Math.floor(passed / regenIntervalMs);
                         energy = Math.min(maxEnergy, energy + (ticks * regenAmount));
-                        lastTickTime += ticks * regenI
+                        lastTickTime += ticks * regenIntervalMs; 
+                        saveData();
+                    }
+                } else {
+                    lastTickTime = now;
+                }
+                updateUI();
+            }
+
+            // === АВТО-ДОБЫЧА (IDLE МЕХАНИКА) ===
+            setInterval(() => {
+                if (autoMinePower > 0) {
+                    score += autoMinePower;
+                    xp += autoMinePower;
+                    checkLevelUp();
+                    saveData();
+                    updateUI();
+                }
+            }, 1000);
+
+            checkRegen();
+            setInterval(checkRegen, 1000);
+
+            document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
+                if (energy >= 1) {
+                    if (energy === maxEnergy) lastTickTime = Date.now();
+                    
+                    energy--;
+
+                    let isCrit = Math.random() < 0.05;
+                    let isLoot = Math.random() < 0.005; 
+                    
+                    let damage = clickPower;
+                    if (isCrit) damage *= 5;
+
+                    score += damage;
+                    xp += damage; 
+                    
+                    if (isLoot) {
+                        energy = maxEnergy; // Мгновенное восстановление
+                        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    }
+
+                    checkLevelUp();
+                    saveData();
+                    updateUI();
+                    
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(isCrit ? 'heavy' : 'light');
+
+                    let nowAnim = Date.now();
+                    let timeSinceLastClick = nowAnim - (lastClickAnimTime || nowAnim - 1000);
+                    lastClickAnimTime = nowAnim;
+                    let animDuration = Math.max(0.15, Math.min(0.6, timeSinceLastClick / 1000));
+
+                    const pickaxe = document.createElement('img');
+                    pickaxe.src = '1000019118-removebg-preview.png?v=fixed2'; 
+                    pickaxe.className = 'pickaxe-effect';
+                    pickaxe.style.left = `${e.clientX - 60}px`;
+                    pickaxe.style.top = `${e.clientY - 80}px`;
+                    pickaxe.style.animationDuration = `${animDuration}s`;
+                    document.body.appendChild(pickaxe);
+
+                    const plusOne = document.createElement('div');
+                    plusOne.className = 'floating-text' + (isCrit ? ' crit' : '');
+                    plusOne.innerText = isCrit ? `КРИТ! +${damage}` : `+${damage}`;
+                    plusOne.style.left = `${e.clientX - 20}px`;
+                    plusOne.style.top = `${e.clientY - 40}px`;
+                    document.body.appendChild(plusOne);
+
+                    if (isLoot) {
+                        const lootText = document.createElement('div');
+                        lootText.className = 'floating-text loot';
+                        lootText.innerText = `✨ МАГИЧЕСКАЯ ПЫЛЬЦА! ✨`;
+                        lootText.style.left = `50%`;
+                        lootText.style.transform = `translateX(-50%)`;
+                        lootText.style.top = `${e.clientY - 80}px`;
+                        document.body.appendChild(lootText);
+                        setTimeout(() => lootText.remove(), 2000);
+                    }
+
+                    const sparkCount = 6 + Math.floor
+        
