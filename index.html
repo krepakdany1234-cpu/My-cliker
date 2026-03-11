@@ -53,7 +53,7 @@
         
         .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 15; white-space: nowrap; }
         
-        /* ОПТИМИЗИРОВАННЫЙ КРИТ: четкая черная обводка вместо красного размытия */
+        /* ОПТИМИЗИРОВАННЫЙ КРИТ */
         .floating-text.crit { 
             color: #ff5252; 
             font-size: 2.2rem; 
@@ -70,7 +70,7 @@
         .pickaxe-effect { position: absolute; width: 100px; height: auto; pointer-events: none; z-index: 50; transform-origin: bottom right; animation: mineStrike ease-in-out forwards; filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7)); }
         @keyframes mineStrike { 0% { transform: rotate(-30deg) scale(1.1); opacity: 0; } 30% { transform: rotate(-70deg) scale(1.4); opacity: 1; } 60% { transform: rotate(15deg) scale(1.1); opacity: 1; } 100% { transform: rotate(35deg) scale(0.9); opacity: 0; } }
         
-        /* ОПТИМИЗИРОВАННЫЕ ИСКРЫ: градиент вместо теней и will-change для видеокарты */
+        /* ОПТИМИЗИРОВАННЫЕ ИСКРЫ */
         .spark { 
             position: absolute; 
             width: 12px; 
@@ -103,6 +103,16 @@
     </div>
 
     <script>
+        // Глобальный отловщик синтаксических ошибок (поможет нам, если код сломается)
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            let el = document.getElementById('energy-text');
+            if(el) { 
+                el.innerText = `КРИТ. ОШИБКА (Стр. ${lineNo}): ${msg}`; 
+                el.style.color = "#ff5252"; 
+            }
+            return false;
+        };
+
         const textEl = document.getElementById('energy-text');
 
         try {
@@ -113,7 +123,6 @@
             let tg = null;
             try { if (window.Telegram && window.Telegram.WebApp) { tg = window.Telegram.WebApp; tg.expand(); } } catch(e) {}
 
-            // === ГЕНЕРАТОР РАЗНОЦВЕТНЫХ ЛИСТЬЕВ ===
             function createLeaf() {
                 const leaf = document.createElement('div');
                 leaf.className = 'leaf';
@@ -144,7 +153,6 @@
             setInterval(createLeaf, 600);
             for(let i = 0; i < 5; i++) { setTimeout(createLeaf, i * 200); }
 
-            // === БАЗОВАЯ ЛОГИКА ИГРЫ ===
             function getSafeNumber(key, fallback) {
                 try {
                     let val = localStorage.getItem(key);
@@ -181,10 +189,8 @@
             const regenAmount = 100;
             let lastClickAnimTime = 0;
 
-            // === СИСТЕМА ЭВОЛЮЦИИ РУДЫ ===
             function updateOreImage() {
                 let oreImg = document.getElementById('ore-img');
-                
                 if (level >= 100) {
                     oreImg.src = '1000019091-removebg-preview.png'; 
                 } else if (level >= 75) {
@@ -334,13 +340,11 @@
                         setTimeout(() => lootText.remove(), 2000);
                     }
 
-                    // Оптимизация количества искр: 4 при крите, 3 при обычном ударе
                     const sparkCount = isCrit ? 4 : 3;
                     for (let i = 0; i < sparkCount; i++) {
                         const spark = document.createElement('div');
                         spark.className = 'spark';
                         
-                        // Меняем цвет градиента для крита
                         if (isCrit) {
                             spark.style.background = 'radial-gradient(circle, #ffffff 10%, #ff5252 40%, transparent 80%)';
                         }
@@ -363,4 +367,4 @@
             });
 
         } catch (err) {
-            if(textEl) { textEl.innerText = "ОШИБКА: " + err.message; textEl.style.color = "
+            if(textEl) { textEl.innerText = "ОШИБКА: " + err.message; textEl.style.c
