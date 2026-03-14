@@ -167,20 +167,21 @@
             const regenAmount = 100;
             let lastClickAnimTime = 0;
 
+            // === ОБНОВЛЕННАЯ СИСТЕМА ЭВОЛЮЦИИ РУДЫ ===
             function updateOreImage() {
                 let oreImg = document.getElementById('ore-img');
                 if (level >= 100) {
-                    oreImg.src = '1000019091-removebg-preview.png'; 
+                    oreImg.src = 'Ruda100lvl.png'; 
                 } else if (level >= 75) {
-                    oreImg.src = '1000019091-removebg-preview.png'; 
+                    oreImg.src = 'Ruda75lvl.png'; 
                 } else if (level >= 50) {
-                    oreImg.src = '1000019091-removebg-preview.png'; 
+                    oreImg.src = 'Ruda50lvl.png'; 
                 } else if (level >= 30) {
-                    oreImg.src = '1000019091-removebg-preview.png'; 
+                    oreImg.src = 'Ruda30lvl.png'; 
                 } else if (level >= 15) {
-                    oreImg.src = '1000019091-removebg-preview.png'; 
+                    oreImg.src = 'Ruda15lvl.png'; // Твоя новая руда для 15 уровня
                 } else {
-                    oreImg.src = '1000019091-removebg-preview.png'; 
+                    oreImg.src = '1000019091-removebg-preview.png'; // Базовая руда
                 }
             }
             updateOreImage();
