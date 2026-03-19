@@ -17,8 +17,10 @@
         body { 
             margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; 
             font-family: 'Georgia', serif; overflow: hidden; 
+            /* Стартовый фон задается здесь, но теперь будет меняться скриптом */
             background-image: url('IMG_20260311_002626.png');
             background-size: cover; background-position: center; background-color: #1a2f24;
+            transition: background-image 0.5s ease-in-out; /* Плавная смена фона */
         }
 
         .leaf {
@@ -167,7 +169,7 @@
             const regenAmount = 100;
             let lastClickAnimTime = 0;
 
-            // === ОБНОВЛЕННАЯ СИСТЕМА ЭВОЛЮЦИИ РУДЫ ===
+            // === СИСТЕМА ЭВОЛЮЦИИ РУДЫ ===
             function updateOreImage() {
                 let oreImg = document.getElementById('ore-img');
                 if (level >= 100) {
@@ -179,12 +181,26 @@
                 } else if (level >= 30) {
                     oreImg.src = 'Ruda30lvl.png'; 
                 } else if (level >= 15) {
-                    oreImg.src = 'Ruda15lvl.png'; // Твоя новая руда для 15 уровня
+                    oreImg.src = 'Ruda15lvl.png'; 
                 } else {
-                    oreImg.src = '1000019091-removebg-preview.png'; // Базовая руда
+                    oreImg.src = '1000019091-removebg-preview.png'; 
                 }
             }
+
+            // === СИСТЕМА СМЕНЫ ФОНА ===
+            function updateBackgroundImage() {
+                if (level >= 15) {
+                    // Новый фон для 15+ уровня
+                    document.body.style.backgroundImage = "url('Fon15lvl.png')";
+                } else {
+                    // Базовый фон
+                    document.body.style.backgroundImage = "url('IMG_20260311_002626.png')";
+                }
+            }
+
+            // Вызываем обе функции при старте
             updateOreImage();
+            updateBackgroundImage();
 
             function saveData() {
                 try {
@@ -211,6 +227,7 @@
                     regenIntervalMs = Math.max(300000 - (level - 1) * 200, MIN_REGEN_MS);
                     
                     updateOreImage(); 
+                    updateBackgroundImage(); // Проверяем фон при левелапе
 
                     let lvlContainer = document.getElementById('level-container');
                     lvlContainer.style.transform = "scale(1.3)";
@@ -341,13 +358,4 @@
                 } else {
                     textEl.style.color = '#ff5252';
                     setTimeout(() => textEl.style.color = '#ffeba1', 300);
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                }
-            });
-
-        } catch (err) {
-            if(textEl) { textEl.innerText = "ОШИБКА: " + err.message; textEl.style.color = "red"; }
-        }
-    </script>
-</body>
-</html>
+          
