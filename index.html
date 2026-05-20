@@ -46,12 +46,15 @@
         .xp-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1976d2, #42a5f5, #90caf9); transition: width 0.2s ease-out; }
         .xp-text { color: #90caf9; font-size: 0.85rem; margin-top: 4px; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 3px #000; z-index: 2; }
         
-        /* Кристалл по центру */
-        .ore-wrapper { flex-grow: 1; display: flex; justify-content: center; align-items: center; -webkit-tap-highlight-color: transparent; z-index: 10; margin: 15px 0; }
-        .crystal-img { width: 260px; height: auto; filter: drop-shadow(0 20px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 25px rgba(100, 255, 150, 0.3)); transition: transform 0.08s ease; cursor: pointer; }
-        .crystal-img:active { transform: scale(0.93) translateY(3px); }
+        /* Зона клика вокруг кристалла */
+        .ore-wrapper { flex-grow: 1; display: flex; justify-content: center; align-items: center; -webkit-tap-highlight-color: transparent; z-index: 10; margin: 15px 0; cursor: pointer; width: 100%; max-width: 340px; }
         
-        /* Магазин под кристаллом */
+        /* Сама картинка — pointer-events: none запрещает браузеру вызывать меню скачивания */
+        .crystal-img { width: 260px; height: auto; filter: drop-shadow(0 20px 15px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 25px rgba(100, 255, 150, 0.3)); transition: transform 0.08s ease; pointer-events: none; -webkit-touch-callout: none; }
+        
+        /* Анимация сжатия теперь срабатывает при нажатии на ВСЮ зону */
+        .ore-wrapper:active .crystal-img { transform: scale(0.93) translateY(3px); }
+        
         .shop-container { display: flex; gap: 10px; width: 90%; max-width: 380px; justify-content: center; z-index: 20; margin-bottom: 10px; }
         .shop-btn { flex: 1; background: linear-gradient(180deg, #8d6e63, #4e342e); border: 2px solid #3e2723; border-radius: 10px; color: #fff; padding: 10px 5px; text-align: center; font-family: 'Georgia', serif; font-size: 0.85rem; font-weight: bold; text-shadow: 1px 1px 2px #000; box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.1s; }
         .shop-btn:active { transform: scale(0.95); box-shadow: 0 2px 3px rgba(0,0,0,0.6); }
@@ -59,11 +62,9 @@
 
         .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 15; white-space: nowrap; }
         .floating-text.crit { color: #ff5252; font-size: 2.2rem; text-shadow: 2px 2px 0px #000, -1px -1px 0px #000; animation: floatUpCrit 1.2s ease-out forwards; }
-        .floating-text.loot { color: #e040fb; font-size: 1.5rem; text-shadow: 0 0 15px #e040fb, 1px 1px 2px #000; animation: floatUpLoot 2s ease-out forwards; }
         
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.4); opacity: 0; } }
         @keyframes floatUpCrit { 0% { transform: translateY(0) scale(1.2); opacity: 1; } 100% { transform: translateY(-90px) scale(1); opacity: 0; } }
-        @keyframes floatUpLoot { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-130px); opacity: 0; } }
         
         .pickaxe-effect { position: absolute; width: 90px; height: auto; pointer-events: none; z-index: 50; transform-origin: bottom right; animation: mineStrike 0.25s ease-in-out forwards; filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7)); }
         @keyframes mineStrike { 0% { transform: rotate(-30deg) scale(1.1); opacity: 0; } 30% { transform: rotate(-60deg) scale(1.3); opacity: 1; } 100% { transform: rotate(25deg) scale(0.9); opacity: 0; } }
@@ -79,13 +80,13 @@
         <div class="score-container" id="score">0</div>
         
         <div class="energy-wrapper"><div class="energy-bar" id="energy-bar"></div></div>
-        <div class="energy-text" id="energy-text">Инициализация v4...</div>
+        <div class="energy-text" id="energy-text">Инициализация v4.1...</div>
 
         <div class="xp-wrapper"><div class="xp-bar" id="xp-bar"></div></div>
         <div class="xp-text" id="xp-text">Опыт: 0 / 150</div>
     </div>
 
-    <div class="ore-wrapper">
+    <div class="ore-wrapper" id="ore-click-zone">
         <img src="1000019091-removebg-preview.png" alt="Кристалл" class="crystal-img" id="ore-img" draggable="false">
     </div>
 
@@ -109,7 +110,6 @@
             let tg = null;
             try { if (window.Telegram && window.Telegram.WebApp) { tg = window.Telegram.WebApp; tg.expand(); } } catch(e) {}
 
-            // Проверка хранилища
             let storageAvailable = false;
             try {
                 localStorage.setItem('test', '1');
@@ -125,17 +125,14 @@
                 return isNaN(n) ? fallback : n;
             }
 
-            // Загрузка базовых данных
             let score = getNum('mithrilScore', 0);
             let level = getNum('mithrilLevel', 1);
             let xp = getNum('mithrilXP', 0);
             let lastTickTime = getNum('lastTickTime', Date.now());
 
-            // Загрузка уровней улучшений из магазина
             let clickUpgradeLvl = getNum('clickUpgradeLvl', 0);
             let energyUpgradeLvl = getNum('energyUpgradeLvl', 0);
 
-            // Формулы расчёта параметров
             function getClickPower() { return 1 + (level - 1) + clickUpgradeLvl; }
             function getMaxEnergy() { return 500 + (level - 1) * 10 + (energyUpgradeLvl * 50); }
             function getRegenInterval() { return Math.max(60000, 300000 - (level - 1) * 200 - (energyUpgradeLvl * 5000)); }
@@ -144,11 +141,9 @@
             let energy = getNum('mithrilEnergy', getMaxEnergy());
             if (energy > getMaxEnergy() || energy < 0) energy = getMaxEnergy();
 
-            // Цены в магазине
             function getClickCost() { return Math.floor(15 * Math.pow(1.5, clickUpgradeLvl)); }
             function getEnergyCost() { return Math.floor(25 * Math.pow(1.6, energyUpgradeLvl)); }
 
-            // Листья
             function createLeaf() {
                 const leaf = document.createElement('div');
                 leaf.className = 'leaf';
@@ -164,14 +159,13 @@
             }
             setInterval(createLeaf, 800);
 
-            // Логика смены графики (Включая твои новые файлы!)
             function updateVisuals() {
                 let oreImg = document.getElementById('ore-img');
                 if (!oreImg) return;
 
                 if (level >= 30) {
-                    oreImg.src = '1000020138.png'; // Твой шикарный фиолетовый кристалл!
-                    document.body.style.backgroundImage = "url('1000020141.png')"; // Твоя неоновая пещера!
+                    oreImg.src = '1000020138.png'; 
+                    document.body.style.backgroundImage = "url('1000020141.png')"; 
                 } else if (level >= 15) {
                     oreImg.src = 'Ruda15lvl.png'; 
                     document.body.style.backgroundImage = "url('Fon15lvl.png')";
@@ -215,12 +209,10 @@
                 document.getElementById('xp-bar').style.width = Math.min(100, (xp / xpn) * 100) + '%';
                 document.getElementById('xp-text').innerText = `Опыт: ${Math.floor(xp)} / ${xpn}`;
 
-                // Обновление цен в кнопках
                 document.getElementById('click-cost').innerText = `Цена: ${getClickCost()}`;
                 document.getElementById('energy-cost').innerText = `Цена: ${getEnergyCost()}`;
             }
 
-            // Обработчики Магазина
             document.getElementById('upgrade-click-btn').addEventListener('click', function() {
                 let cost = getClickCost();
                 if (score >= cost) {
@@ -247,23 +239,21 @@
                 }
             });
 
-            // Клик по кристаллу
-            document.getElementById('ore-img').addEventListener('pointerdown', function(e) {
+            // Клик теперь обрабатывает вся зона ore-click-zone, а не картинка напрямую
+            document.getElementById('ore-click-zone').addEventListener('pointerdown', function(e) {
+                e.preventDefault(); // Глушим стандартное поведение браузера
+                
                 if (energy >= 1) {
                     let mx = getMaxEnergy();
                     if (energy === mx) lastTickTime = Date.now();
                     energy--;
 
                     let isCrit = Math.random() < 0.02;
-                    let isLoot = Math.random() < 0.005;
                     let dmg = getClickPower();
                     if (isCrit) dmg *= 5;
 
                     score += dmg; xp += dmg;
 
-                    if (isLoot) { energy = mx; }
-
-                    // Уровень вверх
                     let xpn = getXpNeeded();
                     while (xp >= xpn) {
                         xp -= xpn; level++;
@@ -279,7 +269,6 @@
                     saveAll(); updateUI();
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(isCrit ? 'heavy' : 'light');
 
-                    // Анимация текста + цифры
                     const plus = document.createElement('div');
                     plus.className = 'floating-text' + (isCrit ? ' crit' : '');
                     plus.innerText = `+${dmg}`;
@@ -287,7 +276,6 @@
                     document.body.appendChild(plus);
                     setTimeout(() => plus.remove(), 1100);
 
-                    // Кирка
                     const pick = document.createElement('img');
                     pick.src = '1000019118-removebg-preview.png';
                     pick.className = 'pickaxe-effect';
@@ -295,7 +283,6 @@
                     document.body.appendChild(pick);
                     setTimeout(() => pick.remove(), 250);
 
-                    // Искры
                     for (let i = 0; i < (isCrit ? 5 : 3); i++) {
                         const spark = document.createElement('div');
                         spark.className = 'spark';
@@ -313,7 +300,6 @@
                 }
             });
 
-            // Регенерация
             setInterval(function() {
                 let mx = getMaxEnergy();
                 if (energy < mx) {
@@ -336,4 +322,5 @@
         }
     </script>
 </body>
-</html>
+    </html>
+    
