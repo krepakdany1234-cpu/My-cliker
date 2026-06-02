@@ -22,7 +22,7 @@
             transition: background-image 0.5s ease-in-out;
         }
 
-        /* Универсальный контейнер для листьев, камушков и пыли */
+        /* Адаптивные частицы (листья, камни, пыль) */
         .particle {
             position: absolute; top: -10%; 
             pointer-events: none; z-index: 1; 
@@ -61,9 +61,6 @@
         .floating-text { position: absolute; color: #a5d6a7; font-size: 1.8rem; font-weight: bold; pointer-events: none; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px #50b487, 1px 1px 2px #000; z-index: 15; white-space: nowrap; }
         .floating-text.crit { color: #ff5252; font-size: 2.2rem; text-shadow: 2px 2px 0px #000, -1px -1px 0px #000; animation: floatUpCrit 1.2s ease-out forwards; }
         
-        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.4); opacity: 0; } }
-        @keyframes floatUpCrit { 0% { transform: translateY(0) scale(1.2); opacity: 1; } 100% { transform: translateY(-90px) scale(1); opacity: 0; } }
-        
         .pickaxe-effect { position: absolute; width: 90px; height: auto; pointer-events: none; z-index: 50; transform-origin: bottom right; animation: mineStrike 0.25s ease-in-out forwards; filter: drop-shadow(3px 5px 5px rgba(0,0,0,0.7)); }
         @keyframes mineStrike { 0% { transform: rotate(-30deg) scale(1.1); opacity: 0; } 30% { transform: rotate(-60deg) scale(1.3); opacity: 1; } 100% { transform: rotate(25deg) scale(0.9); opacity: 0; } }
         
@@ -78,7 +75,7 @@
         <div class="score-container" id="score">0</div>
         
         <div class="energy-wrapper"><div class="energy-bar" id="energy-bar"></div></div>
-        <div class="energy-text" id="energy-text">Инициализация v4.2...</div>
+        <div class="energy-text" id="energy-text">Загрузка модулей v4.3...</div>
 
         <div class="xp-wrapper"><div class="xp-bar" id="xp-bar"></div></div>
         <div class="xp-text" id="xp-text">Опыт: 0 / 150</div>
@@ -94,159 +91,165 @@
     </div>
 
     <script>
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И НАСТРОЙКИ (Верхний безопасный уровень)
+        var tg = null;
+        var storageAvailable = false;
+        var score = 0, level = 1, xp = 0, lastTickTime = Date.now();
+        var clickUpgradeLvl = 0, energyUpgradeLvl = 0, energy = 500;
+        var textEl = null;
+
+        // Глобальный перехватчик критических ошибок
         window.onerror = function(msg, url, lineNo) {
             var el = document.getElementById('energy-text');
-            if(el) { el.innerText = "ОШИБКА КОДА: " + msg; el.style.color = "#ff5252"; }
+            if(el) { el.innerText = "ОШИБКА БРАУЗЕРА: " + msg; el.style.color = "#ff5252"; }
             return false;
         };
-    </script>
 
-    <script>
-        const textEl = document.getElementById('energy-text');
+        // ФУНКЦИИ РАСЧЕТОВ И ЛОГИКИ
+        function getNum(key, fallback) {
+            if (!storageAvailable) return fallback;
+            var v = localStorage.getItem(key);
+            if (v === null || v === undefined || v === 'NaN') return fallback;
+            var n = parseInt(v);
+            return isNaN(n) ? fallback : n;
+        }
 
+        function getClickPower() { return 1 + (level - 1) + clickUpgradeLvl; }
+        function getMaxEnergy() { return 500 + (level - 1) * 10 + (energyUpgradeLvl * 50); }
+        function getRegenInterval() { return Math.max(60000, 300000 - (level - 1) * 200 - (energyUpgradeLvl * 5000)); }
+        function getXpNeeded() { return Math.floor(150 * Math.pow(1.4, level - 1)); }
+        function getClickCost() { return Math.floor(15 * Math.pow(1.5, clickUpgradeLvl)); }
+        function getEnergyCost() { return Math.floor(25 * Math.pow(1.6, energyUpgradeLvl)); }
+
+        // Генератор адаптивных эффектов окружения
+        function createParticle() {
+            var particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            var scale = 0.5 + Math.random() * 0.5;
+
+            if (level < 15) {
+                // До 15 уровня: Листья
+                particle.style.background = Math.random() < 0.6 ? 'linear-gradient(135deg, #f8bbd0, #e91e63)' : 'linear-gradient(135deg, #4caf50, #1b5e20)';
+                particle.style.borderRadius = '0 50% 0 50%';
+                particle.style.width = (15 * scale) + 'px'; 
+                particle.style.height = (15 * scale) + 'px';
+            } else {
+                // После 15 уровня: Осыпание шахты
+                if (Math.random() < 0.4) {
+                    // Каменная крошка
+                    particle.style.background = 'linear-gradient(135deg, #757575, #424242)';
+                    particle.style.borderRadius = '30% 60% 40% 70%';
+                    particle.style.width = (8 * scale) + 'px'; 
+                    particle.style.height = (6 * scale) + 'px';
+                } else {
+                    // Шахтная пыль (Золотая или Фиолетовая на 30+)
+                    var dustColor = level >= 30 ? '#b388ff' : '#ffd700'; 
+                    particle.style.background = dustColor;
+                    particle.style.borderRadius = '50%';
+                    particle.style.width = (3 * scale) + 'px'; 
+                    particle.style.height = (3 * scale) + 'px';
+                    particle.style.boxShadow = '0 0 6px ' + dustColor;
+                }
+            }
+
+            particle.style.setProperty('--end-x', ((Math.random() - 0.5) * 150) + 'px');
+            particle.style.setProperty('--rotation', ((Math.random() > 0.5 ? 1 : -1) * 360) + 'deg');
+            var dur = level < 15 ? (6 + Math.random() * 5) : (2.5 + Math.random() * 2.5); 
+            particle.style.animationDuration = dur + 's';
+            
+            document.body.appendChild(particle);
+            setTimeout(function() { particle.remove(); }, dur * 1000);
+        }
+
+        function updateVisuals() {
+            var oreImg = document.getElementById('ore-img');
+            if (!oreImg) return;
+            if (level >= 30) {
+                oreImg.src = '1000020138.png'; 
+                document.body.style.backgroundImage = "url('1000020141.png')"; 
+            } else if (level >= 15) {
+                oreImg.src = 'Ruda15lvl.png'; 
+                document.body.style.backgroundImage = "url('Fon15lvl.png')";
+            } else {
+                oreImg.src = '1000019091-removebg-preview.png'; 
+                document.body.style.backgroundImage = "url('IMG_20260311_002626.png')";
+            }
+        }
+
+        function saveAll() {
+            if (!storageAvailable) return;
+            try {
+                localStorage.setItem('mithrilScore', score);
+                localStorage.setItem('mithrilLevel', level);
+                localStorage.setItem('mithrilXP', xp);
+                localStorage.setItem('mithrilEnergy', energy);
+                localStorage.setItem('lastTickTime', lastTickTime);
+                localStorage.setItem('clickUpgradeLvl', clickUpgradeLvl);
+                localStorage.setItem('energyUpgradeLvl', energyUpgradeLvl);
+            } catch(e) {}
+        }
+
+        function updateUI() {
+            if (!textEl) return;
+            document.getElementById('score').innerText = score;
+            document.getElementById('level-text').innerText = level;
+            
+            var mx = getMaxEnergy();
+            document.getElementById('energy-bar').style.width = Math.min(100, (energy / mx) * 100) + '%';
+            textEl.style.color = "#ffeba1";
+
+            if (energy >= mx) {
+                textEl.innerText = energy + " / " + mx + " ⚡ (Макс)";
+            } else {
+                var timeLeft = Math.max(0, getRegenInterval() - (Date.now() - lastTickTime));
+                var m = Math.floor(timeLeft / 60000); 
+                var s = Math.floor((timeLeft % 60000) / 1000);
+                textEl.innerText = energy + " / " + mx + " ⚡ (+" + 100 + " через " + m + ":" + (s < 10 ? '0' : '') + s + ")";
+            }
+
+            var xpn = getXpNeeded();
+            document.getElementById('xp-bar').style.width = Math.min(100, (xp / xpn) * 100) + '%';
+            document.getElementById('xp-text').innerText = "Опыт: " + Math.floor(xp) + " / " + xpn;
+            document.getElementById('click-cost').innerText = "Цена: " + getClickCost();
+            document.getElementById('energy-cost').innerText = "Цена: " + getEnergyCost();
+        }
+
+        // ЗАПУСК ИГРЫ ПОСЛЕ ЗАГРУЗКИ СТРАНИЦЫ
         try {
-            let tg = null;
+            textEl = document.getElementById('energy-text');
+
+            // Безопасное подключение Telegram WebApp
             try { if (window.Telegram && window.Telegram.WebApp) { tg = window.Telegram.WebApp; tg.expand(); } } catch(e) {}
 
-            let storageAvailable = false;
+            // Безопасная проверка локального хранилища
             try {
                 localStorage.setItem('test', '1');
                 localStorage.removeItem('test');
                 storageAvailable = true;
             } catch(e) { storageAvailable = false; }
 
-            function getNum(key, fallback) {
-                if (!storageAvailable) return fallback;
-                let v = localStorage.getItem(key);
-                if (v === null || v === undefined || v === 'NaN') return fallback;
-                let n = parseInt(v);
-                return isNaN(n) ? fallback : n;
-            }
+            // Извлечение сохраненных значений
+            score = getNum('mithrilScore', 0);
+            level = getNum('mithrilLevel', 1);
+            xp = getNum('mithrilXP', 0);
+            lastTickTime = getNum('lastTickTime', Date.now());
+            clickUpgradeLvl = getNum('clickUpgradeLvl', 0);
+            energyUpgradeLvl = getNum('energyUpgradeLvl', 0);
 
-            let score = getNum('mithrilScore', 0);
-            let level = getNum('mithrilLevel', 1);
-            let xp = getNum('mithrilXP', 0);
-            let lastTickTime = getNum('lastTickTime', Date.now());
-
-            let clickUpgradeLvl = getNum('clickUpgradeLvl', 0);
-            let energyUpgradeLvl = getNum('energyUpgradeLvl', 0);
-
-            function getClickPower() { return 1 + (level - 1) + clickUpgradeLvl; }
-            function getMaxEnergy() { return 500 + (level - 1) * 10 + (energyUpgradeLvl * 50); }
-            function getRegenInterval() { return Math.max(60000, 300000 - (level - 1) * 200 - (energyUpgradeLvl * 5000)); }
-            function getXpNeeded() { return Math.floor(150 * Math.pow(1.4, level - 1)); }
-
-            let energy = getNum('mithrilEnergy', getMaxEnergy());
+            energy = getNum('mithrilEnergy', getMaxEnergy());
             if (energy > getMaxEnergy() || energy < 0) energy = getMaxEnergy();
 
-            function getClickCost() { return Math.floor(15 * Math.pow(1.5, clickUpgradeLvl)); }
-            function getEnergyCost() { return Math.floor(25 * Math.pow(1.6, energyUpgradeLvl)); }
-
-            // Новая адаптивная система фоновых эффектов
-            function createParticle() {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + 'vw';
-                
-                let scale = 0.5 + Math.random() * 0.5;
-
-                if (level < 15) {
-                    // Локация 1: Зеленые и розовые листья
-                    particle.style.background = Math.random() < 0.6 ? 'linear-gradient(135deg, #f8bbd0, #e91e63)' : 'linear-gradient(135deg, #4caf50, #1b5e20)';
-                    particle.style.borderRadius = '0 50% 0 50%';
-                    particle.style.width = (15 * scale) + 'px'; 
-                    particle.style.height = (15 * scale) + 'px';
-                } else {
-                    // Локация 2 и 3: Осыпание камней и шахтной пыли
-                    if (Math.random() < 0.4) {
-                        // Кусочки каменной породы
-                        particle.style.background = 'linear-gradient(135deg, #757575, #424242)';
-                        particle.style.borderRadius = '30% 60% 40% 70%';
-                        particle.style.width = (8 * scale) + 'px'; 
-                        particle.style.height = (6 * scale) + 'px';
-                    } else {
-                        // Светящаяся пыль (золотая для 15+, фиолетовая для 30+)
-                        let dustColor = level >= 30 ? '#b388ff' : '#ffd700'; 
-                        particle.style.background = dustColor;
-                        particle.style.borderRadius = '50%';
-                        particle.style.width = (3 * scale) + 'px'; 
-                        particle.style.height = (3 * scale) + 'px';
-                        particle.style.boxShadow = `0 0 6px ${dustColor}`;
-                    }
-                }
-
-                particle.style.setProperty('--end-x', ((Math.random() - 0.5) * 150) + 'px');
-                particle.style.setProperty('--rotation', ((Math.random() > 0.5 ? 1 : -1) * 360) + 'deg');
-                
-                // Камни падают быстрее листьев
-                let dur = level < 15 ? (6 + Math.random() * 5) : (2.5 + Math.random() * 2.5); 
-                particle.style.animationDuration = dur + 's';
-                
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), dur * 1000);
-            }
-            // Пускаем частицы чуть чаще (раз в 500мс), так как пыль мелкая
+            // Первый запуск интерфейса
+            updateVisuals();
+            updateUI();
             setInterval(createParticle, 500);
 
-            function updateVisuals() {
-                let oreImg = document.getElementById('ore-img');
-                if (!oreImg) return;
-
-                if (level >= 30) {
-                    oreImg.src = '1000020138.png'; 
-                    document.body.style.backgroundImage = "url('1000020141.png')"; 
-                } else if (level >= 15) {
-                    oreImg.src = 'Ruda15lvl.png'; 
-                    document.body.style.backgroundImage = "url('Fon15lvl.png')";
-                } else {
-                    oreImg.src = '1000019091-removebg-preview.png'; 
-                    document.body.style.backgroundImage = "url('IMG_20260311_002626.png')";
-                }
-            }
-            updateVisuals();
-
-            function saveAll() {
-                if (!storageAvailable) return;
-                try {
-                    localStorage.setItem('mithrilScore', score);
-                    localStorage.setItem('mithrilLevel', level);
-                    localStorage.setItem('mithrilXP', xp);
-                    localStorage.setItem('mithrilEnergy', energy);
-                    localStorage.setItem('lastTickTime', lastTickTime);
-                    localStorage.setItem('clickUpgradeLvl', clickUpgradeLvl);
-                    localStorage.setItem('energyUpgradeLvl', energyUpgradeLvl);
-                } catch(e) {}
-            }
-
-            function updateUI() {
-                document.getElementById('score').innerText = score;
-                document.getElementById('level-text').innerText = level;
-                
-                let mx = getMaxEnergy();
-                document.getElementById('energy-bar').style.width = Math.min(100, (energy / mx) * 100) + '%';
-
-                textEl.style.color = "#ffeba1";
-                if (energy >= mx) {
-                    textEl.innerText = `${energy} / ${mx} ⚡ (Макс)`;
-                } else {
-                    let timeLeft = Math.max(0, getRegenInterval() - (Date.now() - lastTickTime));
-                    let m = Math.floor(timeLeft / 60000); let s = Math.floor((timeLeft % 60000) / 1000);
-                    textEl.innerText = `${energy} / ${mx} ⚡ (+100 через ${m}:${s < 10 ? '0' : ''}${s})`;
-                }
-
-                let xpn = getXpNeeded();
-                document.getElementById('xp-bar').style.width = Math.min(100, (xp / xpn) * 100) + '%';
-                document.getElementById('xp-text').innerText = `Опыт: ${Math.floor(xp)} / ${xpn}`;
-
-                document.getElementById('click-cost').innerText = `Цена: ${getClickCost()}`;
-                document.getElementById('energy-cost').innerText = `Цена: ${getEnergyCost()}`;
-            }
-
+            // Обработчики магазина кликов
             document.getElementById('upgrade-click-btn').addEventListener('click', function() {
-                let cost = getClickCost();
+                var cost = getClickCost();
                 if (score >= cost) {
-                    score -= cost;
-                    clickUpgradeLvl++;
+                    score -= cost; clickUpgradeLvl++;
                     saveAll(); updateUI();
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 } else {
@@ -254,13 +257,12 @@
                 }
             });
 
+            // Обработчики магазина энергии
             document.getElementById('upgrade-energy-btn').addEventListener('click', function() {
-                let cost = getEnergyCost();
+                var cost = getEnergyCost();
                 if (score >= cost) {
-                    score -= cost;
-                    energyUpgradeLvl++;
-                    let mx = getMaxEnergy();
-                    if(energy > mx) energy = mx;
+                    score -= cost; energyUpgradeLvl++;
+                    var mx = getMaxEnergy(); if(energy > mx) energy = mx;
                     saveAll(); updateUI();
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 } else {
@@ -268,73 +270,73 @@
                 }
             });
 
+            // Зона клика по руде
             document.getElementById('ore-click-zone').addEventListener('pointerdown', function(e) {
                 e.preventDefault(); 
-                
                 if (energy >= 1) {
-                    let mx = getMaxEnergy();
+                    var mx = getMaxEnergy();
                     if (energy === mx) lastTickTime = Date.now();
                     energy--;
 
-                    let isCrit = Math.random() < 0.02;
-                    let dmg = getClickPower();
-                    if (isCrit) dmg *= 5;
+                    var isCrit = Math.random() < 0.02;
+                    var dmg = getClickPower(); if (isCrit) dmg *= 5;
 
                     score += dmg; xp += dmg;
-
-                    let xpn = getXpNeeded();
+                    var xpn = getXpNeeded();
                     while (xp >= xpn) {
-                        xp -= xpn; level++;
-                        xpn = getXpNeeded();
+                        xp -= xpn; level++; xpn = getXpNeeded();
                         updateVisuals();
-                        let container = document.getElementById('level-container');
+                        var container = document.getElementById('level-container');
                         if (container) {
                             container.style.transform = "scale(1.2)";
-                            setTimeout(() => container.style.transform = "scale(1)", 200);
+                            setTimeout(function() { container.style.transform = "scale(1)"; }, 200);
                         }
                     }
 
                     saveAll(); updateUI();
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(isCrit ? 'heavy' : 'light');
 
-                    const plus = document.createElement('div');
+                    var plus = document.createElement('div');
                     plus.className = 'floating-text' + (isCrit ? ' crit' : '');
-                    plus.innerText = `+${dmg}`;
-                    plus.style.left = `${e.clientX - 15}px`; plus.style.top = `${e.clientY - 35}px`;
+                    plus.innerText = "+" + dmg;
+                    plus.style.left = (e.clientX - 15) + 'px'; plus.style.top = (e.clientY - 35) + 'px';
                     document.body.appendChild(plus);
-                    setTimeout(() => plus.remove(), 1100);
+                    setTimeout(function() { plus.remove(); }, 1100);
 
-                    const pick = document.createElement('img');
+                    var pick = document.createElement('img');
                     pick.src = '1000019118-removebg-preview.png';
                     pick.className = 'pickaxe-effect';
-                    pick.style.left = `${e.clientX - 50}px`; pick.style.top = `${e.clientY - 60}px`;
+                    pick.style.left = (e.clientX - 50) + 'px'; pick.style.top = (e.clientY - 60) + 'px';
                     document.body.appendChild(pick);
-                    setTimeout(() => pick.remove(), 250);
+                    setTimeout(function() { pick.remove(); }, 250);
 
-                    for (let i = 0; i < (isCrit ? 5 : 3); i++) {
-                        const spark = document.createElement('div');
+                    for (var i = 0; i < (isCrit ? 5 : 3); i++) {
+                        var spark = document.createElement('div');
                         spark.className = 'spark';
                         if (isCrit) spark.style.background = 'radial-gradient(circle, #fff, #ff5252, transparent)';
-                        spark.style.left = `${e.clientX}px`; spark.style.top = `${e.clientY}px`;
-                        spark.style.setProperty('--tx', `${(Math.random() - 0.5) * 140}px`);
-                        spark.style.setProperty('--ty', `${(Math.random() - 0.5) * 140}px`);
+                        spark.style.left = e.clientX + 'px'; spark.style.top = e.clientY + 'px';
+                        spark.style.setProperty('--tx', ((Math.random() - 0.5) * 140) + 'px');
+                        spark.style.setProperty('--ty', ((Math.random() - 0.5) * 140} + 'px');
                         document.body.appendChild(spark);
-                        setTimeout(() => spark.remove(), 500);
+                        setTimeout(function() { spark.remove(); }, 500);
                     }
                 } else {
-                    textEl.style.color = '#ff5252';
-                    setTimeout(() => textEl.style.color = '#ffeba1', 300);
+                    if (textEl) {
+                        textEl.style.color = '#ff5252';
+                        setTimeout(function() { textEl.style.color = '#ffeba1'; }, 300);
+                    }
                     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
                 }
             });
 
+            // Таймер регенерации энергии
             setInterval(function() {
-                let mx = getMaxEnergy();
+                var mx = getMaxEnergy();
                 if (energy < mx) {
-                    let passed = Date.now() - lastTickTime;
-                    let interval = getRegenInterval();
+                    var passed = Date.now() - lastTickTime;
+                    var interval = getRegenInterval();
                     if (passed >= interval) {
-                        let ticks = Math.floor(passed / interval);
+                        var ticks = Math.floor(passed / interval);
                         energy = Math.min(mx, energy + (ticks * 100));
                         lastTickTime += ticks * interval;
                         saveAll();
@@ -343,7 +345,10 @@
                 updateUI();
             }, 1000);
 
-            updateUI();
-
         } catch(err) {
-            if(textEl) { textEl.innerText = "КРИТ ИСПУСКА: " + err.message; textEl.style.color =
+            var el = document.getElementById('energy-text');
+            if(el) { el.innerText = "КРИТ СБОЙ: " + err.message; el.style.color = "red"; }
+        }
+    </script>
+</body>
+</html>
